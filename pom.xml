@@ -20,6 +20,10 @@
         <id>jitpack.io</id>
         <url>https://jitpack.io</url>
     </repository>
+        <repository>
+        <id>local-maven-repo</id>
+        <url>file:///${project.basedir}/local-maven-repo</url>
+    </repository>
 
     </repositories>
 
@@ -36,17 +40,9 @@
   <artifactId>vget</artifactId>
   <version>1.1.27</version>
 </dependency>
-	<dependency>
-		<groupId>com.abanstudios</groupId>
-		<artifactId>sqliteutils</artifactId>
-		<version>1.0</version>
-	</dependency>
-        	<dependency>
-		<groupId>com.abanstudios</groupId>
-		<artifactId>sqliteutils2</artifactId>
-		<version>1.0</version>
-	</dependency>
-           <dependency>
+	
+        
+    <dependency>
      <groupId>com.google.api-client</groupId>
      <artifactId>google-api-client</artifactId>
      <version>1.19.1</version>
@@ -62,9 +58,21 @@
   <version>0.4</version>
 </dependency>
 <dependency>
+		<groupId>com.abanstudios</groupId>
+		<artifactId>sqliteutils</artifactId>
+		<version>1.0.0</version>
+	</dependency>
+ 
+
+<dependency>
   <groupId>joda-time</groupId>
   <artifactId>joda-time</artifactId>
   <version>2.9.3</version>
+</dependency>
+<dependency>
+  <groupId>net.proteanit</groupId>
+  <artifactId>rs2xml</artifactId>
+  <version>1.0.0</version>
 </dependency>
 </dependencies>
 </project>
