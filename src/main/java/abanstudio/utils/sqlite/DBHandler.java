@@ -2,7 +2,7 @@
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
- */
+ */ 
 package abanstudio.utils.sqlite;
 
 import java.sql.ResultSet;
@@ -130,6 +130,27 @@ public class DBHandler {
             newDB.closeConn();
         
         
+    }
+    public static ArrayList<String> getClips(){
+             DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+          newDB.openConn();
+          String sql = "SELECT Name Name "
+                    +"FROM CLIPS "
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        ArrayList<String> newList = new ArrayList<>();
+        for(ArrayList<String> i : list){
+            newList.add(i.get(0));
+        }
+         newDB.closeConn();
+         
+         return newList;
     }
     public static ArrayList<Integer> getClips(String UserID) {
                  DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
