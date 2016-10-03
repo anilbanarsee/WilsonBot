@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -56,9 +57,11 @@ public class Server {
     //ArrayList<ArrayList<Thread>> gameThread;
     Thread gameThread;
     
-    HashMap<String, HashMap<String, Thread>> map; 
+    HashMap<String, HashMap<String, Game>> map;
     
-    String[] threadList = {"Th1","Th2","Th3","Th4","Th5"};
+    HashMap<String, HashMap<String, Thread>> threadmap;
+    
+    String[] gameList = {"G1","G2","G3","G4","G5"};
     
     
     Game game;
@@ -111,16 +114,30 @@ public class Server {
     private void populateMap(){
         List<IGuild> guilds = Main.client.getGuilds();
         for(IGuild g : guilds){
-            HashMap<String, Thread> hmap = new HashMap<>();
-            for(String thread : threadList){
-                hmap.put(thread, null);
-            }
+            HashMap<String, Game> hmap = new HashMap<>();
             map.put(g.getID(), hmap);
         }
     }
     
-    private Thread getFromMap(String gid, String thread){
+    private Game getGame(String gid, String thread){
         return map.get(gid).get(thread);
+    }
+    
+    private Thread getThread(String gid, String thread){
+        return threadmap.get(gid).get(thread);
+    }
+    
+    private void setGame(String gid, String thread, Game g){
+        map.get(gid).put(thread, g);
+    }
+    
+    private void setThread(String gid, String thread, Thread t){
+        threadmap.get(gid).put(thread, t);
+    }
+    
+    private void accessQueue(){
+        ArrayList<String> requests;
+        
     }
     
     private String matchCommand(String command) {
@@ -274,11 +291,24 @@ public class Server {
     }
     
     public void play(String[] arguments, IMessage message){
+        
+        if(arguments[0].equals("random"))
+        {
+            
+        }
+        else
+        {
+            playClip(arguments, message);
+        }
+      
+        
+    }
+    private void playClip(String[] clips, IMessage message){
         ArrayList<File> files = new ArrayList<File>();
         
         File folder = new File("assets");
         
-        for(String s : arguments){
+        for(String s : clips){
             if(s.length()>0){
                 
                 for (final File fileEntry : folder.listFiles()){ 
@@ -295,14 +325,36 @@ public class Server {
         }
 
        
-        for(File f : files){
+        playFiles(files, message.getGuild().getID());
+        
+    }
+    
+    private void playRandom(String[] tags, IMessage message){
+        
+        ArrayList<String> clips = DBHandler.getClips(tags);
+        ArrayList<File> files = new ArrayList<>();
+        
+        Random r = new Random();
+        
+        int n = r.nextInt(clips.size());
+        
+        String s = clips.get(n);
+        File f = new File("assets/"+s+".mp3");
+        sendMessage(message.getChannel(), "Playing random clip");
+        
+        
+        playFiles(files, message.getGuild().getID());
+        
+    }
+    
+    private void playFiles(ArrayList<File> files, String guildID){
+                for(File f : files){
             try {
-                Main.client.getGuildByID(message.getGuild().getID()).getAudioChannel().queueFile(f);
+                Main.client.getGuildByID(guildID).getAudioChannel().queueFile(f);
             } catch (DiscordException ex) {
                 Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
     }
     
     public void join(String[] arguments, IMessage message){
@@ -420,6 +472,7 @@ public class Server {
             if(arguments.length>2){
             String start = arguments[2];
             String[] time = start.split(":");
+        
             int seconds = 0;
             if(time.length==3){
                 seconds += Integer.parseInt(time[0])*3600;
@@ -574,6 +627,8 @@ public class Server {
     public void game(String[] arguments, IMessage message){
 
         if(arguments[0].equals("start")){
+            
+            
             
             
             
