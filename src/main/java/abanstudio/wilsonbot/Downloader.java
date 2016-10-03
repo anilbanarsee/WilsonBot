@@ -38,7 +38,7 @@ public class Downloader implements Runnable{
 
 
 
-    public static void main(String[] args) throws MalformedURLException{
+    public static void main(String[] args) throws MalformedURLException, InterruptedException{
         try {
             download("https://www.youtube.com/watch?v=gRDx9IaZ5zE","hello",null,true);
         } catch (IOException ex) {
@@ -48,7 +48,7 @@ public class Downloader implements Runnable{
     
     
     
-    public static File download(String url, String name, IChannel channel, boolean checkLength) throws IOException{
+    public static File download(String url, String name, IChannel channel, boolean checkLength) throws IOException, InterruptedException{
         
         
         final int maxMinutes = 20;
@@ -75,14 +75,14 @@ public class Downloader implements Runnable{
             long minutes = YTApi.getLength(video);
             if(checkLength){
                 if(YTApi.getLengthS(video)>maxClipSize){
-                    MainListener.sendMessage(channel, "Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
+                    Server.sendMessage(channel, "Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
                     return null;
                 }
             }
             if(minutes<maxMinutes){
                 
                 if(minutes>warnMinutes){
-                    MainListener.sendMessage(channel, "Warning, file is over 10 minutes, may take some time");
+                    Server.sendMessage(channel, "Warning, file is over 10 minutes, may take some time");
                 }
                 
                 file = YTDownloader.download(url);
@@ -91,10 +91,10 @@ public class Downloader implements Runnable{
                 
             }
             else
-                 MainListener.sendMessage(channel, "Source file was over the "+maxMinutes+" minute limit");
+                 Server.sendMessage(channel, "Source file was over the "+maxMinutes+" minute limit");
         }
         else{
-             MainListener.sendMessage(channel, "Given url was not youtube or a file");
+             Server.sendMessage(channel, "Given url was not youtube or a file");
              return null;
         }
         return file;
@@ -105,7 +105,9 @@ public class Downloader implements Runnable{
         try {
             download(url, name, channel, checkLength);
         } catch (IOException ex) {
-            MainListener.sendMessage(channel, "There was an error with the download, please try again or use a different link.");
+            Server.sendMessage(channel, "There was an error with the download, please try again or use a different link.");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Downloader.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
