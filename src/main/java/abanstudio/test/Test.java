@@ -6,6 +6,10 @@
 package abanstudio.test;
 
 import abanstudio.utils.sqlite.DBHandler;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Random;
 
 /**
  *
@@ -13,6 +17,23 @@ import abanstudio.utils.sqlite.DBHandler;
  */
 public class Test {
     public static void main(String[] args){
-        System.out.println(DBHandler.getClips());
+            
+        Random r = new Random();
+        
+        ArrayList<Integer> list = new ArrayList<>();
+        
+        for(int n = 0; n<600; n++)
+            list.add(r.nextInt(6));
+        
+        int x = 0;
+        
+        for(int i = 0; i<list.size(); i++){
+            if(list.get(i)==5){
+                
+                x++;
+            }
+        }
+        System.out.println(x);
+        
     }
 }
