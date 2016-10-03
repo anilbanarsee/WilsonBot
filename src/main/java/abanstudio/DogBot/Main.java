@@ -27,7 +27,7 @@ public class Main {
         System.out.println("Connecting");
         client = new ClientBuilder().withToken("MTgwOTczODE1OTQ0MTgzODA4.ChiAog.Z6vL_7Ws9fDurKT4DziLuzFQGmY").login();
         
-        client.getDispatcher().registerListener(new MainListener());
+        client.getDispatcher().registerListener(new Server());
         
     }
 }
