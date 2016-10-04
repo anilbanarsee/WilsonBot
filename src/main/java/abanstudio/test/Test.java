@@ -18,22 +18,7 @@ import java.util.Random;
 public class Test {
     public static void main(String[] args){
             
-        Random r = new Random();
-        
-        ArrayList<Integer> list = new ArrayList<>();
-        
-        for(int n = 0; n<600; n++)
-            list.add(r.nextInt(6));
-        
-        int x = 0;
-        
-        for(int i = 0; i<list.size(); i++){
-            if(list.get(i)==5){
-                
-                x++;
-            }
-        }
-        System.out.println(x);
+        System.out.println(DBHandler.getClips());
         
     }
 }
