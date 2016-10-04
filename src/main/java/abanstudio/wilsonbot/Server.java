@@ -292,9 +292,17 @@ public class Server {
     
     public void play(String[] arguments, IMessage message){
         
+        System.out.println(arguments[0]);
         if(arguments[0].equals("random"))
         {
+            System.out.println("playing random");
+            String[] tags = new String[arguments.length-1];
             
+            for(int i = 1; i<arguments.length; i++){
+                tags[i-1]=arguments[i];
+            }
+            System.out.println(Arrays.toString(tags));
+            playRandom(tags, message);
         }
         else
         {
@@ -331,7 +339,16 @@ public class Server {
     
     private void playRandom(String[] tags, IMessage message){
         
-        ArrayList<String> clips = DBHandler.getClips(tags);
+        ArrayList<String> clips;
+        
+        if(tags.length==0){
+            clips = DBHandler.getClips();
+        }
+        else{
+            clips = DBHandler.getClips(tags);
+        }
+        
+        System.out.println("List"+clips);
         ArrayList<File> files = new ArrayList<>();
         
         Random r = new Random();
@@ -342,6 +359,7 @@ public class Server {
         File f = new File("assets/"+s+".mp3");
         sendMessage(message.getChannel(), "Playing random clip");
         
+        files.add(f);
         
         playFiles(files, message.getGuild().getID());
         
