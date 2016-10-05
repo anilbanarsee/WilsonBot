@@ -32,8 +32,8 @@ public class DBHandler {
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
         
         
-        String query = "INSERT into CLIPS (Name, Start, Duration, Source, OwnerID) "
-                    + "VALUES (?,?,?,?,?);"
+        String query = "INSERT into CLIPS (Name, Start, Duration, Source, OwnerID, Volume) "
+                    + "VALUES (?,?,?,?,?,?);"
                     ;
             
             newDB.openConn();
@@ -41,11 +41,13 @@ public class DBHandler {
             newDB.prepStatement();
             
 
+
             newDB.pstSetString(1, name);
             newDB.pstSetInt(2, start);
             newDB.pstSetInt(3, duration); 
             newDB.pstSetString(4, source);
             newDB.pstSetString(5, ownerID);
+            newDB.pstSetString(6, "1");
 
             newDB.executeN();
             
@@ -131,11 +133,13 @@ public class DBHandler {
         
         
     }
-    public static ArrayList<String> getClips(){
-             DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
-          newDB.openConn();
+    public static boolean clipExists(String clipName){
+        
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
           String sql = "SELECT Name Name "
                     +"FROM CLIPS "
+                  + "WHERE Name = '"+clipName+"'"
                   + ";";
         
         newDB.setSQL(sql);
@@ -144,18 +148,15 @@ public class DBHandler {
          
         
         List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
-        ArrayList<String> newList = new ArrayList<>();
-        for(ArrayList<String> i : list){
-            newList.add(i.get(0));
-        }
+        boolean b = list.size()>0;
          newDB.closeConn();
          
-         return newList;
+         return b;
     }
-    public static ArrayList<String[]> getClipsAndTags(){
+    public static ArrayList<String[]> getClips(){
              DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
           newDB.openConn();
-          String sql = "SELECT Name Name, Tags Tags "
+          String sql = "SELECT Name Name, Volume Volume "
                     +"FROM CLIPS "
                   + ";";
         
@@ -167,18 +168,78 @@ public class DBHandler {
         List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
         ArrayList<String[]> newList = new ArrayList<>();
         for(ArrayList<String> i : list){
-            String[] n = {i.get(0), i.get(1)};
+            String[] data = {i.get(0),i.get(1)};
+            newList.add(data);
+        }
+         newDB.closeConn();
+         
+         return newList;
+    }
+    public static ArrayList<String> getClipNames(){
+        
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
+        String sql = "SELECT Name Name "
+                    +"FROM CLIPS "
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        ArrayList<String> newList = new ArrayList<>();
+        for(ArrayList<String> i : list){
+           
+            newList.add(i.get(0));
+        }
+         newDB.closeConn();
+         
+         return newList;
+    }
+    public static ArrayList<String[]> getClipsAndTags(){
+             DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+          newDB.openConn();
+          String sql = "SELECT Name Name, Tags Tags, Volume Volume "
+                    +"FROM CLIPS "
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        ArrayList<String[]> newList = new ArrayList<>();
+        for(ArrayList<String> i : list){
+            String[] n = {i.get(0), i.get(1), i.get(2)};
             newList.add(n);
         }
          newDB.closeConn();
          
          return newList;
     }
-    public static ArrayList<String> getClips(String[] tags){
+    public static void setVolume(String clipID, float volume){
+            DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+          newDB.openConn();
+          String sql = "UPDATE CLIPS SET Volume="+volume+" WHERE Name='"+clipID+"'";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        newDB.executeN();
+         
+        
+
+         newDB.closeConn();
+         
+
+    }
+    public static ArrayList<String[]> getClips(String[] tags){
         
         ArrayList<String[]> allClips = getClipsAndTags();
-        ArrayList<String> clips = new ArrayList<>();
-        
+        ArrayList<String[]> clips = new ArrayList<>();
+        String[] data = new String[2];
         for(String[] s: allClips){
             
             if(s[1]!=null){
@@ -198,7 +259,9 @@ public class DBHandler {
                 }
             
                 if(tagged)
-                    clips.add(s[0]);
+                    data[0] = s[0];
+                    data[1] = s[2];
+                    clips.add(data);
                 }
             
         }
@@ -227,6 +290,8 @@ public class DBHandler {
          
          return newList;
     }
+    
+    
     public static String getClipID(String name){
         System.out.println("Hello");
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");

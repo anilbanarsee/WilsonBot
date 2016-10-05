@@ -6,6 +6,7 @@
 package abanstudio.test;
 
 import abanstudio.utils.sqlite.DBHandler;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,7 +19,8 @@ import java.util.Random;
 public class Test {
     public static void main(String[] args){
             
-        System.out.println(DBHandler.getClips());
+        File f =  new File("");
+        System.out.println(f.getAbsolutePath());
         
     }
 }

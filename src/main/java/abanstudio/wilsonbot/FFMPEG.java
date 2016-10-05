@@ -21,17 +21,14 @@ import net.bramp.ffmpeg.builder.FFmpegOutputBuilder;
  * @author Reetoo
  */
 public class FFMPEG {
-    public static void main(String[] args){
-        
-        File f = new File("assets/bravo1.mp3");
-
-        
-        
-
-// Or run a two-pass encode (which is slower at the cost of better quality)
-//executor.createTwoPassJob(builder).run();
+    
+    String mainPath;
+    
+    public FFMPEG(String path){
+        mainPath= path;
     }
-    public static void convertAndTrim(File f, String name, int[] times){
+    
+    public void convertAndTrim(File f, String name, int[] times, String subpath){
         File file = new File("assets/downloaded/"+f.getName().split("\\.")[0]+".webm");
         if(file.exists()){
             System.out.println("webm exists, using that");
@@ -39,18 +36,19 @@ public class FFMPEG {
         }
         FFmpeg ffmpeg = null;
         try {
-            ffmpeg = new FFmpeg("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffmpeg.exe");
+           // ffmpeg = new FFmpeg("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffmpeg.exe");
+            ffmpeg = new FFmpeg(mainPath+"ffmpeg\\bin\\ffmpeg.exe");
         } catch (IOException ex) {
             System.out.println("Error in starting FFmpeg object");
             return;
         }
-        FFprobe ffprobe = new FFprobe("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffprobe.exe");
-               
+        //FFprobe ffprobe = new FFprobe("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffprobe.exe");
+          FFprobe ffprobe = new FFprobe(mainPath+"ffmpeg\\bin\\ffprobe.exe");     
         FFmpegOutputBuilder oBuilder = new FFmpegBuilder()
 
-            .setInput("C:/Users/Reetoo/Documents/NetBeansProjects/WilsonBot/assets/downloaded/"+f.getName())     // Filename, or a FFmpegProbeResult
+            .setInput(mainPath+"/assets/downloaded/"+f.getName())     // Filename, or a FFmpegProbeResult
             .overrideOutputFiles(true) // Override the output if it exists
-            .addOutput("C:/Users/Reetoo/Documents/NetBeansProjects/WilsonBot/assets/"+name+".mp3")   // Filename for the destination
+            .addOutput(mainPath+"/assets/"+subpath+name+".mp3")   // Filename for the destination
             .setFormat("mp3")
                 .setAudioBitRate(65536)
 
@@ -78,5 +76,8 @@ public class FFMPEG {
         System.out.println("start job 111");
         
 
+    }
+    public static void convert(File f){
+        
     }
 }

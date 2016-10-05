@@ -75,14 +75,14 @@ public class Downloader implements Runnable{
             long minutes = YTApi.getLength(video);
             if(checkLength){
                 if(YTApi.getLengthS(video)>maxClipSize){
-                    Server.sendMessage(channel, "Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
+                    WilsonServer.sendMessage(channel, "Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
                     return null;
                 }
             }
             if(minutes<maxMinutes){
                 
                 if(minutes>warnMinutes){
-                    Server.sendMessage(channel, "Warning, file is over 10 minutes, may take some time");
+                    WilsonServer.sendMessage(channel, "Warning, file is over 10 minutes, may take some time");
                 }
                 
                 file = YTDownloader.download(url);
@@ -91,10 +91,10 @@ public class Downloader implements Runnable{
                 
             }
             else
-                 Server.sendMessage(channel, "Source file was over the "+maxMinutes+" minute limit");
+                 WilsonServer.sendMessage(channel, "Source file was over the "+maxMinutes+" minute limit");
         }
         else{
-             Server.sendMessage(channel, "Given url was not youtube or a file");
+             WilsonServer.sendMessage(channel, "Given url was not youtube or a file");
              return null;
         }
         return file;
@@ -105,7 +105,7 @@ public class Downloader implements Runnable{
         try {
             download(url, name, channel, checkLength);
         } catch (IOException ex) {
-            Server.sendMessage(channel, "There was an error with the download, please try again or use a different link.");
+            WilsonServer.sendMessage(channel, "There was an error with the download, please try again or use a different link.");
         } catch (InterruptedException ex) {
             Logger.getLogger(Downloader.class.getName()).log(Level.SEVERE, null, ex);
         }

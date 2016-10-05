@@ -40,12 +40,12 @@ public class PokemonGuessGame implements Game{
         }
         channel = m.getChannel();
         
-        Server.sendMessage(channel, "Pokemon guess game set-up, using pokemon "+s+" gen "+gen+",");
+        WilsonServer.sendMessage(channel, "Pokemon guess game set-up, using pokemon "+s+" gen "+gen+",");
     }
     
     @Override
     public void startgame(IMessage message) {
-        Server.sendMessage(channel, "Starting game");
+        WilsonServer.sendMessage(channel, "Starting game");
         run();
     }
 
@@ -74,11 +74,11 @@ public class PokemonGuessGame implements Game{
         if(s.equals(currentPokemon)){
             guessing = false;
 
-              Server.sendMessage(channel, "You guessed "+currentPokemon+" correctly!");
+              WilsonServer.sendMessage(channel, "You guessed "+currentPokemon+" correctly!");
           
         }
         else{
-             Server.sendMessage(channel, s+" was incorrect");
+             WilsonServer.sendMessage(channel, s+" was incorrect");
         }
     }
     
@@ -95,7 +95,7 @@ public class PokemonGuessGame implements Game{
           File f = new File("assets/pokemon/sil/"+pokeNum+".png");
           File f2 = new File("assets/pokemon/artwork/"+pokeNum+".png");
           
-          Server.sendFile(channel, f);
+          WilsonServer.sendFile(channel, f);
           
           while(guessing&&running){
               try {
