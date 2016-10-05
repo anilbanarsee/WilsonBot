@@ -5,7 +5,7 @@
  */
 package abanstudio.wilsonbot;
 
-import static abanstudio.wilsonbot.Server.sendMessage;
+import static abanstudio.wilsonbot.WilsonServer.sendMessage;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 

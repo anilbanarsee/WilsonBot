@@ -5,7 +5,7 @@
  */
 package abanstudio.test;
 
-import abanstudio.wilsonbot.Server;
+import abanstudio.wilsonbot.WilsonServer;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
@@ -14,7 +14,7 @@ import sx.blah.discord.handle.obj.IMessage;
  *
  * @author User
  */
-public class TestInterface extends Server{
+public class TestInterface extends WilsonServer{
     
     
     

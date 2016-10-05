@@ -22,6 +22,7 @@ import sx.blah.discord.api.EventSubscriber;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.VoiceChannel;
 import sx.blah.discord.handle.obj.IChannel;
@@ -39,8 +40,9 @@ import sx.blah.discord.util.RequestBuffer;
  *
  * @author Reetoo
  */
-public class Server {
+public class WilsonServer {
     
+    IDiscordClient client;
     
     String[][] commMap = {{"\\b[jJ]oin\\b","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
                        ,{"\\b[pP]lay\\b","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
@@ -51,7 +53,8 @@ public class Server {
                        ,{"\\b[mM]ove[Aa]ll\\b","moveall","Moves all users from one channel to another"}
                        ,{"\\b[gG]ame\\b","game","Starts a game"}
                        ,{"\\b[gG]uess\\b","guess","Guesses an answer for the current game on this server"}
-                       ,{"\\b[dD]elete[cC]lip\\b","deleteclip","Deletes the specified clip"}};
+                       ,{"\\b[dD]elete[cC]lip\\b","deleteclip","Deletes the specified clip"}
+                       ,{"\\b[sS]et[vV]olume\\b","setvolume","Sets the volume of the specified clip"}};
     
     static Matcher m;
     //ArrayList<ArrayList<Thread>> gameThread;
@@ -68,8 +71,9 @@ public class Server {
     
     List<ArrayList<String>> pokemon;
 
-    public Server(){
+    public WilsonServer(IDiscordClient client){
         map = new HashMap<>();
+        this.client = client;
     }
     
     
@@ -112,7 +116,7 @@ public class Server {
     }
     
     private void populateMap(){
-        List<IGuild> guilds = Main.client.getGuilds();
+        List<IGuild> guilds = client.getGuilds();
         for(IGuild g : guilds){
             HashMap<String, Game> hmap = new HashMap<>();
             map.put(g.getID(), hmap);
@@ -263,6 +267,9 @@ public class Server {
         else if(command.equals("deleteclip")){
             deleteClip(newarg, message);
         }
+        else if(command.equals("setvolume")){
+            setVolume(newarg, message);
+        }
     }
     
     public void parlay(IMessage message){
@@ -290,6 +297,37 @@ public class Server {
         sendMessage(message.getChannel(),"You never had a parlay with me nigga");
     }
     
+    public void setVolume(String[] arguments, IMessage message){
+        
+        float volume;
+        try{
+            volume = Float.parseFloat(arguments[1]);
+        }
+        
+        catch(NumberFormatException e){
+            sendMessage(message.getChannel(), "You gave me "+arguments[1]+" to convert into a number. I'm afraid I can't do that Dave.");
+            return;
+        }
+        
+        if(volume>2){
+            sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than double");
+            return;
+        }
+        else if(volume < 0.25){
+            sendMessage(message.getChannel(), "You cannot reduce a clip's volume by more than 4 times");
+            return;
+        }
+        
+        if(!DBHandler.clipExists(arguments[0])){
+            sendMessage(message.getChannel(), "You gave me "+arguments[0]+" as a clip name, Dave. That clip does not exist. I'm afraid I can't reduce the volume for this clip, Dave.");
+            return;
+        }
+        DBHandler.setVolume(arguments[0], volume);
+        
+        sendMessage(message.getChannel(), arguments[0]+" was set to volume level "+volume);
+        
+    }
+    
     public void play(String[] arguments, IMessage message){
         
         System.out.println(arguments[0]);
@@ -311,12 +349,12 @@ public class Server {
       
         
     }
-    private void playClip(String[] clips, IMessage message){
-        ArrayList<File> files = new ArrayList<File>();
+    private void playClip(String[] files, IMessage message){
+        ArrayList<Clip> clips = new ArrayList<>();
         
         File folder = new File("assets");
         
-        for(String s : clips){
+        for(String s : files){
             if(s.length()>0){
                 
                 for (final File fileEntry : folder.listFiles()){ 
@@ -324,7 +362,7 @@ public class Server {
                         //System.out.println(fileEntry.getName().substring(0, fileEntry.getName().length()-4));
 
                         if(fileEntry.getName().substring(0, fileEntry.getName().length()-4).equals(s)){
-                            files.add(fileEntry);
+                            clips.add(new Clip(fileEntry, Float.parseFloat(files[1])));
                             sendMessage(message.getChannel(),"Playing "+fileEntry.getName().substring(0, fileEntry.getName().length()-4));
                         }
                     }
@@ -333,44 +371,45 @@ public class Server {
         }
 
        
-        playFiles(files, message.getGuild().getID());
+        playFiles(clips, message.getGuild().getID());
         
     }
     
     private void playRandom(String[] tags, IMessage message){
         
-        ArrayList<String> clips;
+        ArrayList<String[]> data;
         
         if(tags.length==0){
-            clips = DBHandler.getClips();
+            data = DBHandler.getClips();
         }
         else{
-            clips = DBHandler.getClips(tags);
+            data = DBHandler.getClips(tags);
         }
         
-        System.out.println("List"+clips);
-        ArrayList<File> files = new ArrayList<>();
+        System.out.println("List"+data);
+        ArrayList<Clip> clips = new ArrayList<>();
         
         Random r = new Random();
         
-        int n = r.nextInt(clips.size());
+        int n = r.nextInt(data.size());
         
-        String s = clips.get(n);
-        File f = new File("assets/"+s+".mp3");
+        String[] s = data.get(n);
+        Clip clip = new Clip(new File("assets/"+s[0]+".mp3"),Float.parseFloat(s[1]));
         sendMessage(message.getChannel(), "Playing random clip");
         
-        files.add(f);
+        clips.add(clip);
         
-        playFiles(files, message.getGuild().getID());
+        playFiles(clips, message.getGuild().getID());
         
     }
     
-    private void playFiles(ArrayList<File> files, String guildID){
-                for(File f : files){
+    private void playFiles(ArrayList<Clip> clips, String guildID){
+                for(Clip clip : clips){
             try {
-                Main.client.getGuildByID(guildID).getAudioChannel().queueFile(f);
+                client.getGuildByID(guildID).getAudioChannel().setVolume(clip.getVolume());
+                client.getGuildByID(guildID).getAudioChannel().queueFile(clip.getFile());
             } catch (DiscordException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -564,7 +603,7 @@ public class Server {
             sendMessage(message.getChannel(), "There was an error downloading the requested file.");
             return;
         } catch (InterruptedException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
@@ -576,7 +615,7 @@ public class Server {
             times[0] = maxClipLength;
         }
         
-        FFMPEG.convertAndTrim(file, name, times);
+        Main.ffmpeg.convertAndTrim(file, name, times, "");
         
       
         
@@ -599,7 +638,7 @@ public class Server {
 
         RequestBuffer.request(() -> {
 		try {
-			new MessageBuilder(Main.client).withChannel(channel).withContent(message).build();
+			new MessageBuilder(Main.wilsonClient).withChannel(channel).withContent(message).build();
 		} catch (DiscordException | MissingPermissionsException e) {
 			e.printStackTrace();
 		}
@@ -678,7 +717,7 @@ public class Server {
             try {
                 gameThread.join();
             } catch (InterruptedException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
             }
             sendMessage(message.getChannel(), "Game ended");
         }
@@ -698,13 +737,13 @@ public class Server {
         try {
             channel.sendFile(f);
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MissingPermissionsException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (HTTP429Exception ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DiscordException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -761,11 +800,11 @@ public class Server {
                     if(vchan.getName().replace(" ", "").equals(arguments[0].replace(" ", "")))
                         user.moveToVoiceChannel(target);
                 } catch (DiscordException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (HTTP429Exception ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (MissingPermissionsException ex) {
-                    Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
                 }
                     
             }
@@ -787,7 +826,7 @@ public class Server {
          File folder = new File("assets");
         
        
-         for (String file : DBHandler.getClips()){ 
+         for (String file : DBHandler.getClipNames()){ 
             
                 s += file+"\n";
             
