@@ -5,6 +5,7 @@
  */
 package abanstudio.wilsonbot;
 
+import abanstudio.command.Command;
 import abanstudio.djdog.DjDogServer;
 import abanstudio.utils.sqlite.DBHandler;
 import java.io.File;
@@ -45,7 +46,7 @@ import sx.blah.discord.util.audio.AudioPlayer.Track;
  *
  * @author Reetoo
  */
-public class WilsonServer {
+public class WilsonServerTest extends BotServer{
     
     IDiscordClient client;
     
@@ -72,6 +73,8 @@ public class WilsonServer {
     
     ArrayList<Float> volumeBuffer;
     
+    Command[] commands;
+    
     HashMap<String, HashMap<String, Thread>> threadmap;
     
     String[] gameList = {"G1","G2","G3","G4","G5"};
@@ -82,7 +85,7 @@ public class WilsonServer {
     
     List<ArrayList<String>> pokemon;
 
-    public WilsonServer(IDiscordClient client, DjDogServer server){
+    public WilsonServerTest(IDiscordClient client, DjDogServer server){
         map = new HashMap<>();
         this.client = client;
         volumeBuffer = new ArrayList<>();
@@ -90,43 +93,26 @@ public class WilsonServer {
     }
     
     
-    @EventSubscriber
-    public void onReady(ReadyEvent event){
-        System.out.println("Bot Ready !");
+    private void initalizeCommands(){
+        Command[] comms = {
+                    
+                    new Command(){public void exec(String[] arg, IMessage m) {join(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {play(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {parlay(m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}},
+                    new Command(){public void exec(String[] arg, IMessage m) {}}
+
+
+        
+                    };
     }
     
-    @EventSubscriber
-    public void onMessage(MessageReceivedEvent event){
-       ;
-        if(event.getMessage().getAuthor().isBot())
-            return;
-        String message = event.getMessage().getContent();
-        boolean flag = false;
-        for(IUser u : Main.users){
-            if(u.getID().equals(event.getMessage().getAuthor().getID())){
-                flag = true;
-                break;
-            }
-        }
-        System.out.println(event.getMessage().getChannel().isPrivate());
-        
-        if(message.startsWith("dog ")||flag){
-            String command = message;
-            if((message.startsWith("dog ")))
-                command = message.substring(4);
-            parseCommand(command, event.getMessage());
-           
-        }
-        
-            
-        
-    }
-    
-    @EventSubscriber
-    public void onDisconnect(DiscordDisconnectedEvent event) throws DiscordException{
-        System.out.println("Bot disconnected with reason "+event.getReason()+". Reconnecting...");
-        Main.main(null);
-    }
     
     private void populateMap(){
         List<IGuild> guilds = client.getGuilds();
@@ -168,111 +154,15 @@ public class WilsonServer {
         try {
             djdog.download(arguments, message);
         } catch (IOException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
     }
     
-    private String matchCommand(String command) {
-       
 
-        for(String[] regComm : commMap){
-            if(matches(command,regComm[0]))
-                return regComm[1];
-        }
-        
-        
-        return "null";
-    }
-    
-    public void parseCommand(String command, IMessage message){
-         
-       String[] split = command.split("\\s+");
-       String com = "";
-       String arg = "";
-       for(int i=0; i<split.length; i++){
-           String test = matchCommand(split[i]);
-           
-           if(!test.equals("null")){
-               doCommand(com,arg,message);
-               com = test;
-               arg = "";
-           }
-           else{
-               arg += " "+split[i];
-           }
-           
-           
-       }
-       doCommand(com,arg,message);
-       
-    }
-    
-    public void doCommand(String command, String argument, IMessage message){
-        String[] arguments = argument.split("\\s+");
-        int i = arguments.length;
-        for(String s : arguments){
-            s = s.replace("\\s+", "");
-            if(s.equals("")) i--;
-        }
-        int x = 0;
-        String[] newarg = new String[i];
-        for(String s: arguments){
-            if(!s.equals("")){
-                newarg[x] = s;
-                x++;
-            }
-        }
-        
-        System.out.println(Arrays.toString(newarg));
-        if(command.equals("join")){
-            //System.out.println("Join "+argument);
-            join(newarg,  message);
-
-        }
-        else if(command.equals("play")){
-            play(newarg, message);
-        }
-        else if(command.equals("parlay")){
-            parlay(message);
-        }
-        else if(command.equals("unparlay")){
-            unparlay(message);
-        }
-        else if(command.equals("list")){
-            list(newarg, message);
-        }
-        else if(command.equals("download")){
-            download(argument, message);
-        }
-        else if(command.equals("addclip")){
-            addClip(newarg, message);
-        }
-        else if(command.equals("moveall")){
-            moveAll(newarg, message);
-        }
-        else if(command.equals("game")){
-            game(newarg, message);
-        }
-        else if(command.equals("guess")){
-            guess(newarg, message);
-        }
-        else if(command.equals("deleteclip")){
-            deleteClip(newarg, message);
-        }
-        else if(command.equals("setvolume")){
-            setVolume(newarg, message);
-        }
-        else if(command.equals("addmusic")){
-            addMusic(newarg, message);
-        }
-        else if(command.equals("music")){
-            music(newarg, message);
-        }
-    }
     
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
@@ -304,7 +194,7 @@ public class WilsonServer {
         try {
             djdog.play(arguments, message);
         } catch (DiscordException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         
     }
@@ -423,9 +313,9 @@ public class WilsonServer {
                 player.queue(clip.getFile());
                 
             } catch (IOException ex) {
-                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
             } catch (UnsupportedAudioFileException ex) {
-                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -631,7 +521,7 @@ public class WilsonServer {
             sendMessage(message.getChannel(), "There was an error downloading the requested file.");
             return;
         } catch (InterruptedException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         
@@ -745,7 +635,7 @@ public class WilsonServer {
             try {
                 gameThread.join();
             } catch (InterruptedException ex) {
-                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
             }
             sendMessage(message.getChannel(), "Game ended");
         }
@@ -765,13 +655,13 @@ public class WilsonServer {
         try {
             channel.sendFile(f);
         } catch (IOException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MissingPermissionsException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DiscordException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         } catch (RateLimitException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -840,11 +730,11 @@ public class WilsonServer {
                     if(vchan.getName().replace(" ", "").equals(arguments[0].replace(" ", "")))
                         user.moveToVoiceChannel(target);
                 } catch (DiscordException ex) {
-                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (MissingPermissionsException ex) {
-                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (RateLimitException ex) {
-                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
                 }
                     
             }
