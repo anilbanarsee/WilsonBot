@@ -3,18 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abanstudio.wilsonbot;
+package abanstudio.command;
 
+import abanstudio.wilsonbot.BotServer;
+import abanstudio.wilsonbot.WilsonServer;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  *
  * @author Reetoo
  */
-public abstract class Command {
+public interface Command {
     
-    public static void start(String[] arguments, IMessage message){
-        
-    }
+    
+    
+    public void exec(String[] arguments, IMessage message);
     
 }

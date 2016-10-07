@@ -9,6 +9,7 @@ import abanstudio.djdog.DjDogServer;
 import java.io.File;
 import java.util.ArrayList;
 import sx.blah.discord.api.ClientBuilder;
+import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;

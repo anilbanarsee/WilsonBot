@@ -8,23 +8,28 @@ package abanstudio.test;
 import abanstudio.utils.sqlite.DBHandler;
 import abanstudio.wilsonbot.FFMPEG;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import sx.blah.discord.util.audio.AudioPlayer;
+import sx.blah.discord.util.audio.providers.FileProvider;
 
 /**
  *
  * @author User
  */
 public class Test {
-    public static void main(String[] args){
-         
-        File f = new File("").getAbsoluteFile();
+    public static void main(String[] args) throws IOException, UnsupportedAudioFileException{
+
         
-        
-        FFMPEG ff = new FFMPEG(f.getAbsolutePath());
-        ff.convertAndTrim(null, null, null, null);
+        AudioPlayer.Track track = new AudioPlayer.Track(new FileProvider("helloworld.mp3")); // Don't worry, I will be covering what "FileProvider" is in a moment.
+        Map<String, Object> metadata = track.getMetadata();
+        System.out.println("hello");
+
     }
     
 }
