@@ -18,6 +18,10 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.DiscordException;
 import abanstudio.wilsonbot.Main;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.util.MessageBuilder;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RequestBuffer;
 
 /**
  *
@@ -45,6 +49,9 @@ public class DjDogServer {
     
     public void download(String[] arguments, IMessage message) throws IOException, InterruptedException{
         
+        
+        sendMessage(message.getChannel(),"Sure thing boss");
+        
         String name = arguments[1];
         
         
@@ -59,8 +66,14 @@ public class DjDogServer {
         
         DBHandler.addClipToUser(clip, message.getAuthor().getID());
         
+        sendMessage(message.getChannel(),"Music added to my collection");
+        
+    }
+    public void skip(String guildID) throws DiscordException{
+        client.getGuildByID(guildID).getAudioChannel().skip();
     }
     public void play(String[] arguments, IMessage message) throws DiscordException{
+        clear(message.getGuild().getID());
         
         File f = new File("assets/music/"+arguments[0]);
         
@@ -69,6 +82,19 @@ public class DjDogServer {
     }
     public void clear(String guildID) throws DiscordException{
         client.getGuildByID(guildID).getAudioChannel().clearQueue();
+    }
+    
+     public void sendMessage(IChannel channel, String message){
+
+        RequestBuffer.request(() -> {
+		try {
+			new MessageBuilder(client).withChannel(channel).withContent(message).build();
+		} catch (DiscordException | MissingPermissionsException e) {
+			e.printStackTrace();
+		}
+		return null;
+	});
+
     }
     
 }

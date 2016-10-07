@@ -165,10 +165,10 @@ public class DBHandler {
         ResultSet rs = newDB.executeQ();
          
         
-        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
         ArrayList<String[]> newList = new ArrayList<>();
-        for(ArrayList<String> i : list){
-            String[] data = {i.get(0),i.get(1)};
+        for(ArrayList<Object> i : list){
+            String[] data = {(String) i.get(0),i.get(1)+""};
             newList.add(data);
         }
          newDB.closeConn();
@@ -210,10 +210,10 @@ public class DBHandler {
         ResultSet rs = newDB.executeQ();
          
         
-        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
         ArrayList<String[]> newList = new ArrayList<>();
-        for(ArrayList<String> i : list){
-            String[] n = {i.get(0), i.get(1), i.get(2)};
+        for(ArrayList<Object> i : list){
+            String[] n = {(String) i.get(0), (String) i.get(1), ((int) i.get(2))+""};
             newList.add(n);
         }
          newDB.closeConn();

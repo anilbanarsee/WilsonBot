@@ -37,13 +37,14 @@ public class FFMPEG {
         FFmpeg ffmpeg = null;
         try {
            // ffmpeg = new FFmpeg("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffmpeg.exe");
-            ffmpeg = new FFmpeg(mainPath+"ffmpeg\\bin\\ffmpeg.exe");
+            System.out.println(mainPath+"\\ffmpeg\\bin\\ffmpeg.exe");
+            ffmpeg = new FFmpeg(mainPath+"\\ffmpeg\\bin\\ffmpeg.exe");
         } catch (IOException ex) {
             System.out.println("Error in starting FFmpeg object");
             return;
         }
         //FFprobe ffprobe = new FFprobe("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffprobe.exe");
-          FFprobe ffprobe = new FFprobe(mainPath+"ffmpeg\\bin\\ffprobe.exe");     
+          FFprobe ffprobe = new FFprobe(mainPath+"\\ffmpeg\\bin\\ffprobe.exe");     
         FFmpegOutputBuilder oBuilder = new FFmpegBuilder()
 
             .setInput(mainPath+"/assets/downloaded/"+f.getName())     // Filename, or a FFmpegProbeResult

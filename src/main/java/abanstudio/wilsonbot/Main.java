@@ -6,6 +6,7 @@
 package abanstudio.wilsonbot;
 
 import abanstudio.djdog.DjDogServer;
+import java.io.File;
 import java.util.ArrayList;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
@@ -30,15 +31,20 @@ public class Main {
         
         String path = "";
         
+            
+        File f =  new File("");
+        path = f.getAbsolutePath();
+        
         ffmpeg = new FFMPEG(path);
         
         System.out.println("Connecting");
         wilsonClient = new ClientBuilder().withToken("MTgwOTczODE1OTQ0MTgzODA4.ChiAog.Z6vL_7Ws9fDurKT4DziLuzFQGmY").login();
         djdogClient = new ClientBuilder().withToken("MjMyODQyNDMzNTM5MzQyMzM3.CtUzGQ.ahwIgKZ2FOW1og_ZouciwBG8tSQ").login();
         
+        DjDogServer djdog = new DjDogServer(djdogClient);
         
-        wilsonClient.getDispatcher().registerListener(new WilsonServer(wilsonClient));
-        djdogClient.getDispatcher().registerListener(new DjDogServer(djdogClient));
+        djdogClient.getDispatcher().registerListener(djdog);
+        wilsonClient.getDispatcher().registerListener(new WilsonServer(wilsonClient,djdog));
         
     }
 }
