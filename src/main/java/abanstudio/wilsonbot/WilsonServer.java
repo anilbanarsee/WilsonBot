@@ -5,6 +5,7 @@
  */
 package abanstudio.wilsonbot;
 
+import abanstudio.djdog.DjDogServer;
 import abanstudio.utils.sqlite.DBHandler;
 import java.io.File;
 import java.io.IOException;
@@ -54,7 +55,9 @@ public class WilsonServer {
                        ,{"\\b[gG]ame\\b","game","Starts a game"}
                        ,{"\\b[gG]uess\\b","guess","Guesses an answer for the current game on this server"}
                        ,{"\\b[dD]elete[cC]lip\\b","deleteclip","Deletes the specified clip"}
-                       ,{"\\b[sS]et[vV]olume\\b","setvolume","Sets the volume of the specified clip"}};
+                       ,{"\\b[sS]et[vV]olume\\b","setvolume","Sets the volume of the specified clip"}
+                       ,{"\\b[aA]dd[mM]usic\\b","addmusic","Adds music clip to bot"}
+                       ,{"\\b[mM]usic\\b","music","Music based commands (DjDog)"}};
     
     static Matcher m;
     //ArrayList<ArrayList<Thread>> gameThread;
@@ -66,14 +69,16 @@ public class WilsonServer {
     
     String[] gameList = {"G1","G2","G3","G4","G5"};
     
+    DjDogServer djdog;
     
     Game game;
     
     List<ArrayList<String>> pokemon;
 
-    public WilsonServer(IDiscordClient client){
+    public WilsonServer(IDiscordClient client, DjDogServer server){
         map = new HashMap<>();
         this.client = client;
+        djdog = server;
     }
     
     
@@ -141,6 +146,25 @@ public class WilsonServer {
     
     private void accessQueue(){
         ArrayList<String> requests;
+        
+    }
+    
+    private void addMusic(String[] arguments, IMessage message)
+    {
+        File f = null;
+        
+        System.out.println("ADDMUSIC");
+        
+        sendMessage(message.getChannel(),"Yo, djdog, add this shit to your music collection");
+        
+        try {
+            djdog.download(arguments, message);
+        } catch (IOException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         
     }
     
@@ -270,6 +294,12 @@ public class WilsonServer {
         else if(command.equals("setvolume")){
             setVolume(newarg, message);
         }
+        else if(command.equals("addmusic")){
+            addMusic(newarg, message);
+        }
+        else if(command.equals("music")){
+            music(newarg, message);
+        }
     }
     
     public void parlay(IMessage message){
@@ -297,6 +327,16 @@ public class WilsonServer {
         sendMessage(message.getChannel(),"You never had a parlay with me nigga");
     }
     
+    public void music(String[] arguments, IMessage message){
+        
+        try {
+            djdog.play(arguments, message);
+        } catch (DiscordException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
+    
     public void setVolume(String[] arguments, IMessage message){
         
         float volume;
@@ -309,8 +349,8 @@ public class WilsonServer {
             return;
         }
         
-        if(volume>2){
-            sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than double");
+        if(volume>3){
+            sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than 3 times");
             return;
         }
         else if(volume < 0.25){
@@ -351,22 +391,20 @@ public class WilsonServer {
     }
     private void playClip(String[] files, IMessage message){
         ArrayList<Clip> clips = new ArrayList<>();
+        ArrayList<String[]> clip = DBHandler.getClips();
         
         File folder = new File("assets");
         
         for(String s : files){
             if(s.length()>0){
                 
-                for (final File fileEntry : folder.listFiles()){ 
-                    if(!fileEntry.isDirectory()){
-                        //System.out.println(fileEntry.getName().substring(0, fileEntry.getName().length()-4));
-
-                        if(fileEntry.getName().substring(0, fileEntry.getName().length()-4).equals(s)){
-                            clips.add(new Clip(fileEntry, Float.parseFloat(files[1])));
-                            sendMessage(message.getChannel(),"Playing "+fileEntry.getName().substring(0, fileEntry.getName().length()-4));
-                        }
+                for(String[] clipData: clip){
+                    if(clipData[0].equals(s)){
+                        clips.add(new Clip(new File("assets/"+clipData[0]+".mp3"), Float.parseFloat(clipData[1])));
                     }
                 }
+                
+                
             }                               
         }
 

@@ -6,6 +6,7 @@
 package abanstudio.test;
 
 import abanstudio.utils.sqlite.DBHandler;
+import abanstudio.wilsonbot.FFMPEG;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,9 +19,12 @@ import java.util.Random;
  */
 public class Test {
     public static void main(String[] args){
-            
-        File f =  new File("");
-        System.out.println(f.getAbsolutePath());
+         
+        File f = new File("").getAbsoluteFile();
         
+        
+        FFMPEG ff = new FFMPEG(f.getAbsolutePath());
+        ff.convertAndTrim(null, null, null, null);
     }
+    
 }
