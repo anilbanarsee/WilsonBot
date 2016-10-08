@@ -9,3 +9,7 @@ Current Milestones :
 -Fix volume bug
 
 -Implement looping to djdog
+
+-Implement tag system
+
+-Fix downloading clips from same source
