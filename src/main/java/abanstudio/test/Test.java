@@ -25,11 +25,11 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class Test {
     public static void main(String[] args) throws IOException, UnsupportedAudioFileException{
 
-        String[] tags = {"dota"};
-            
-        ArrayList<String[]> data = DBHandler.getClips(tags);
-        for(String[]s : data)
-            System.out.println(Arrays.toString(s));
+        
+        AudioPlayer.Track track = new AudioPlayer.Track(new FileProvider("helloworld.mp3")); // Don't worry, I will be covering what "FileProvider" is in a moment.
+        Map<String, Object> metadata = track.getMetadata();
+        System.out.println("hello");
+
     }
     
 }

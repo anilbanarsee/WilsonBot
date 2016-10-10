@@ -322,11 +322,11 @@ public class WilsonServer {
         }
         
         if(volume>3){
-            sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than 4 times");
+            sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than 3 times");
             return;
         }
-        else if(volume < 0.1){
-            sendMessage(message.getChannel(), "You cannot reduce a clip's volume by more than 10 times");
+        else if(volume < 0.25){
+            sendMessage(message.getChannel(), "You cannot reduce a clip's volume by more than 4 times");
             return;
         }
         
