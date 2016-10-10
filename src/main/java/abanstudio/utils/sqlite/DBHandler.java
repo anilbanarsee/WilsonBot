@@ -213,7 +213,9 @@ public class DBHandler {
         List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
         ArrayList<String[]> newList = new ArrayList<>();
         for(ArrayList<Object> i : list){
-            String[] n = {(String) i.get(0), (String) i.get(1), ((int) i.get(2))+""};
+
+                String[] n = {(String) i.get(0), (String) i.get(1), i.get(2)+""};
+
             newList.add(n);
         }
          newDB.closeConn();
@@ -238,10 +240,11 @@ public class DBHandler {
     public static ArrayList<String[]> getClips(String[] tags){
         
         ArrayList<String[]> allClips = getClipsAndTags();
+        
         ArrayList<String[]> clips = new ArrayList<>();
-        String[] data = new String[2];
+        
         for(String[] s: allClips){
-            
+            String[] data = new String[2];
             if(s[1]!=null){
                 String[] t = s[1].split(",");
             
@@ -258,11 +261,12 @@ public class DBHandler {
                         break;
                 }
             
-                if(tagged)
+                if(tagged){
                     data[0] = s[0];
                     data[1] = s[2];
                     clips.add(data);
                 }
+            }
             
         }
         

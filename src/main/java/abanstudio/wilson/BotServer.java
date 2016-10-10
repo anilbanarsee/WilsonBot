@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abanstudio.wilsonbot;
+package abanstudio.wilson;
 
 import abanstudio.command.Command;
+import abanstudio.wilsonbot.Main;
 import static abanstudio.wilsonbot.WilsonServer.matches;
 import java.util.Arrays;
 import sx.blah.discord.api.IDiscordClient;
@@ -26,7 +27,11 @@ abstract public class BotServer{
     
     Command[] commands;
     String[][] commMap;
+    final String prefix;
     
+    public BotServer(String pre){
+        prefix = pre;
+    }
     
     @EventSubscriber
     public void onReady(ReadyEvent event){
@@ -40,17 +45,11 @@ abstract public class BotServer{
             return;
         String message = event.getMessage().getContent();
         boolean flag = false;
-        for(IUser u : Main.users){
-            if(u.getID().equals(event.getMessage().getAuthor().getID())){
-                flag = true;
-                break;
-            }
-        }
-        System.out.println(event.getMessage().getChannel().isPrivate());
         
-        if(message.startsWith("dog ")||flag){
+        
+        if(message.startsWith(prefix+" ")||flag){
             String command = message;
-            if((message.startsWith("dog ")))
+            if((message.startsWith(prefix+" ")))
                 command = message.substring(4);
             parseCommand(command, event.getMessage());
            
