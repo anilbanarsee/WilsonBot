@@ -3,11 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abanstudio.wilsonbot;
+package abanstudio.wilson;
 
 import abanstudio.command.Command;
 import abanstudio.djdog.DjDogServer;
 import abanstudio.utils.sqlite.DBHandler;
+import abanstudio.wilsonbot.Clip;
+import abanstudio.wilsonbot.Downloader;
+import abanstudio.wilsonbot.Game;
+import abanstudio.wilsonbot.Main;
+import abanstudio.wilsonbot.PokemonGuessGame;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,18 +55,17 @@ public class WilsonServerTest extends BotServer{
     
     IDiscordClient client;
     
-    String[][] commMap = {{"\\b[jJ]oin\\b","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
-                       ,{"\\b[pP]lay\\b","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
-                       ,{"\\b[pP]arlay\\b","parlay","begins parlay with me, this means you don't have to type 'dog'"}
-                       ,{"\\b[uU]nparlay\\b","unparlay","ends parlay with me"}
-                       ,{"\\b[lL]ist\\b","list","Lists various things, multi-use command"}
-                       ,{"\\b[aA]dd[Cc]lip\\b","addclip","Add clip to soundboard"}
-                       ,{"\\b[mM]ove[Aa]ll\\b","moveall","Moves all users from one channel to another"}
-                       ,{"\\b[gG]ame\\b","game","Starts a game"}
-                       ,{"\\b[gG]uess\\b","guess","Guesses an answer for the current game on this server"}
-                       ,{"\\b[dD]elete[cC]lip\\b","deleteclip","Deletes the specified clip"}
-                       ,{"\\b[sS]et[vV]olume\\b","setvolume","Sets the volume of the specified clip"}
-                       ,{"\\b[aA]dd[mM]usic\\b","addmusic","Adds music clip to bot"}
+    String[][] commMap = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
+                       ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
+                       ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
+                       ,{"[uU]nparlay","unparlay","ends parlay with me"}
+                       ,{"[lL]ist","list","Lists various things, multi-use command"}
+                       ,{"[aA]dd[Cc]lip","addclip","Add clip to soundboard"}
+                       ,{"[mM]ove[Aa]ll","moveall","Moves all users from one channel to another"}
+                       ,{"[gG]ame","game","Starts a game"}
+                       ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
+                       ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
+                       ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
                        
                         };
     
@@ -72,6 +76,8 @@ public class WilsonServerTest extends BotServer{
     HashMap<String, HashMap<String, Game>> map;
     
     ArrayList<Float> volumeBuffer;
+    
+    ArrayList<IUser> parlayUsers;
     
     Command[] commands;
     
@@ -86,10 +92,13 @@ public class WilsonServerTest extends BotServer{
     List<ArrayList<String>> pokemon;
 
     public WilsonServerTest(IDiscordClient client, DjDogServer server){
+        
+        super(client);
         map = new HashMap<>();
-        this.client = client;
         volumeBuffer = new ArrayList<>();
+        parlayUsers = new ArrayList<>();
         djdog = server;
+        
     }
     
     
@@ -99,18 +108,19 @@ public class WilsonServerTest extends BotServer{
                     new Command(){public void exec(String[] arg, IMessage m) {join(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {play(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {parlay(m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}},
-                    new Command(){public void exec(String[] arg, IMessage m) {}}
+                    new Command(){public void exec(String[] arg, IMessage m) {unparlay(m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {list(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {addClip(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {moveAll(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {game(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {guess(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {deleteClip(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}}
 
 
         
                     };
+        commands = comms;
     }
     
     
@@ -138,65 +148,29 @@ public class WilsonServerTest extends BotServer{
         threadmap.get(gid).put(thread, t);
     }
     
-    private void accessQueue(){
-        ArrayList<String> requests;
-        
-    }
-    
-    private void addMusic(String[] arguments, IMessage message)
-    {
-        File f = null;
-        
-        System.out.println("ADDMUSIC");
-        
-        sendMessage(message.getChannel(),"Yo, djdog, add this shit to your music collection");
-        
-        try {
-            djdog.download(arguments, message);
-        } catch (IOException ex) {
-            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
-    }
-    
-
-    
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
-        for(IUser u : Main.users){
+        for(IUser u : parlayUsers){
             if(u.getID().equals(user.getID())){
-                sendMessage(message.getChannel(),"Nigga, we already talkin'");
+                sendMessage(message.getChannel(),"we already talkin'");
                 return;
             }
         }
         sendMessage(message.getChannel(),"Ok dog, I'll know you are talking to me now");
-        Main.users.add(user);
+        parlayUsers.add(user);
         
     }
     
     public void unparlay(IMessage message){
                 IUser user = message.getAuthor();
-        for(int i = 0; i<Main.users.size(); i++){
-            if(Main.users.get(i).getID().equals(user.getID())){
+        for(int i = 0; i<parlayUsers.size(); i++){
+            if(parlayUsers.get(i).getID().equals(user.getID())){
                 sendMessage(message.getChannel(),"Ok, dog, catch you later.");
-                Main.users.remove(i);
+                parlayUsers.remove(i);
                 return;
             }
         }
-        sendMessage(message.getChannel(),"You never had a parlay with me nigga");
-    }
-    
-    public void music(String[] arguments, IMessage message){
-        
-        try {
-            djdog.play(arguments, message);
-        } catch (DiscordException ex) {
-            Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
+        sendMessage(message.getChannel(),"You never had a parlay with me");
     }
     
     public void setVolume(String[] arguments, IMessage message){
@@ -215,8 +189,8 @@ public class WilsonServerTest extends BotServer{
             sendMessage(message.getChannel(), "You cannot increase a clip's volume by more than 3 times");
             return;
         }
-        else if(volume < 0.25){
-            sendMessage(message.getChannel(), "You cannot reduce a clip's volume by more than 4 times");
+        else if(volume < 0.1){
+            sendMessage(message.getChannel(), "You cannot reduce a clip's volume by more than 10 times");
             return;
         }
         
@@ -320,51 +294,6 @@ public class WilsonServerTest extends BotServer{
         }
     }
     
-    public void join(String[] arguments, IMessage message){
-        IChannel channel = message.getChannel();
-        
-        if(arguments.length==0){
-            sendMessage(channel,"Nigga, tell me where you want me to go, give a channel name or use 'me' if you want me to join you");
-        }
-        String argument = arguments[0];
-        for(int i = 1; i<arguments.length; i++){
-            argument += " "+arguments[i];
-        }
-        
-        if(argument.equals("me")){
-           
-            for(IVoiceChannel vc : message.getAuthor().getConnectedVoiceChannels()){
-                if(vc.getGuild().getID().equals(message.getGuild().getID())){
-                    try {
-                        vc.join();
-                    } catch (MissingPermissionsException ex) {
-                        sendMessage(message.getChannel(),"I don't have permissions to join that channel");
-                    }
-                    return;
-                }
-            }
-            sendMessage(message.getChannel(),"You are not in a voicechannel");
-            return;
-        }
-        for(IVoiceChannel vchan : message.getGuild().getVoiceChannels()){
-
-            
-            if(vchan.getName().equals(argument)){
-                sendMessage(channel,"On my way to "+argument+", dog");
-                try {
-                    vchan.join();
-                } catch (MissingPermissionsException ex) {
-                    sendMessage(message.getChannel(),"I don't have permissions to join that channel");
-                }
-                return;
-            }
-            
-        }
-        sendMessage(channel,"Stop playing nigga there ain't no "+argument+" channel in this guild.");
-        
-
-        
-    }
     
     public void deleteClip(String[] arguments, IMessage message){
         if(arguments.length<1){
@@ -378,6 +307,7 @@ public class WilsonServerTest extends BotServer{
             sendMessage(message.getChannel(), "I could not find a clip name "+arguments[0]);
             return;
         }
+        
         if(!ownerid.equals(message.getAuthor().getID())){
             sendMessage(message.getChannel(), "According to my records you do not own that clip");
             return;
@@ -547,24 +477,7 @@ public class WilsonServerTest extends BotServer{
         System.out.println(startpoint+" + "+duration);
         
     }
-    
-    public void leave(IMessage message){
         
-    }
-    
-    public static void sendMessage(IChannel channel, String message){
-
-        RequestBuffer.request(() -> {
-		try {
-			new MessageBuilder(Main.wilsonClient).withChannel(channel).withContent(message).build();
-		} catch (DiscordException | MissingPermissionsException e) {
-			e.printStackTrace();
-		}
-		return null;
-	});
-
-    }
-    
     public static boolean matches(String s, String regex){
             Pattern p = Pattern.compile(regex);
             m = p.matcher(s);
@@ -663,6 +576,10 @@ public class WilsonServerTest extends BotServer{
         } catch (RateLimitException ex) {
             Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public static void recieveFile(IChannel channel, File f){
+        
     }
     
     public void moveAll(String[] arguments, IMessage message){
