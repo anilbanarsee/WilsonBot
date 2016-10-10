@@ -11,7 +11,7 @@ import abanstudio.wilsonbot.FFMPEG;
 import abanstudio.wilsonbot.YTDownloader;
 import java.io.File;
 import java.io.IOException;
-import sx.blah.discord.api.EventSubscriber;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IMessage;
@@ -70,18 +70,18 @@ public class DjDogServer {
         
     }
     public void skip(String guildID) throws DiscordException{
-        client.getGuildByID(guildID).getAudioChannel().skip();
+       
     }
     public void play(String[] arguments, IMessage message) throws DiscordException{
         clear(message.getGuild().getID());
         
         File f = new File("assets/music/"+arguments[0]);
         
-        client.getGuildByID(message.getGuild().getID()).getAudioChannel().queueFile(f);
+    
         
     }
     public void clear(String guildID) throws DiscordException{
-        client.getGuildByID(guildID).getAudioChannel().clearQueue();
+       
     }
     
      public void sendMessage(IChannel channel, String message){

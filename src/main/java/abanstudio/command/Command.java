@@ -5,7 +5,7 @@
  */
 package abanstudio.command;
 
-import abanstudio.wilsonbot.BotServer;
+import abanstudio.wilson.BotServer;
 import abanstudio.wilsonbot.WilsonServer;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IMessage;
