@@ -5,7 +5,6 @@
  */
 package abanstudio.wilsonbot;
 
-import abanstudio.wilson.BotServer;
 import abanstudio.command.Command;
 import abanstudio.djdog.DjDogServer;
 import abanstudio.utils.sqlite.DBHandler;
