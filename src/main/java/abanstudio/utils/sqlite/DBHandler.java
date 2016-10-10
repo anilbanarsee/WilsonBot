@@ -5,6 +5,7 @@
  */ 
 package abanstudio.utils.sqlite;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -69,6 +70,63 @@ public class DBHandler {
          //return list.get(0).get(0);
           //TODO 
         //Add correct parameters and code to add to database
+        
+    }
+    public static int addClip(String name, int start, int duration, String source, String ownerID, String tag){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        
+        String query = "INSERT into CLIPS (Name, Start, Duration, Source, OwnerID, Tags, Volume) "
+                    + "VALUES (?,?,?,?,?,?,?);"
+                    ;
+            
+            newDB.openConn();
+            newDB.setSQL(query);
+            newDB.prepStatement();
+            
+
+
+            newDB.pstSetString(1, name);
+            newDB.pstSetInt(2, start);
+            newDB.pstSetInt(3, duration); 
+            newDB.pstSetString(4, source);
+            newDB.pstSetString(5, ownerID);
+            newDB.pstSetString(6, tag);
+            newDB.pstSetString(7, "1");
+
+            newDB.executeN();
+            
+            query = "SELECT ID ID "
+                    + "FROM CLIPS"
+                    + " WHERE Name = '"+name+"';";
+            newDB.setSQL(query);
+            newDB.prepStatement();
+            
+            ResultSet rs = newDB.executeQ();
+
+          
+                        List<ArrayList<Integer>> list = DbUtils.resultSetToNestedList(rs);
+                        newDB.closeConn();
+                        
+                        return list.get(0).get(0);
+              
+            
+         //return list.get(0).get(0);
+          //TODO 
+        //Add correct parameters and code to add to database
+        
+    }
+    public static void syncFiles(){
+        
+        File folder = new File("assets/");
+        
+        for(File file : folder.listFiles()){
+            String s = file.getName().split(".")[0];
+            if(!clipExists(s)){
+                addClip(s,0,0,"disk","sync");
+            }
+        }
+        
         
     }
     public static void removeClip(int clipID){
