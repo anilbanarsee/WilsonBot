@@ -121,9 +121,12 @@ public class DBHandler {
         File folder = new File("assets/");
         
         for(File file : folder.listFiles()){
-            String s = file.getName().split(".")[0];
-            if(!clipExists(s)){
-                addClip(s,0,0,"disk","sync");
+            if(!file.isDirectory()){
+                
+                String s = file.getName().split("\\.")[0];
+                if(!clipExists(s)){
+                    addClip(s,0,0,"disk","sync");
+                }
             }
         }
         

@@ -25,11 +25,7 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class Test {
     public static void main(String[] args) throws IOException, UnsupportedAudioFileException{
 
-        String[] tags = {"dota"};
-        ArrayList<String[]> clips = DBHandler.getClips(tags);
-        for(String[]  s : clips){
-            System.out.println(Arrays.toString(s));
-        }
+        DBHandler.syncFiles();
     }
     
 }
