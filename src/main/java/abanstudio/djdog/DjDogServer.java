@@ -11,7 +11,7 @@ import abanstudio.wilsonbot.FFMPEG;
 import abanstudio.wilsonbot.YTDownloader;
 import java.io.File;
 import java.io.IOException;
-import sx.blah.discord.api.EventSubscriber;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IMessage;
