@@ -117,7 +117,7 @@ public class WilsonServer {
             parseCommand(command, event.getMessage());
            
         }
-        
+
             
         
     }
@@ -189,7 +189,7 @@ public class WilsonServer {
     }
     
     public void parseCommand(String command, IMessage message){
-         
+       
        String[] split = command.split("\\s+");
        String com = "";
        String arg = "";
