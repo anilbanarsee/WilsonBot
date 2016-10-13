@@ -55,7 +55,7 @@ public class WilsonServerTest extends BotServer{
     
     IDiscordClient client;
     
-    String[][] commMap = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
+    String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
                        ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
                        ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
                        ,{"[uU]nparlay","unparlay","ends parlay with me"}
@@ -79,7 +79,7 @@ public class WilsonServerTest extends BotServer{
     
     ArrayList<IUser> parlayUsers;
     
-    Command[] commands;
+
     
     HashMap<String, HashMap<String, Thread>> threadmap;
     
@@ -98,6 +98,8 @@ public class WilsonServerTest extends BotServer{
         volumeBuffer = new ArrayList<>();
         parlayUsers = new ArrayList<>();
         djdog = server;
+        commMap = comms;
+        initalizeCommands();
         
     }
     
@@ -310,7 +312,12 @@ public class WilsonServerTest extends BotServer{
         
         if(!ownerid.equals(message.getAuthor().getID())){
             sendMessage(message.getChannel(), "According to my records you do not own that clip");
-            return;
+            if(isAdmin(message.getAuthor(),message.getGuild())){
+                sendMessage(message.getChannel(), "Oh, I'm very sorry Sir. I did not realise you were an Administrator. The clip will be deleted at once.");
+            }
+            else{
+                return;
+            }
         }
         File f = new File("assets/"+arguments[0]+".mp3");
         f.delete();

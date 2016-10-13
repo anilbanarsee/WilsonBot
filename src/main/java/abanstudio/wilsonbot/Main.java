@@ -6,6 +6,7 @@
 package abanstudio.wilsonbot;
 
 import abanstudio.djdog.DjDogServer;
+import abanstudio.wilson.WilsonServerTest;
 import java.io.File;
 import java.util.ArrayList;
 import sx.blah.discord.api.ClientBuilder;
@@ -45,7 +46,7 @@ public class Main {
         DjDogServer djdog = new DjDogServer(djdogClient);
         
         djdogClient.getDispatcher().registerListener(djdog);
-        wilsonClient.getDispatcher().registerListener(new WilsonServer(wilsonClient,djdog));
+        wilsonClient.getDispatcher().registerListener(new WilsonServerTest(wilsonClient,djdog));
         
     }
 }
