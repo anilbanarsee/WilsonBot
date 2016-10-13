@@ -22,6 +22,7 @@ $RECYCLE.BIN/
 *.mp4
 *.mp3
 
+
 # =========================
 # Operating System Files
 # =========================
@@ -50,4 +51,4 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-*.mp3
+
