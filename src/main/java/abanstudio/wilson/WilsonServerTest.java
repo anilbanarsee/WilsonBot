@@ -13,12 +13,15 @@ import abanstudio.wilsonbot.Downloader;
 import abanstudio.wilsonbot.Game;
 import abanstudio.wilsonbot.Main;
 import abanstudio.wilsonbot.PokemonGuessGame;
+import abanstudio.wilsonbot.UserLog;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.logging.Level;
@@ -46,6 +49,9 @@ import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
+import sx.blah.discord.util.audio.events.TrackStartEvent;
+import sx.blah.discord.util.audio.providers.FileProvider;
+
 
 /**
  *
@@ -66,6 +72,8 @@ public class WilsonServerTest extends BotServer{
                        ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
                        ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
                        ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
+                       ,{"[bB]an[cC]lip","ban","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
+                       ,{"[vV]eto","veto","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
                        
                         };
     
@@ -79,7 +87,7 @@ public class WilsonServerTest extends BotServer{
     
     ArrayList<IUser> parlayUsers;
     
-
+    HashMap<String, UserLog> userLogs;
     
     HashMap<String, HashMap<String, Thread>> threadmap;
     
@@ -99,10 +107,17 @@ public class WilsonServerTest extends BotServer{
         parlayUsers = new ArrayList<>();
         djdog = server;
         commMap = comms;
+        userLogs = new HashMap<>();
         initalizeCommands();
         
     }
     
+    @EventSubscriber
+    public void trackChange(TrackStartEvent event){
+        Track t = event.getTrack();
+        AudioPlayer player = event.getPlayer();
+        player.setVolume((float) t.getMetadata().get("volume"));
+    }
     
     private void initalizeCommands(){
         Command[] comms = {
@@ -124,7 +139,6 @@ public class WilsonServerTest extends BotServer{
                     };
         commands = comms;
     }
-    
     
     private void populateMap(){
         List<IGuild> guilds = client.getGuilds();
@@ -248,7 +262,7 @@ public class WilsonServerTest extends BotServer{
         }
 
        
-        playFiles(clips, message.getGuild());
+        playFiles(clips, message.getGuild(), message.getAuthor(), message.getChannel());
         
     }
     
@@ -276,17 +290,31 @@ public class WilsonServerTest extends BotServer{
         
         clips.add(clip);
         
-        playFiles(clips, message.getGuild());
+        playFiles(clips, message.getGuild(), message.getAuthor(), message.getChannel());
         
     }
     
-    private void playFiles(ArrayList<Clip> clips, IGuild guild){
+    private void playFiles(ArrayList<Clip> clips, IGuild guild, IUser user, IChannel channel){
         
         AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
-                for(Clip clip : clips){
+
+        for(Clip clip : clips){
             try {
-                player.setVolume(clip.getVolume());
-                player.queue(clip.getFile());
+                Track track = new Track(new FileProvider(clip.getFile()));
+                Map<String, Object> metadata = track.getMetadata();
+                metadata.put("volume",clip.getVolume());
+                metadata.put("name",clip.getFile().getName());
+                UserLog log = userLogs.get(user.getID());
+                if(log == null){
+                    log = new UserLog(user);
+                    userLogs.put(user.getID(), log);
+                }
+                long n = log.checkTime(LocalTime.now());
+                if(n==-1)
+                    player.queue(track);
+                else{
+                    sendMessage(channel,"You are sending too many clips, please wait "+n+" seconds to queue another clip.");
+                }
                 
             } catch (IOException ex) {
                 Logger.getLogger(WilsonServerTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -690,12 +718,12 @@ public class WilsonServerTest extends BotServer{
 
         
     }
-    
-    private void download(String argument, IMessage message) {
-        
-        
+   
+    public void ban(String[] arguments, IMessage message){
         
     }
-
-
+    
+    public void veto(String[] arguments, IMessage message){
+        
+    }
 }

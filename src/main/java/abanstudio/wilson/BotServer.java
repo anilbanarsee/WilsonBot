@@ -237,6 +237,9 @@ abstract public class BotServer{
     
     public boolean isAdmin(IUser user, IGuild guild){
         List<IRole> roles = user.getRolesForGuild(guild);
+        
+        
+               
         for(IRole role : roles){
            
             for(Permissions p : role.getPermissions()){
