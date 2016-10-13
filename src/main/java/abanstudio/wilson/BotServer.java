@@ -69,7 +69,7 @@ abstract public class BotServer{
             parseCommand(command, event.getMessage());
            
         }
-        
+        System.out.println(isAdmin(event.getMessage().getAuthor(),event.getMessage().getGuild()));
             
         
     }
@@ -96,31 +96,16 @@ abstract public class BotServer{
         return "null";
     }
     
-    public void parseCommand(String command, IMessage message){
-         
+   public void parseCommand(String command, IMessage message){
+
        String[] split = command.split("\\s+");
        String com = "";
        String arg = "";
-       
-       String[] arguments = arg.split("\\s+");
-       int length = arguments.length;
-       for(String s : arguments){
-           s = s.replace("\\s+", "");
-           if(s.equals("")) length--;
-       }
-       int x = 0;
-       String[] argument = new String[length];
-       for(String s: arguments){
-           if(!s.equals("")){
-               argument[x] = s;
-               x++;
-           }
-       }
        for(int i=0; i<split.length; i++){
            String test = matchCommand(split[i]);
            
            if(!test.equals("null")){
-               doCommand(com,argument,message);
+               doCommand(com,arg,message);
                com = test;
                arg = "";
            }
@@ -130,20 +115,34 @@ abstract public class BotServer{
            
            
        }
-       
-       doCommand(com,argument,message);
+       doCommand(com,arg,message);
        
     }
     
-    public void doCommand(String command, String[] argument, IMessage message){
+    public void doCommand(String command, String argument, IMessage message){
        
+        String[] arguments = argument.split("\\s+");
+        int i = arguments.length;
+        for(String s : arguments){
+            s = s.replace("\\s+", "");
+            if(s.equals("")) i--;
+        }
+        int x = 0;
+        String[] newarg = new String[i];
+        for(String s: arguments){
+            if(!s.equals("")){
+                newarg[x] = s;
+                x++;
+            }
+        }
         
-        System.out.println(Arrays.toString(argument));
         
-        for(int i = 0; i<commMap.length; i++){
-            String comm = commMap[i][1];
+
+        
+        for(int j = 0; j<commMap.length; j++){
+            String comm = commMap[j][1];
             if(command.equals(comm)){
-                commands[i].exec(argument, message);
+                commands[j].exec(newarg, message);
             }
         }
         
@@ -240,9 +239,11 @@ abstract public class BotServer{
         List<IRole> roles = user.getRolesForGuild(guild);
         for(IRole role : roles){
            
-            if(role.getPermissions().contains(Permissions.ADMINISTRATOR)){
-                return true;
+            for(Permissions p : role.getPermissions()){
+                if(p.hasPermission(8))
+                    return true;
             }
+                    
             //Permissions p = (Permissions) role.getPermissions().toArray()[0];
             //if(p.hasPermission(Permissions.ADMINISTRATOR)){return true;}
            
