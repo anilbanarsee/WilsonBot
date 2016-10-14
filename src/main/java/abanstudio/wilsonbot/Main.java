@@ -47,6 +47,7 @@ public class Main {
         
         djdogClient.getDispatcher().registerListener(djdog);
         wilsonClient.getDispatcher().registerListener(new WilsonServerTest(wilsonClient,djdog));
+
         
     }
 }

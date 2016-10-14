@@ -69,7 +69,9 @@ abstract public class BotServer{
             parseCommand(command, event.getMessage());
            
         }
+
         System.out.println(isAdmin(event.getMessage().getAuthor(),event.getMessage().getGuild()));
+
             
         
     }
@@ -88,6 +90,7 @@ abstract public class BotServer{
        
 
         for(String[] regComm : commMap){
+
             if(matches(command,"\\b"+regComm[0]+"\\b"))
                 return regComm[1];
         }
@@ -96,16 +99,20 @@ abstract public class BotServer{
         return "null";
     }
     
+
    public void parseCommand(String command, IMessage message){
 
        String[] split = command.split("\\s+");
        String com = "";
        String arg = "";
+
        for(int i=0; i<split.length; i++){
            String test = matchCommand(split[i]);
            
            if(!test.equals("null")){
+               
                doCommand(com,arg,message);
+
                com = test;
                arg = "";
            }
@@ -115,6 +122,7 @@ abstract public class BotServer{
            
            
        }
+
        doCommand(com,arg,message);
        
     }
@@ -142,6 +150,7 @@ abstract public class BotServer{
             String comm = commMap[j][1];
             if(command.equals(comm)){
                 commands[j].exec(newarg, message);
+
             }
         }
         
@@ -237,19 +246,10 @@ abstract public class BotServer{
     public boolean isAdmin(IUser user, IGuild guild){
         List<IRole> roles = user.getRolesForGuild(guild);
         
-        
-               
-        for(IRole role : roles){
-           
-            for(Permissions p : role.getPermissions()){
-                if(p.hasPermission(8))
-                    return true;
-            }
-                    
             //Permissions p = (Permissions) role.getPermissions().toArray()[0];
             //if(p.hasPermission(Permissions.ADMINISTRATOR)){return true;}
            
-        }
+        
         return false;
     }
 }

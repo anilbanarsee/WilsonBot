@@ -121,6 +121,7 @@ public class DBHandler {
         File folder = new File("assets/");
         
         for(File file : folder.listFiles()){
+
             if(!file.isDirectory()){
                 
                 String s = file.getName().split("\\.")[0];
@@ -274,8 +275,10 @@ public class DBHandler {
         List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
         ArrayList<String[]> newList = new ArrayList<>();
         for(ArrayList<Object> i : list){
+
             
             String[] n = {(String) i.get(0), (String) i.get(1), i.get(2)+""};
+
 
             newList.add(n);
         }
@@ -302,11 +305,10 @@ public class DBHandler {
         
         ArrayList<String[]> allClips = getClipsAndTags();
         ArrayList<String[]> clips = new ArrayList<>();
-        
+
+        String[] data = new String[2];
         for(String[] s: allClips){
-            
-            
-            String[] data = new String[2];
+
             if(s[1]!=null){
                 String[] t = s[1].split(",");
             
@@ -323,13 +325,15 @@ public class DBHandler {
                         break;
                 }
             
+
                 if(tagged){
+
                     data[0] = s[0];
                     data[1] = s[2];
                     clips.add(data);
                 }
-            
             }
+
         }
         
         return clips;

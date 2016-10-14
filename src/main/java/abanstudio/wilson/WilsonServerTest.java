@@ -52,7 +52,6 @@ import sx.blah.discord.util.audio.AudioPlayer.Track;
 import sx.blah.discord.util.audio.events.TrackStartEvent;
 import sx.blah.discord.util.audio.providers.FileProvider;
 
-
 /**
  *
  * @author Reetoo
@@ -61,6 +60,7 @@ public class WilsonServerTest extends BotServer{
     
     IDiscordClient client;
     
+
     String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
                        ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
                        ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
@@ -74,6 +74,7 @@ public class WilsonServerTest extends BotServer{
                        ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
                        ,{"[bB]an[cC]lip","ban","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
                        ,{"[vV]eto","veto","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
+
                        
                         };
     
@@ -118,6 +119,7 @@ public class WilsonServerTest extends BotServer{
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
+
     
     private void initalizeCommands(){
         Command[] comms = {
@@ -262,7 +264,9 @@ public class WilsonServerTest extends BotServer{
         }
 
        
+
         playFiles(clips, message.getGuild(), message.getAuthor(), message.getChannel());
+
         
     }
     
@@ -290,6 +294,7 @@ public class WilsonServerTest extends BotServer{
         
         clips.add(clip);
         
+
         playFiles(clips, message.getGuild(), message.getAuthor(), message.getChannel());
         
     }
@@ -340,6 +345,7 @@ public class WilsonServerTest extends BotServer{
         
         if(!ownerid.equals(message.getAuthor().getID())){
             sendMessage(message.getChannel(), "According to my records you do not own that clip");
+
             if(isAdmin(message.getAuthor(),message.getGuild())){
                 sendMessage(message.getChannel(), "Oh, I'm very sorry Sir. I did not realise you were an Administrator. The clip will be deleted at once.");
             }
@@ -718,6 +724,7 @@ public class WilsonServerTest extends BotServer{
 
         
     }
+
    
     public void ban(String[] arguments, IMessage message){
         
@@ -726,4 +733,5 @@ public class WilsonServerTest extends BotServer{
     public void veto(String[] arguments, IMessage message){
         
     }
+
 }

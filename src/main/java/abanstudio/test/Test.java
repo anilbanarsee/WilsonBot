@@ -7,6 +7,7 @@ package abanstudio.test;
 
 import abanstudio.utils.sqlite.DBHandler;
 import abanstudio.wilsonbot.FFMPEG;
+<<<<<<< HEAD
 import abanstudio.wilsonbot.UserLog;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +19,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.Scanner;
+=======
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+>>>>>>> 031a50c2467d728cbc926fe4df6b7592c17d72f8
 import javax.sound.sampled.UnsupportedAudioFileException;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.providers.FileProvider;
@@ -28,6 +38,7 @@ import sx.blah.discord.util.audio.providers.FileProvider;
  */
 public class Test {
     public static void main(String[] args) throws IOException, UnsupportedAudioFileException{
+
 
         UserLog user = new UserLog(null);
         
@@ -41,6 +52,7 @@ public class Test {
             System.out.println(user.checkTime(LocalTime.now()));
         
         }
+
     }
     
 }
