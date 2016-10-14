@@ -7,6 +7,7 @@ package abanstudio.wilson;
 
 import abanstudio.command.Command;
 import abanstudio.djdog.DjDogServer;
+import abanstudio.exceptions.R9KException;
 import abanstudio.utils.sqlite.DBHandler;
 import abanstudio.wilsonbot.Clip;
 import abanstudio.wilsonbot.Downloader;
@@ -116,6 +117,7 @@ public class WilsonServerTest extends BotServer{
     @EventSubscriber
     public void trackChange(TrackStartEvent event){
         Track t = event.getTrack();
+        t.getMetadata().put("played", true);
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
@@ -309,14 +311,26 @@ public class WilsonServerTest extends BotServer{
                 Map<String, Object> metadata = track.getMetadata();
                 metadata.put("volume",clip.getVolume());
                 metadata.put("name",clip.getFile().getName());
+                metadata.put("time", LocalTime.now());
+                metadata.put("played", false);
                 UserLog log = userLogs.get(user.getID());
+                
                 if(log == null){
                     log = new UserLog(user);
                     userLogs.put(user.getID(), log);
                 }
-                long n = log.checkTime(LocalTime.now());
-                if(n==-1)
+                long n;
+                try {
+                    n = log.checkTrack(track);
+                } catch (R9KException ex) {
+                    sendMessage(channel,"R9k mode is in effect, meaning you cannot play the same clip multiple times within a small time frame, please wait "+ex.getDiff()+" seconds to play '"+ex.getName()+"'.");
+                    return;
+                }
+                if(n==0)
                     player.queue(track);
+                else if(n<0){
+                    sendMessage(channel,"You still have "+(-n)+" unplayed clips in your queue, wait for them to finish before queuing more");
+                }
                 else{
                     sendMessage(channel,"You are sending too many clips, please wait "+n+" seconds to queue another clip.");
                 }

@@ -5,10 +5,12 @@
  */
 package abanstudio.wilsonbot;
 
+import abanstudio.exceptions.R9KException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.util.audio.AudioPlayer.Track;
 
 /**
  *
@@ -16,37 +18,72 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class UserLog {
     
-    ArrayList<LocalTime> times;
+    ArrayList<Track> tracks;
     IUser user;
-    private int maxClips = 4;
+    private int maxClips = 6;
+    private boolean r9k = true;
+    private int r9kTime = 20;
     private int maxTime = 60;
     
     public UserLog(IUser user){
         this.user = user;
-        times = new ArrayList<>();
+        tracks = new ArrayList<>();
     }
     
-    public void addToLog(LocalTime d){
-        if(times.size()>=maxClips){
-            times.remove(0);
+    public void addToLog(Track t){
+        if(tracks.size()>=maxClips){
+            tracks.remove(0);
         }
-        times.add(d);
+        tracks.add(t);
     }
     
-    public long checkTime(LocalTime d){
-        if(times.size()>=maxClips){
-            LocalTime first = times.get(0);
-            if(d.isBefore(first.plusSeconds(maxTime))){
-                long diffSec = maxTime-(d.toSecondOfDay()-first.toSecondOfDay());
+    public long checkTrack(Track track) throws R9KException{
+        LocalTime cTime = null;
+        if(tracks.size()>=maxClips){
+            Track first = tracks.get(0);
+            cTime = (LocalTime) track.getMetadata().get("time");
+            LocalTime fTime = (LocalTime) first.getMetadata().get("time");
+            if(cTime.isBefore(fTime.plusSeconds(maxTime))){
+                long diffSec = maxTime-(cTime.toSecondOfDay()-fTime.toSecondOfDay());
                 return diffSec;
             }
+            long numUn = currentUnplayed();
+            if(numUn>=maxClips){
+                return -numUn; 
+            }
+           
         }
-        addToLog(d);
-        return -1;
+         if(r9k){
+             if(cTime==null)
+                cTime = (LocalTime) track.getMetadata().get("time");
+             for(Track t: tracks){
+
+                LocalTime tTime = (LocalTime) t.getMetadata().get("time");
+                    if(cTime.isBefore(tTime.plusSeconds(r9kTime))){
+                        String trackName = (String) t.getMetadata().get("name");
+                        if(trackName.equals(track.getMetadata().get("name"))){
+                            long diffSec = r9kTime-(cTime.toSecondOfDay()-tTime.toSecondOfDay());
+                            throw new R9KException(diffSec, trackName);
+                        }
+                    }
+                }
+            }
+        addToLog(track);
+        return 0;
     }
     
-    public ArrayList<LocalTime> getTimes(){
-        return times;
+    public int currentUnplayed(){
+        int n = 0;
+        for(Track t: tracks){
+            boolean b = (Boolean)t.getMetadata().get("played");
+            if(!b)
+                n++;
+        }
+        return n;
+    }
+    
+    public ArrayList<Track> getTimes(){
+        return tracks;
     }
     
 }
