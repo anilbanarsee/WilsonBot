@@ -88,7 +88,7 @@ abstract public class BotServer{
        
 
         for(String[] regComm : commMap){
-            if(matches(command,regComm[0]))
+            if(matches(command,"\\b"+regComm[0]+"\\b"))
                 return regComm[1];
         }
         
@@ -136,8 +136,7 @@ abstract public class BotServer{
             }
         }
         
-        
-
+        System.out.println(argument+Arrays.toString(newarg));
         
         for(int j = 0; j<commMap.length; j++){
             String comm = commMap[j][1];
