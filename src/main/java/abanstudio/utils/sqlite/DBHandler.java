@@ -5,16 +5,11 @@
  */ 
 package abanstudio.utils.sqlite;
 
+import abanstudio.utils.sqlite.DBConn;
 import java.io.File;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.table.TableModel;
 import net.proteanit.sql.DbUtils;
 
 
@@ -301,15 +296,114 @@ public class DBHandler {
          
 
     }
+    public static ArrayList<String> getBanners(String clip){
+              DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+          newDB.openConn();
+          String sql = "SELECT Banlist Banlist "
+                    +"FROM CLIPS "
+                  + "WHERE Name = '"+clip+"';";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
+        ArrayList<String> newList = new ArrayList<>();
+        for(ArrayList<Object> i : list){
+
+            String s = (String)i.get(0);
+            String[] split = s.split(",");
+            for(String st : split){
+                if(!st.equals("")){
+                    newList.add(st);
+                }
+            }
+            
+            
+        }
+         newDB.closeConn();
+         
+         return newList;
+    }
+    /* public static void getUser(String ID){
+        
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
+        String sql = "SELECT Banlist Banlist "
+                    +"FROM CLIPS "
+                  + "WHERE Name = '"+clip+"';";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
+        ArrayList<String> newList = new ArrayList<>();
+        for(ArrayList<Object> i : list){
+
+            String s = (String)i.get(0);
+            String[] split = s.split(",");
+            for(String st : split){
+                if(!st.equals("")){
+                    newList.add(st);
+                }
+            }
+            
+            
+        }
+         newDB.closeConn();
+         
+         return newList;
+    }
+    public static void banClip(String clip, String userID, boolean b){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        
+        String query = "INSERT into BANVETO (Name, Start, Duration, Source, OwnerID, Volume) "
+                    + "VALUES (?,?,?);"
+                    ;
+            
+            newDB.openConn();
+            newDB.setSQL(query);
+            newDB.prepStatement();
+            
+
+
+            newDB.pstSetString(1, name);
+            newDB.pstSetInt(2, start);
+            newDB.pstSetInt(3, duration); 
+            newDB.pstSetString(4, source);
+            newDB.pstSetString(5, ownerID);
+            newDB.pstSetString(6, "1");
+
+            newDB.executeN();
+            
+            query = "SELECT ID ID "
+                    + "FROM CLIPS"
+                    + " WHERE Name = '"+name+"';";
+            newDB.setSQL(query);
+            newDB.prepStatement();
+            
+            ResultSet rs = newDB.executeQ();
+
+          
+                        List<ArrayList<Integer>> list = DbUtils.resultSetToNestedList(rs);
+                        newDB.closeConn();
+                        
+                        return list.get(0).get(0);
+    }*/
     public static ArrayList<String[]> getClips(String[] tags){
         
         ArrayList<String[]> allClips = getClipsAndTags();
         ArrayList<String[]> clips = new ArrayList<>();
 
-        String[] data = new String[2];
+        
         for(String[] s: allClips){
-
+            
             if(s[1]!=null){
+                String[] data = new String[2];
                 String[] t = s[1].split(",");
             
                 boolean tagged = false;

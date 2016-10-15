@@ -3,18 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abanstudio.command;
-
-import sx.blah.discord.handle.obj.IMessage;
+package abanstudio.exceptions;
 
 /**
  *
  * @author Reetoo
  */
-public interface Command {
-    
-    
-    
-    public void exec(String[] arguments, IMessage message);
+public class DisconnectedException extends Exception{
     
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package abanstudio.command;
+package abanstudio.games;
 
 import sx.blah.discord.handle.obj.IMessage;
 
@@ -11,10 +11,16 @@ import sx.blah.discord.handle.obj.IMessage;
  *
  * @author Reetoo
  */
-public interface Command {
+public interface Game extends Runnable{
+
+   
     
     
-    
-    public void exec(String[] arguments, IMessage message);
+    public void startgame(IMessage message);
+    public void endGame();
+    public void printScores();
+    public void nextRound();
+    public void changeSetting(int i[][]);
+
     
 }
