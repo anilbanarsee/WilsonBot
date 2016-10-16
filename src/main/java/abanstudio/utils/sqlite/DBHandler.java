@@ -128,6 +128,66 @@ public class DBHandler {
         
         
     }
+    public static String getAdminRights(String userID){
+          
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
+          String sql = "SELECT Admin Admin "
+                    +"FROM USERS "
+                  + "WHERE UserID = '"+userID+"'"
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+        String admin = "null";
+        
+        for(ArrayList<String> sublist: list){
+            admin = sublist.get(0);
+        }
+        
+        newDB.closeConn();
+         
+        return admin;
+    }
+    public static void addAdminRights(String userID, String admin){
+       DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        
+           String query = "INSERT into USERS (UserID, Admin) "
+                    + "VALUES (?,?);"
+                    ;
+            
+            newDB.openConn();
+            newDB.setSQL(query);
+            newDB.prepStatement();
+
+            newDB.pstSetString(1, userID);
+            newDB.pstSetString(2, admin);
+            
+
+
+            newDB.executeN();
+          
+              
+            newDB.closeConn();
+    }
+    public static void removeAdminRights(String userID, String admin){
+          
+          
+         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+       // System.out.println(bookingID);
+        String sql = "DELETE FROM Users WHERE UserID = '"+userID+"';";
+       // String sql = "UPDATE repair_bookings SET customer_id ='100000' WHERE IDENTITY = '"+bookingID+"';";
+            newDB.openConn();
+            newDB.setSQL(sql);
+            newDB.prepStatement();
+            newDB.executeN();
+            newDB.closeConn();
+    }
     public static void removeClip(int clipID){
        
          
@@ -297,11 +357,12 @@ public class DBHandler {
 
     }
     public static ArrayList<String> getBanners(String clip){
-              DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
-          newDB.openConn();
-          String sql = "SELECT Banlist Banlist "
-                    +"FROM CLIPS "
-                  + "WHERE Name = '"+clip+"';";
+              
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");          
+        newDB.openConn();          
+        String sql = "SELECT UserID UserID "
+                    +"FROM BANVETO "
+                  + "WHERE BanOrVeto = 'ban' AND ClipName = '"+clip+"';";
         
         newDB.setSQL(sql);
         newDB.prepStatement();
@@ -312,13 +373,7 @@ public class DBHandler {
         ArrayList<String> newList = new ArrayList<>();
         for(ArrayList<Object> i : list){
 
-            String s = (String)i.get(0);
-            String[] split = s.split(",");
-            for(String st : split){
-                if(!st.equals("")){
-                    newList.add(st);
-                }
-            }
+            newList.add(i.get(0).toString());
             
             
         }
@@ -326,42 +381,12 @@ public class DBHandler {
          
          return newList;
     }
-    /* public static void getUser(String ID){
-        
-        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
-        newDB.openConn();
-        String sql = "SELECT Banlist Banlist "
-                    +"FROM CLIPS "
-                  + "WHERE Name = '"+clip+"';";
-        
-        newDB.setSQL(sql);
-        newDB.prepStatement();
-        ResultSet rs = newDB.executeQ();
-         
-        
-        List<ArrayList<Object>> list = DbUtils.resultSetToNestedList(rs);
-        ArrayList<String> newList = new ArrayList<>();
-        for(ArrayList<Object> i : list){
-
-            String s = (String)i.get(0);
-            String[] split = s.split(",");
-            for(String st : split){
-                if(!st.equals("")){
-                    newList.add(st);
-                }
-            }
-            
-            
-        }
-         newDB.closeConn();
-         
-         return newList;
-    }
-    public static void banClip(String clip, String userID, boolean b){
+    
+    public static void vetoClip(String clip, String userID){
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
         
         
-        String query = "INSERT into BANVETO (Name, Start, Duration, Source, OwnerID, Volume) "
+        String query = "INSERT into BANVETO (UserID, ClipName, BanOrVeto) "
                     + "VALUES (?,?,?);"
                     ;
             
@@ -371,29 +396,64 @@ public class DBHandler {
             
 
 
-            newDB.pstSetString(1, name);
-            newDB.pstSetInt(2, start);
-            newDB.pstSetInt(3, duration); 
-            newDB.pstSetString(4, source);
-            newDB.pstSetString(5, ownerID);
-            newDB.pstSetString(6, "1");
+            newDB.pstSetString(1, userID);
+            newDB.pstSetString(2, clip);
+            newDB.pstSetString(3, "veto"); 
 
             newDB.executeN();
+            newDB.closeConn();
             
-            query = "SELECT ID ID "
-                    + "FROM CLIPS"
-                    + " WHERE Name = '"+name+"';";
+    }
+    public static void banClip(String clip, String userID){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        
+        String query = "INSERT into BANVETO (UserID, ClipName, BanOrVeto) "
+                    + "VALUES (?,?,?);"
+                    ;
+            
+            newDB.openConn();
             newDB.setSQL(query);
             newDB.prepStatement();
             
-            ResultSet rs = newDB.executeQ();
 
-          
-                        List<ArrayList<Integer>> list = DbUtils.resultSetToNestedList(rs);
-                        newDB.closeConn();
-                        
-                        return list.get(0).get(0);
-    }*/
+
+            newDB.pstSetString(1, userID);
+            newDB.pstSetString(2, clip);
+            newDB.pstSetString(3, "ban"); 
+
+            newDB.executeN();
+            newDB.closeConn();
+            
+    }
+    public static void unvetoClip(String clip, String userID){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        String query = "DELETE "
+                + "FROM BANVETO "
+                + "WHERE ClipName ='"+clip+"' AND UserID = '"+userID+"';";
+        
+        newDB.openConn();
+        newDB.setSQL(query);
+        newDB.prepStatement();
+        newDB.executeN();
+        newDB.closeConn();
+        
+    }
+    public static void unbanClip(String clip, String userID){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        
+        String query = "DELETE "
+                + "FROM BANVETO "
+                + "WHERE ClipName ='"+clip+"' AND UserID = '"+userID+"';";
+        
+        newDB.openConn();
+        newDB.setSQL(query);
+        newDB.prepStatement();
+        newDB.executeN();
+        newDB.closeConn();
+        
+    }
     public static ArrayList<String[]> getClips(String[] tags){
         
         ArrayList<String[]> allClips = getClipsAndTags();

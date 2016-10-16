@@ -75,7 +75,7 @@ abstract public class BotServer{
            
         }
 
-        System.out.println(isAdmin(event.getMessage().getAuthor(),event.getMessage().getGuild()));
+
 
             
         
@@ -261,13 +261,5 @@ abstract public class BotServer{
         }
        
     }
-    public boolean isAdmin(IUser user, IGuild guild){
-        List<IRole> roles = user.getRolesForGuild(guild);
-        
-            //Permissions p = (Permissions) role.getPermissions().toArray()[0];
-            //if(p.hasPermission(Permissions.ADMINISTRATOR)){return true;}
-           
-        
-        return false;
-    }
+    public abstract boolean isAdmin(IUser user);
 }
