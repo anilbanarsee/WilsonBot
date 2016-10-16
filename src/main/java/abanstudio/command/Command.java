@@ -11,10 +11,17 @@ import sx.blah.discord.handle.obj.IMessage;
  *
  * @author Reetoo
  */
-public interface Command {
+public abstract class Command {
     
+    private Command[] subComms;
     
+    public Command(Command[] cs){
+        subComms = cs;
+    }
+    public Command(){
+        subComms = null;
+    }
     
-    public void exec(String[] arguments, IMessage message);
+    public abstract void exec(String[] arguments, IMessage message);
     
 }
