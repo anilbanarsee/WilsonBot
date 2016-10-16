@@ -10,12 +10,10 @@ import abanstudio.command.Command;
 import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.exceptions.R9KException;
 import abanstudio.utils.sqlite.DBHandler;
-import abanstudio.discordbot.Clip;
 import abanstudio.utils.Downloader;
 import abanstudio.games.Game;
 import abanstudio.discordbot.Main;
 import abanstudio.games.PokemonGuessGame;
-import abanstudio.discordbot.UserLog;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalTime;
@@ -43,15 +41,15 @@ import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 import sx.blah.discord.util.audio.events.TrackStartEvent;
+import sx.blah.discord.util.audio.events.TrackFinishEvent;
 import sx.blah.discord.util.audio.providers.FileProvider;
+
 
 /**
  *
  * @author Reetoo
  */
 public class WilsonServer extends BotServer{
-    
-    IDiscordClient client;
     
 
     String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
@@ -65,13 +63,15 @@ public class WilsonServer extends BotServer{
                        ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
                        ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
                        ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
-                       ,{"[bB]an[cC]lip","ban","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
-                       ,{"[vV]eto","veto","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
+                       ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
+                       ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
+                       ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
+                        ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
 
                        
                         };
     
-    static Matcher m;
+
     //ArrayList<ArrayList<Thread>> gameThread;
     Thread gameThread;
     
@@ -87,7 +87,11 @@ public class WilsonServer extends BotServer{
     
     String[] gameList = {"G1","G2","G3","G4","G5"};
     
+    Track currentTrack;
+    
     DjDogServer djdog;
+    
+    boolean r9k;
     
     Game game;
     
@@ -103,18 +107,49 @@ public class WilsonServer extends BotServer{
         commMap = comms;
         userLogs = new HashMap<>();
         initalizeCommands();
+        r9k = true;
         
     }
     
     @EventSubscriber
     public void trackChange(TrackStartEvent event){
         Track t = event.getTrack();
+        currentTrack = t;
+        String trackName = t.getMetadata().get("name").toString();
+        
+        IUser banner = checkTrackForChannel(getConnectedChannel(event.getPlayer().getGuild()),t);
+        
+        if(banner!=null){
+            IChannel channel = (IChannel) t.getMetadata().get("textchannel");
+            sendMessage(channel, "Clip :"+trackName+" was skipped as "+banner.getName()+" has voted to ban the clip and is present within this channel.");
+            currentTrack = null;
+            event.getPlayer().skip();
+            return;
+        }
+    
+        
+        currentTrack = t;
         t.getMetadata().put("played", true);
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
-
+        @EventSubscriber
+    public void trackEnd(TrackFinishEvent event){
+        
+        currentTrack = null;
+    }
     
+    public IVoiceChannel getConnectedChannel(IGuild guild){
+        List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
+        for(IVoiceChannel channel : channels){
+            if(channel.getGuild().getID().equals(guild.getID())){
+                return channel;
+            }
+        }
+        System.out.println("CRITICAL ERROR");
+        return null;
+    }
+
     private void initalizeCommands(){
         Command[] comms = {
                     
@@ -128,11 +163,15 @@ public class WilsonServer extends BotServer{
                     new Command(){public void exec(String[] arg, IMessage m) {game(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {guess(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {deleteClip(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}}
+                    new Command(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {ban(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {unban(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {veto(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}}
+                    
+                
+        };
 
-
-        
-                    };
         commands = comms;
     }
     
@@ -158,6 +197,98 @@ public class WilsonServer extends BotServer{
     
     private void setThread(String gid, String thread, Thread t){
         threadmap.get(gid).put(thread, t);
+    }
+    
+    public IUser checkTrackForChannel(IVoiceChannel voicechannel, Track t){
+        
+        List<IUser> users = voicechannel.getConnectedUsers();
+        if(currentTrack!=null){
+            String clipName = t.getMetadata().get("name").toString();
+            ArrayList<String> banners = DBHandler.getBanners(clipName);
+            for(IUser u: users){
+            
+                for(String id: banners){
+                    System.out.println(id);
+                    System.out.println(u.getID());
+                    System.out.println(id.equals(u.getID()));
+                    if(id.equals(u.getID())){
+                        
+                        return u;
+                    }
+                }
+            
+            }
+        }
+        
+        return null;
+        
+    }
+    
+    @Override
+    public void join(String[] arguments, IMessage message){
+        
+        IChannel channel = message.getChannel();
+        
+        if(arguments.length==0){
+            sendMessage(channel,"Nigga, tell me where you want me to go, give a channel name or use 'me' if you want me to join you");
+        }
+        String argument = arguments[0];
+        for(int i = 1; i<arguments.length; i++){
+            argument += " "+arguments[i];
+        }
+        
+        IVoiceChannel voicechannel = null;
+        
+        if(argument.equals("me")){
+           
+            for(IVoiceChannel vc : message.getAuthor().getConnectedVoiceChannels()){
+                if(vc.getGuild().getID().equals(message.getGuild().getID())){
+
+                        voicechannel = vc;
+                        break;
+
+                }
+            }
+            if(voicechannel==null){
+                sendMessage(message.getChannel(),"You are not in a voicechannel");
+                return;
+            }
+        }
+        else{
+            for(IVoiceChannel vchan : message.getGuild().getVoiceChannels()){
+
+            
+                if(vchan.getName().equals(argument)){
+                    
+                    sendMessage(channel,"On my way to "+argument+", dog");
+                    voicechannel = vchan;
+                    break;
+                }            
+            }
+            if(voicechannel==null){
+                sendMessage(channel,"Stop playing nigga there ain't no "+argument+" channel in this guild.");
+                return;
+            }
+        }
+        
+        IUser banner = checkTrackForChannel(voicechannel,currentTrack);
+        if(banner!=null){
+            
+            
+            sendMessage(channel,currentTrack.getMetadata().get("name").toString()+" was skipped on joining this channel as "+banner.getName()+" has banned it.");
+            AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(message.getGuild());
+            player.skip();
+
+       }
+        
+        try {
+            voicechannel.join();
+        } catch (MissingPermissionsException ex) {
+            sendMessage(channel,"I do not have permissions to join this channel.");
+
+        }
+        
+
     }
     
     public void parlay(IMessage message){
@@ -302,9 +433,10 @@ public class WilsonServer extends BotServer{
                 Track track = new Track(new FileProvider(clip.getFile()));
                 Map<String, Object> metadata = track.getMetadata();
                 metadata.put("volume",clip.getVolume());
-                metadata.put("name",clip.getFile().getName());
+                metadata.put("name",clip.getFile().getName().split("\\.")[0]);
                 metadata.put("time", LocalTime.now());
                 metadata.put("played", false);
+                metadata.put("textchannel", channel);
                 UserLog log = userLogs.get(user.getID());
                 
                 if(log == null){
@@ -352,7 +484,7 @@ public class WilsonServer extends BotServer{
         if(!ownerid.equals(message.getAuthor().getID())){
             sendMessage(message.getChannel(), "According to my records you do not own that clip");
 
-            if(isAdmin(message.getAuthor(),message.getGuild())){
+            if(isMasterAdmin(message.getAuthor())){
                 sendMessage(message.getChannel(), "Oh, I'm very sorry Sir. I did not realise you were an Administrator. The clip will be deleted at once.");
             }
             else{
@@ -551,7 +683,47 @@ public class WilsonServer extends BotServer{
         }   
         
     }
-    
+    public void set(String[] arguments, IMessage message){
+        
+        if(!isAdmin(message.getAuthor())){
+            sendMessage(message.getChannel(), "You are not an admin");
+            return;
+        }
+        if(arguments.length<2){
+            return;
+        }
+        
+        if(arguments[0].equals("r9k")){
+            
+            if(arguments[1].equals("on")){
+                sendMessage(message.getChannel(), "r9k mode is enabled");
+                r9k = true;
+                return;
+            }
+            else if(arguments[1].equals("off")){
+                sendMessage(message.getChannel(), "r9k mode is disabled");
+                r9k = false;
+                return;
+            }
+        }
+        if(arguments[0].equals("admin")){
+            if(!isMasterAdmin(message.getAuthor())){
+                sendMessage(message.getChannel(), "You must be a master admin to give admin to other users");
+                return;
+            }
+            List<IUser> tempUsers = message.getGuild().getUsersByName(arguments[1]);
+            if(tempUsers.size()<1){
+                sendMessage(message.getChannel(), "There is noone with that name in this guild");
+                return;
+            }
+            if(tempUsers.size()>1){
+                sendMessage(message.getChannel(), "There is more than one person with that name");
+                return;
+            }
+            DBHandler.addAdminRights(tempUsers.get(0).getID(), prefix);
+        }
+
+    }
     public void game(String[] arguments, IMessage message){
 
         if(arguments[0].equals("start")){
@@ -713,11 +885,84 @@ public class WilsonServer extends BotServer{
 
    
     public void ban(String[] arguments, IMessage message){
+        IChannel channel = message.getChannel();
+        ArrayList<String> exist = new ArrayList<>();
+        ArrayList<String> already = new ArrayList<>();
+        ArrayList<String> success = new ArrayList<>();
+        String userID = message.getAuthor().getID();
+        for(String s: arguments){
+            
+            if(!DBHandler.clipExists(s)){
+                exist.add(s);
+            }
+            else
+            {
+                ArrayList<String> banners = DBHandler.getBanners(s);
+                boolean flag = false;
+                for(String banner: banners){
+                    if(banner.equals(userID)){
+                        already.add(s);
+                        flag = true;
+                        break;
+                    }
+                }
+                if(!flag){
+                    DBHandler.banClip(s, message.getAuthor().getID());
+                    success.add(s);
+                }
+            
+            
+            }
+        }
+        
+        if(success.size()>0)
+            sendMessage(channel,"The following clips were successfully banned : \n"+success);        
+        if(exist.size()>0)
+            sendMessage(channel,"The following clips did not exist and were therefore not banned : \n"+exist);
+        if(already.size()>0)
+            sendMessage(channel,"The following clips have already been banned by you : \n"+already);
         
     }
-    
+    public void unban(String[] arguments, IMessage message){
+        IChannel channel = message.getChannel();
+        ArrayList<String> errors = new ArrayList<>();
+        ArrayList<String> success = new ArrayList<>();
+        for(String s: arguments){
+            
+            if(!DBHandler.clipExists(s)){
+                errors.add(s);
+            }
+            else
+            {
+                DBHandler.unbanClip(s, message.getAuthor().getID());
+                success.add(s);
+            
+            }
+        }
+        sendMessage(channel,"The following clips were successfully unbanned : \n"+success);
+        
+        if(errors.size()>0)
+        sendMessage(channel,"The following clips did not exist and were therefore not banned : \n"+errors);
+    }
     public void veto(String[] arguments, IMessage message){
-        
+        sendMessage(message.getChannel(),"ERROR VETOING IS NOT IMPLEMENTED. REASON GIVEN : 'can't be fucked rite now'");
     }
+
+    @Override
+    public boolean isAdmin(IUser user) {
+        if(DBHandler.getAdminRights(user.getID()).equals("null")){
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isMasterAdmin(IUser user) {
+        if(DBHandler.getAdminRights(user.getID()).equals("master")){
+            return true;
+        }
+        return false;
+    }
+
+
 
 }

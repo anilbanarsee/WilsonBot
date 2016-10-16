@@ -6,28 +6,6 @@
 package abanstudio.test;
 
 import abanstudio.utils.sqlite.DBHandler;
-import abanstudio.wilsonbot.FFMPEG;
-<<<<<<< HEAD
-import abanstudio.wilsonbot.UserLog;
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
-import java.util.Scanner;
-=======
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
->>>>>>> 031a50c2467d728cbc926fe4df6b7592c17d72f8
 import javax.sound.sampled.UnsupportedAudioFileException;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.providers.FileProvider;
@@ -37,21 +15,14 @@ import sx.blah.discord.util.audio.providers.FileProvider;
  * @author User
  */
 public class Test {
-    public static void main(String[] args) throws IOException, UnsupportedAudioFileException{
+    public static void main(String[] args){
 
-
-        UserLog user = new UserLog(null);
+        /*DBHandler.banClip("420", "0241");
+        DBHandler.banClip("420", "0242");
+        DBHandler.banClip("420", "0243");
+        DBHandler.banClip("420", "0244");*/
         
-
-        while(true){
-            Scanner s = new Scanner(System.in);
-            String line = s.next();
-            if(line.equals("end"))
-                break;
-
-            System.out.println(user.checkTime(LocalTime.now()));
-        
-        }
+        System.out.println(DBHandler.getBanners("420"));
 
     }
     
