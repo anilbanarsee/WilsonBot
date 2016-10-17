@@ -34,8 +34,14 @@ public class ReadingThread extends Thread{
 
             try {
                 while ((line = input.readLine()) != null){
-                    
-                    if(line.startsWith("[ffmpeg]")){
+                    if(line.startsWith("[youtube]")){
+                        int i = line.lastIndexOf("]");
+                        String s = line.substring(i+1,line.length()-1);
+                        String[] a = s.split(":");
+                        String file = a[0];
+                        filename = file.replaceAll("\\s", "");
+                    }
+                    else if(line.startsWith("[ffmpeg]")){
                         int i = line.lastIndexOf("\\");
                         String[] a =  {line.substring(0, i), line.substring(i)};
                         filename = a[1].substring(1, a[1].length()-1);
