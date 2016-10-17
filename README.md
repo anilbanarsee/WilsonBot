@@ -1,7 +1,7 @@
 # WilsonBot
-Discord bot with several features
+**Discord bot with several features**
 
-Outstanding Milestones:
+**Outstanding Milestones:**
 
   -Implement DjDog
   
@@ -11,14 +11,14 @@ Outstanding Milestones:
   
   -Fix downloading clips from same source
 
-New Milestones :
+**New Milestones :**
 
   -Implement command tree structure
   
   -Implement module system
 
 
-Recently Completed Milestones :
+**Recently Completed Milestones :**
 
   -Implement BotServer (with method array structure)
   
