@@ -20,13 +20,14 @@ public class UserLog {
     ArrayList<Track> tracks;
     IUser user;
     private int maxClips = 5;
-    private boolean r9k = true;
     private int r9kTime = 20;
     private int maxTime = 60;
+    WilsonServer server;
     
-    public UserLog(IUser user){
+    public UserLog(IUser user, WilsonServer server){
         this.user = user;
         tracks = new ArrayList<>();
+        this.server = server;
     }
     
     public void addToLog(Track t){
@@ -52,7 +53,7 @@ public class UserLog {
             }
            
         }
-         if(r9k){
+         if(server.r9k){
              if(cTime==null)
                 cTime = (LocalTime) track.getMetadata().get("time");
              for(Track t: tracks){

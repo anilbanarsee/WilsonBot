@@ -440,15 +440,18 @@ public class WilsonServer extends BotServer{
                 UserLog log = userLogs.get(user.getID());
                 
                 if(log == null){
-                    log = new UserLog(user);
+                    log = new UserLog(user,this);
                     userLogs.put(user.getID(), log);
                 }
                 long n;
                 try {
                     n = log.checkTrack(track);
+                          
                 } catch (R9KException ex) {
+                   
                     sendMessage(channel,"R9k mode is in effect, meaning you cannot play the same clip multiple times within a small time frame, please wait "+ex.getDiff()+" seconds to play '"+ex.getName()+"'.");
                     return;
+                    
                 }
                 if(n==0)
                     player.queue(track);
