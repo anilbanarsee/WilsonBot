@@ -16,20 +16,7 @@ import java.net.URL;
  */
 public class YTDownloader {
     
-        public static void main(String[] args) {
-        try {
-            // ex: http://www.youtube.com/watch?v=Nj6PFaDmp6c
-            String url = "https://www.youtube.com/watch?v=zoMiYklHvjk";
-            // ex: "/Users/axet/Downloads"
-            String path = "assets/downloaded";
-            VGet v = new VGet(new URL(url), new File(path));
-                  v.download();
-            System.out.println(v.getTarget().getCanonicalPath());
 
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
         public static File download(String url) throws IOException, InterruptedException{
             String filename;
             final Process p = Runtime.getRuntime().exec("youtube-dl.exe -o C:/Users/Reetoo/Documents/NetBeansProjects/WilsonBot/assets/downloaded/%(id)s.%(ext)s "+url );
