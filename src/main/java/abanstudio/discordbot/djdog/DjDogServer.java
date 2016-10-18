@@ -15,11 +15,16 @@ import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.DiscordException;
 import abanstudio.discordbot.Main;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
  *
@@ -67,19 +72,27 @@ public class DjDogServer {
         sendMessage(message.getChannel(),"Music added to my collection");
         
     }
-    public void skip(String guildID) throws DiscordException{
-        client.getGuildByID(guildID).getAudioChannel().skip();
+    public void skip(IGuild guild) throws DiscordException{
+         AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
+         player.skip();
     }
     public void play(String[] arguments, IMessage message) throws DiscordException{
-        clear(message.getGuild().getID());
+        clear(message.getGuild());
         
-        File f = new File("assets/music/"+arguments[0]);
+        File f = new File("assets/music/"+arguments[0]+".mp3");
         
-        client.getGuildByID(message.getGuild().getID()).getAudioChannel().queueFile(f);
-        
+        AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(message.getGuild());
+        try {
+            player.queue(f);
+        } catch (IOException ex) {
+            Logger.getLogger(DjDogServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedAudioFileException ex) {
+            Logger.getLogger(DjDogServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-    public void clear(String guildID) throws DiscordException{
-        client.getGuildByID(guildID).getAudioChannel().clearQueue();
+    public void clear(IGuild guild) throws DiscordException{
+        AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
+         player.skip();
     }
     
      public void sendMessage(IChannel channel, String message){

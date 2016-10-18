@@ -30,7 +30,6 @@ public class ReadingThread extends Thread{
      
             BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
             String line = null; 
-            System.out.println("HELLLLLLLO");
 
             try {
                 while ((line = input.readLine()) != null){
