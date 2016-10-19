@@ -39,6 +39,7 @@ public class UserLog {
     
     public long checkTrack(Track track) throws R9KException{
         LocalTime cTime = null;
+        boolean flag = false;
         if(tracks.size()>=maxClips){
             Track first = tracks.get(0);
             cTime = (LocalTime) track.getMetadata().get("time");
@@ -47,12 +48,16 @@ public class UserLog {
                 long diffSec = maxTime-(cTime.toSecondOfDay()-fTime.toSecondOfDay());
                 return diffSec;
             }
+            else if(cTime.isBefore(fTime)){
+                flag = true;
+            }
             long numUn = currentUnplayed();
             if(numUn>=maxClips){
                 return -numUn; 
             }
            
         }
+        if(!flag){
          if(server.r9k){
              if(cTime==null)
                 cTime = (LocalTime) track.getMetadata().get("time");
@@ -68,6 +73,10 @@ public class UserLog {
                     }
                 }
             }
+        }
+        if(flag){
+            tracks.clear();
+        }
         addToLog(track);
         return 0;
     }

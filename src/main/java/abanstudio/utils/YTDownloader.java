@@ -24,8 +24,14 @@ public class YTDownloader {
             ReadingThread rt = new ReadingThread(p);
             rt.start();
             p.waitFor();
-            System.out.println("HellO"+"assets/downloaded/"+rt.filename);
-            return new File("assets/downloaded/"+rt.filename);
+            for(File f : new File("assets/downloaded/").listFiles()){
+                if(f.getName().split("\\.")[0].equals(rt.filename.split("\\.")[0])){
+                    return new File("assets/downloaded/"+f.getName());
+                }
+            }
+           
+            return null;
+            
         }
 
 }
