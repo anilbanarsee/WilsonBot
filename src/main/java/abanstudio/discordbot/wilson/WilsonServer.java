@@ -878,8 +878,14 @@ public class WilsonServer extends BotServer{
          for (String file : DBHandler.getClipNames()){ 
             
                 s += file+"\n";
-            
+                int n = s.length();
+                if(n>1500){
+                    sendMessage(message.getChannel(),"```"+s+"```");
+                    s="";
+                }
          }
+         
+
          
          sendMessage(message.getChannel(),"```"+s+"```");
 
