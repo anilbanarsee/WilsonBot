@@ -44,12 +44,13 @@ public class UserLog {
             Track first = tracks.get(0);
             cTime = (LocalTime) track.getMetadata().get("time");
             LocalTime fTime = (LocalTime) first.getMetadata().get("time");
-            if(cTime.isBefore(fTime.plusSeconds(maxTime))){
+            
+            if(cTime.isBefore(fTime)){
+                flag = true;
+            }
+            else if(cTime.isBefore(fTime.plusSeconds(maxTime))){
                 long diffSec = maxTime-(cTime.toSecondOfDay()-fTime.toSecondOfDay());
                 return diffSec;
-            }
-            else if(cTime.isBefore(fTime)){
-                flag = true;
             }
             long numUn = currentUnplayed();
             if(numUn>=maxClips){
