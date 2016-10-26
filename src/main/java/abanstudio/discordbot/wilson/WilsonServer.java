@@ -551,31 +551,31 @@ public class WilsonServer extends BotServer{
         
         
 
-        int startpoint = 0;
-        int duration = 0;
-        int[] times = null;
+        double startpoint = 0;
+        double duration = 0;
+        double[] times = null;
         try{
         
             if(arguments.length>2){
             String start = arguments[2];
             String[] time = start.split(":");
         
-            int seconds = 0;
+            double seconds = 0;
             if(time.length==3){
                 seconds += Integer.parseInt(time[0])*3600;
                 seconds += Integer.parseInt(time[1])*60;
-                seconds += Integer.parseInt(time[2]);
+                seconds += Double.parseDouble(time[2]);
             }
             else if(time.length==2){
                 seconds += Integer.parseInt(time[0])*60;
-                seconds += Integer.parseInt(time[1]);
+                seconds += Double.parseDouble(time[1]);
 
             }
             else if(time.length==1){
-                seconds += Integer.parseInt(time[0]);
+                seconds += Double.parseDouble(time[0]);
             }
             duration = seconds;
-            times = new int[1];
+            times = new double[1];
             times[0] = duration;
             
             if(arguments.length>3){
@@ -586,18 +586,18 @@ public class WilsonServer extends BotServer{
             if(time.length==3){
                 seconds += Integer.parseInt(time[0])*3600;
                 seconds += Integer.parseInt(time[1])*60;
-                seconds += Integer.parseInt(time[2]);
+                seconds += Double.parseDouble(time[2]);
             }
             else if(time.length==2){
                 seconds += Integer.parseInt(time[0])*60;
-                seconds += Integer.parseInt(time[1]);
+                seconds += Double.parseDouble(time[1]);
 
             }
             else if(time.length==1){
-                seconds += Integer.parseInt(time[0]);
+                seconds += Double.parseDouble(time[0]);
             }
                 duration = seconds-startpoint;
-                times = new int[2];
+                times = new double[2];
                 times[0] = startpoint;
                 times[1] = duration;
             }
@@ -641,7 +641,7 @@ public class WilsonServer extends BotServer{
         sendMessage(message.getChannel(),"If file is http and over "+maxClipLength+" seconds, it will be automatically trimmed to that.");
         
         if(times == null){
-            times = new int[1];
+            times = new double[1];
             times[0] = maxClipLength;
         }
         

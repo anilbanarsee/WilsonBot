@@ -17,13 +17,13 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class Test {
     public static void main(String[] args){
 
-        /*DBHandler.banClip("420", "0241");
-        DBHandler.banClip("420", "0242");
-        DBHandler.banClip("420", "0243");
-        DBHandler.banClip("420", "0244");*/
-        
-        System.out.println(DBHandler.getBanners("420"));
-
+        double d = 4.534434;
+        System.out.println(Math.round((d%1)*10));
+        double[] times = {d};
+        System.out.println(d-(d%1));
+        System.out.println((times[0]%1));
+        double du = ((times[0]-(times[0]%1))*1000)+(times[0]%1)*1000;
+        System.out.println(Math.round(du));
     }
     
 }

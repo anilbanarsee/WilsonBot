@@ -26,7 +26,7 @@ public class FFMPEG {
         mainPath= path;
     }
     
-    public void convertAndTrim(File f, String name, int[] times, String subpath){
+    public void convertAndTrim(File f, String name, double[] times, String subpath){
         File file = new File("assets/downloaded/"+f.getName().split("\\.")[0]+".webm");
         if(file.exists()){
             System.out.println("webm exists, using that");
@@ -62,10 +62,18 @@ public class FFMPEG {
             builder = oBuilder.done();
         }
         else if(times.length==1){
-            builder = oBuilder.setDuration(times[0], TimeUnit.SECONDS).done();
+            
+            double du = ((times[0]-(times[0]%1))*1000)+(times[0]%1)*1000;
+            long duration = Math.round(du);
+            builder = oBuilder.setDuration(duration, TimeUnit.MILLISECONDS).done();   
         }
         else{
-            builder = oBuilder.setStartOffset(times[0], TimeUnit.SECONDS).setDuration(times[1], TimeUnit.SECONDS).done();
+            double du = ((times[1]-(times[1]%1))*1000)+(times[1]%1)*1000;
+            long duration = Math.round(du);
+            double du2 = ((times[0]-(times[0]%1))*1000)+(times[0]%1)*1000;
+            long startpoint = Math.round(du2);
+            System.out.println("Starting at : "+startpoint+" with Duration :"+duration);
+            builder = oBuilder.setStartOffset(startpoint, TimeUnit.MILLISECONDS).setDuration(duration, TimeUnit.MILLISECONDS).done();
         }
         
         FFmpegExecutor executor = new FFmpegExecutor(ffmpeg, ffprobe);
