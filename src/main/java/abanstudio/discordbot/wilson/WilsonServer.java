@@ -67,6 +67,7 @@ public class WilsonServer extends BotServer{
                        ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
                        ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
                         ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
+                        ,{"[sS]kip","skip","Skips the current clip (no current limitations, please use responsibly)"}
 
                        
                         };
@@ -107,7 +108,7 @@ public class WilsonServer extends BotServer{
         commMap = comms;
         userLogs = new HashMap<>();
         initalizeCommands();
-        r9k = true;
+        r9k = false;
         
     }
     
@@ -167,7 +168,8 @@ public class WilsonServer extends BotServer{
                     new Command(){public void exec(String[] arg, IMessage m) {ban(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {unban(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {veto(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}}
+                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {skip(arg,m);}}
                     
                 
         };
@@ -395,6 +397,47 @@ public class WilsonServer extends BotServer{
         
     }
     
+    public void timeout(String[] args, IMessage message){
+        
+        if(args.length<2){
+            sendMessage(message.getChannel(),"You must give two arguments : [userName] [timeoutduration]");
+        }
+        
+        List<IUser> userlist = message.getGuild().getUsersByName(args[0]);
+        if(userlist.size()<1){
+            sendMessage(message.getChannel(),"There is no one with the name "+args[0]+" in this channel");
+            return;
+        }
+        else{
+            if(userlist.size()>1)
+            System.out.println("Warning there are multiple people with the name "+message.getAuthor().getName()+" in this channel");
+            
+            IUser user = userlist.get(0);
+            
+            List<IVoiceChannel> vcList = message.getGuild().getVoiceChannelsByName("afk");
+            
+            user.moveToVoiceChannel(vcList.get(0));
+        }
+        
+    }
+    
+    public void setTag(String[] args, IMessage message){
+        
+        
+        
+    }
+    public void setTagRegex(String[] args, IMessage message){
+        if(!isAdmin(message.getAuthor())){
+            sendMessage(message.getChannel(),"You must be an admin to do that. It's not that I don't trust you, I just don't trust you");
+            return;
+        }
+        for(String s: args){
+            
+        }
+    }
+    public void getSource(String[] args, IMessage message){
+        
+    }
     private void playRandom(String[] tags, IMessage message){
         
         ArrayList<String[]> data;
@@ -726,6 +769,24 @@ public class WilsonServer extends BotServer{
             DBHandler.addAdminRights(tempUsers.get(0).getID(), prefix);
         }
 
+    }
+    public void skip(String[] args, IMessage message){
+        //UserLog ul = userLogs.get(message.getAuthor().getID());
+        IGuild guild = message.getGuild();
+        AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
+        String returnMessage = "";
+        if(args.length!=0){
+            if(args[0].equals("skip")){
+                player.clear();
+                returnMessage = message.getAuthor()+" skipped all queued clips";
+            }
+        }
+        else{
+            player.skip();
+            returnMessage = message.getAuthor().getName()+" skipped the current clip.";
+        }
+        
+        sendMessage(message.getChannel(),returnMessage);
     }
     public void game(String[] arguments, IMessage message){
 

@@ -8,6 +8,7 @@ package abanstudio.discordbot.wilson;
 import abanstudio.exceptions.R9KException;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 
@@ -18,25 +19,36 @@ import sx.blah.discord.util.audio.AudioPlayer.Track;
 public class UserLog {
     
     ArrayList<Track> tracks;
+    ArrayList<String> commList;
     IUser user;
     private int maxClips = 5;
     private int r9kTime = 20;
     private int maxTime = 60;
+    private HashMap<String, Integer> comms;
     WilsonServer server;
     
     public UserLog(IUser user, WilsonServer server){
+        comms = new HashMap<>();
+        setCommLimits();
         this.user = user;
         tracks = new ArrayList<>();
         this.server = server;
     }
     
-    public void addToLog(Track t){
+    private void setCommLimits(){
+        comms.put("skip-time", 10);
+        comms.put("skip-max", 1);
+    }
+    
+    private void addToLog(Track t){
         if(tracks.size()>=maxClips){
             tracks.remove(0);
         }
         tracks.add(t);
     }
-    
+    private void addToLog(String s){
+        
+    }
     public long checkTrack(Track track) throws R9KException{
         LocalTime cTime = null;
         boolean flag = false;
