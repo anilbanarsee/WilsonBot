@@ -84,7 +84,6 @@ abstract public class BotServer{
     @EventSubscriber
     public void onDisconnect(DiscordDisconnectedEvent event) throws DiscordException{
         System.out.println("Bot disconnected with reason "+event.getReason()+". Reconnecting...");
-        Main.main(null);
     }
     
     public void onFileRecieved(MessageEmbedEvent event){
