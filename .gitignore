@@ -67,3 +67,4 @@ Database.db
 *.db
 *.tar
 *.gz
+*.wav

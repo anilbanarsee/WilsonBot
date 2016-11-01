@@ -61,9 +61,9 @@ public class DjDogServer {
         File f = Downloader.download(arguments[0],name,message.getChannel(),false);
         
         
+        String[] time = null;
         
-        
-        Main.ffmpeg.convertAndTrim(f, name, null, "music/");
+        Main.ffmpeg.convertAndTrim(f, name, time, "music/");
        
         int clip  = DBHandler.addClip(name,0,0,arguments[0],message.getAuthor().getID());
         
