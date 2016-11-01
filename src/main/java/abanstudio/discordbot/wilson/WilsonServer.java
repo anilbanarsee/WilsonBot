@@ -66,7 +66,8 @@ public class WilsonServer extends BotServer{
                        ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
                        ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
                        ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
-                        ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
+                       ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
+                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)"}
 
                        
                         };
@@ -167,7 +168,8 @@ public class WilsonServer extends BotServer{
                     new Command(){public void exec(String[] arg, IMessage m) {ban(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {unban(arg,m);}},
                     new Command(){public void exec(String[] arg, IMessage m) {veto(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}}
+                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}},
+                    new Command(){public void exec(String[] arg, IMessage m) {shutdown(m);}}
                     
                 
         };
@@ -198,7 +200,10 @@ public class WilsonServer extends BotServer{
     private void setThread(String gid, String thread, Thread t){
         threadmap.get(gid).put(thread, t);
     }
-    
+    private void shutdown(IMessage message){
+        sendMessage(message.getChannel(),"Bot shutting down");
+        System.exit(0);
+    }
     public IUser checkTrackForChannel(IVoiceChannel voicechannel, Track t){
         
         List<IUser> users = voicechannel.getConnectedUsers();
