@@ -91,23 +91,23 @@ public class FFMPEG {
             System.out.println("trimming");
             Process p;
             if(times.length == 0)
-                p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -codec copy assets/downloaded/temp"+f.getName());
+                p = Runtime.getRuntime().exec("ffmpeg -y -i assets/downloaded/"+f.getName()+" -codec copy assets/downloaded/temp"+f.getName());
    
     
             else if(times.length == 1)
-               p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -codec copy -t "+times[0]+" assets/downloaded/temp"+f.getName());
+               p = Runtime.getRuntime().exec("ffmpeg -y -i assets/downloaded/"+f.getName()+" -codec copy -t "+times[0]+" assets/downloaded/temp"+f.getName());
    
             else{
                
                
-               p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -ss "+times[0]+" -codec copy -t "+times[1]+" assets/downloaded/temp"+f.getName());
+               p = Runtime.getRuntime().exec("ffmpeg -y -i assets/downloaded/"+f.getName()+" -ss "+times[0]+" -codec copy -t "+times[1]+" assets/downloaded/temp"+f.getName());
             }
             ReadingThread rt = new ReadingThread(p);
             rt.start();
             p.waitFor();
             
             System.out.println("cutting");
-            p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/temp"+f.getName()+" -vn -ab 256 assets/"+subpath+name+".mp3");
+            p = Runtime.getRuntime().exec("ffmpeg -y -i assets/downloaded/temp"+f.getName()+" -vn -ab 256 assets/"+subpath+name+".mp3");
             
             rt = new ReadingThread(p);
             rt.start();
