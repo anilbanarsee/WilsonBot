@@ -26,12 +26,14 @@ public class FFMPEG {
         mainPath= path;
     }
     
-    public void convertAndTrim(File f, String name, double[] times, String subpath){
+    public void convertAndTrim(File f, String name, double[] times, String subpath) throws IOException, InterruptedException{
         File file = new File("assets/downloaded/"+f.getName().split("\\.")[0]+".webm");
         if(file.exists()){
             System.out.println("webm exists, using that");
             f = file;
         }
+
+            
         FFmpeg ffmpeg = null;
         try {
            // ffmpeg = new FFmpeg("C:\\Users\\Reetoo\\Documents\\ffmpeg\\bin\\ffmpeg.exe");
@@ -81,7 +83,41 @@ public class FFMPEG {
         // Run a one-pass encode
         executor.createJob(builder).run();
         System.out.println("start job 111");
-        
+     
+
+    }
+    public void convertAndTrim(File f, String name, String[] times, String subpath) throws IOException, InterruptedException{
+
+            System.out.println("trimming");
+            Process p;
+            if(times.length == 0)
+                p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -codec copy assets/downloaded/temp"+f.getName());
+   
+    
+            else if(times.length == 1)
+               p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -codec copy -t "+times[0]+" assets/downloaded/temp"+f.getName());
+   
+            else{
+               
+               
+               p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/"+f.getName()+" -ss "+times[0]+" -codec copy -t "+times[1]+" assets/downloaded/temp"+f.getName());
+            }
+            ReadingThread rt = new ReadingThread(p);
+            rt.start();
+            p.waitFor();
+            
+            System.out.println("cutting");
+            p = Runtime.getRuntime().exec("ffmpeg -i assets/downloaded/temp"+f.getName()+" -vn -ab 256 assets/"+subpath+name+".mp3");
+            
+            rt = new ReadingThread(p);
+            rt.start();
+            p.waitFor();
+            System.out.println("deleting temp");
+            p = Runtime.getRuntime().exec("rm assets/downloaded/temp"+f.getName());
+            
+            rt = new ReadingThread(p);
+            rt.start();
+            p.waitFor();
 
     }
     public static void convert(File f){

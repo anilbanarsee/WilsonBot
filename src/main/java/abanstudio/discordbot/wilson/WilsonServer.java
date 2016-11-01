@@ -553,61 +553,55 @@ public class WilsonServer extends BotServer{
 
         double startpoint = 0;
         double duration = 0;
-        double[] times = null;
+        String lastBeforeError = "";
+        int lastIndex = 0;
+        String[] times;
+        if(arguments.length<4){
+             times = new String[1];
+        }
+        else{
+            times = new String[2];
+        }
+
         try{
         
-            if(arguments.length>2){
-            String start = arguments[2];
-            String[] time = start.split(":");
-        
-            double seconds = 0;
-            if(time.length==3){
-                seconds += Integer.parseInt(time[0])*3600;
-                seconds += Integer.parseInt(time[1])*60;
-                seconds += Double.parseDouble(time[2]);
-            }
-            else if(time.length==2){
-                seconds += Integer.parseInt(time[0])*60;
-                seconds += Double.parseDouble(time[1]);
+            for(int i=2; i<arguments.length; i++){
+                String[] splitTime = arguments[i].split(":");
+                lastIndex = i;
+                if(splitTime.length>3){
+                    
+                    sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2 or 30:2 \n Invalid parameter "+arguments[lastIndex]);
 
-            }
-            else if(time.length==1){
-                seconds += Double.parseDouble(time[0]);
-            }
-            duration = seconds;
-            times = new double[1];
-            times[0] = duration;
-            
-            if(arguments.length>3){
-                startpoint = seconds;
-                            start = arguments[3];
-            time = start.split(":");
-            seconds = 0;
-            if(time.length==3){
-                seconds += Integer.parseInt(time[0])*3600;
-                seconds += Integer.parseInt(time[1])*60;
-                seconds += Double.parseDouble(time[2]);
-            }
-            else if(time.length==2){
-                seconds += Integer.parseInt(time[0])*60;
-                seconds += Double.parseDouble(time[1]);
+                    return;
+                }
+                for(int j = 0; j<splitTime.length; j++){
 
-            }
-            else if(time.length==1){
-                seconds += Double.parseDouble(time[0]);
-            }
-                duration = seconds-startpoint;
-                times = new double[2];
-                times[0] = startpoint;
-                times[1] = duration;
+                    lastBeforeError = splitTime[j]; 
+                    if(j!=2){
+                        
+                        Integer.parseInt(splitTime[j]);
+                    }
+                    else{
+                        Double.parseDouble(splitTime[j]);
+                    }
+                }
+                
+                
+                if((i-2)<=times.length){
+                    times[i-2] = arguments[i];
+                }
+                    
             }
             
-            }
+            
+
         }
-        
         catch(NumberFormatException e ){
-            sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2");
+            
+            sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2 or 30:2 \n"+lastBeforeError+" was invalid within parameter "+arguments[lastIndex]);
         }
+        
+        
         
         if(duration<0){
             sendMessage(message.getChannel(), "Optional 3rd and 4th arguments must be [startpoint] [endpoint], it's likely you did [endpoint] [startpoint]");
@@ -641,11 +635,17 @@ public class WilsonServer extends BotServer{
         sendMessage(message.getChannel(),"If file is http and over "+maxClipLength+" seconds, it will be automatically trimmed to that.");
         
         if(times == null){
-            times = new double[1];
-            times[0] = maxClipLength;
+            times = new String[1];
+            times[0] = ""+maxClipLength;
         }
         
-        Main.ffmpeg.convertAndTrim(file, name, times, "");
+        try {
+            Main.ffmpeg.convertAndTrim(file, name, times, "");
+        } catch (IOException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
       
         
