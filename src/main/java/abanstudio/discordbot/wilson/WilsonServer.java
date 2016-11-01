@@ -373,14 +373,14 @@ public class WilsonServer extends BotServer{
         ArrayList<Clip> clips = new ArrayList<>();
         ArrayList<String[]> clip = DBHandler.getClips();
         
-        File folder = new File("assets");
+      
         
         for(String s : files){
             if(s.length()>0){
                 
                 for(String[] clipData: clip){
                     if(clipData[0].equals(s)){
-                        clips.add(new Clip(new File("assets/"+clipData[0]+".mp3"), Float.parseFloat(clipData[1])));
+                        clips.add(new Clip(new File("assets/clips/"+clipData[0]+".mp3"), Float.parseFloat(clipData[1])));
                     }
                 }
                 
@@ -414,7 +414,7 @@ public class WilsonServer extends BotServer{
         int n = r.nextInt(data.size());
         
         String[] s = data.get(n);
-        Clip clip = new Clip(new File("assets/"+s[0]+".mp3"),Float.parseFloat(s[1]));
+        Clip clip = new Clip(new File("assets/clips/"+s[0]+".mp3"),Float.parseFloat(s[1]));
         sendMessage(message.getChannel(), "Playing random clip");
         
         clips.add(clip);
@@ -640,7 +640,7 @@ public class WilsonServer extends BotServer{
         }
         
         try {
-            Main.ffmpeg.convertAndTrim(file, name, times, "");
+            Main.ffmpeg.convertAndTrim(file, name, times, "clips/");
         } catch (IOException ex) {
             Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
