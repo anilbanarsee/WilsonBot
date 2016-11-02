@@ -5,8 +5,14 @@
  */
 package abanstudio.test;
 
+import abanstudio.command.Action;
+import abanstudio.command.Command;
 import abanstudio.utils.sqlite.DBHandler;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.providers.FileProvider;
 
@@ -16,14 +22,14 @@ import sx.blah.discord.util.audio.providers.FileProvider;
  */
 public class Test {
     public static void main(String[] args){
-
-        double d = 4.534434;
-        System.out.println(Math.round((d%1)*10));
-        double[] times = {d};
-        System.out.println(d-(d%1));
-        System.out.println((times[0]%1));
-        double du = ((times[0]-(times[0]%1))*1000)+(times[0]%1)*1000;
-        System.out.println(Math.round(du));
+        ArrayList<String> test = new ArrayList<>();
+        test.add("hello");
+        test.add("world");
+        String[] array = new String[test.size()];
+        String[] testarray = test.toArray(array);
+        System.out.println(Arrays.toString(testarray));
     }
-    
+    public static void testMethod(String s){
+        System.out.println(s.length());
+    }
 }

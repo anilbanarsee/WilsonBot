@@ -5,23 +5,76 @@
  */
 package abanstudio.command;
 
-import sx.blah.discord.handle.obj.IMessage;
+import abanstudio.command.Action;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
- * @author Reetoo
+ * @author General
  */
-public abstract class Command {
+public class Command {
     
-    private Command[] subComms;
+
+    private Action action;
+    String regex, comm, desc_sh, desc;
     
-    public Command(Command[] cs){
-        subComms = cs;
+    public Command(Action a){
+        setAction(a);
+        //info = new String[0];
+        regex = "";
+        comm = "";
+        desc_sh = "";
+        desc = "";
     }
-    public Command(){
-        subComms = null;
+    public Command(Action a, String[] info){
+        setAction(a);
+        setInfo(info);
+    }
+
+    public final void setInfo(String[] info){
+        regex = "";
+        comm = "";
+        desc_sh = "";
+        desc = "";
+        if(info.length>0)
+            regex = info[0];
+        if(info.length>1)
+            comm = info[1];
+        if(info.length>2)
+            desc_sh = info[2];
+        if(info.length>3)
+            desc = info[3];
+    }
+    public final void setAction(Action a){
+        action = a;
+    }
+    public Action getAction(){
+        return action;
+    }
+
+    public String[] getInfo(){
+        String[] info = {regex,comm,desc_sh,desc};
+        return info;
+    }
+    public String getRegex(){
+        return regex;
+    }
+    public String getComm(){return comm;}
+    public String getDescSh(){return desc_sh;}
+    public String getDesc(){return desc;}
+    
+    public static Command matchCommand(ArrayList<Command> commList, String input){
+        for(Command c : commList){
+            Pattern p = Pattern.compile(c.getRegex());
+            Matcher m = p.matcher(input);
+            if(m.find()){
+                return c;
+            }
+        }
+        return null;
     }
     
-    public abstract void exec(String[] arguments, IMessage message);
     
 }

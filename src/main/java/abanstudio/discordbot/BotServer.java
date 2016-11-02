@@ -6,6 +6,7 @@
 package abanstudio.discordbot;
 
 import abanstudio.discordbot.Main;
+import abanstudio.command.Action;
 import abanstudio.command.Command;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.exceptions.InvalidSearchException;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,11 +45,12 @@ import sx.blah.discord.util.RequestBuffer;
 abstract public class BotServer{
     
     
-    protected Command[] commands;
-    protected String[][] commMap;
+    protected ArrayList<Command> commands;
     protected IDiscordClient client;
     protected ArrayList<IRole> roles;
     protected Matcher m;
+    protected String[][] commData;
+    protected HashMap<String, Action> actionMap;
     
     public String prefix = "dog";
     
@@ -86,22 +89,30 @@ abstract public class BotServer{
         System.out.println("Bot disconnected with reason "+event.getReason()+". Reconnecting...");
     }
     
+    
     public void onFileRecieved(MessageEmbedEvent event){
         System.out.println("File Recieved Event");
     }
     
-    protected String matchCommand(String command) {
-       
-
-        for(String[] regComm : commMap){
-
-            if(matches(command,"\\b"+regComm[0]+"\\b"))
-                return regComm[1];
+    public void parseCommand(String input, IMessage message){
+        
+        String[] split = input.split(" ");
+        Command loaded = null;
+        ArrayList<String> args = new ArrayList<String>();
+        for(String s : split){
+            Command c = Command.matchCommand(commands, s);
+            
+            if(c!=null){
+                if(loaded!=null){
+                    String[] array = new String[args.size()];
+                    loaded.getAction().exec(args.toArray(array), message);
+                }
+                loaded = c;
+            }
         }
         
-        
-        return "null";
     }
+    
     public boolean matches(String s, String regex){
             Pattern p = Pattern.compile(regex);
             m = p.matcher(s);
@@ -109,61 +120,7 @@ abstract public class BotServer{
             return m.find();
     }
 
-   public void parseCommand(String command, IMessage message){
-
-       String[] split = command.split("\\s+");
-       String com = "";
-       String arg = "";
-
-       for(int i=0; i<split.length; i++){
-           String test = matchCommand(split[i]);
-           
-           if(!test.equals("null")){
-               
-               doCommand(com,arg,message);
-
-               com = test;
-               arg = "";
-           }
-           else{
-               arg += " "+split[i];
-           }
-           
-           
-       }
-
-       doCommand(com,arg,message);
-       
-    }
-    
-    public void doCommand(String command, String argument, IMessage message){
-       
-        String[] arguments = argument.split("\\s+");
-        int i = arguments.length;
-        for(String s : arguments){
-            s = s.replace("\\s+", "");
-            if(s.equals("")) i--;
-        }
-        int x = 0;
-        String[] newarg = new String[i];
-        for(String s: arguments){
-            if(!s.equals("")){
-                newarg[x] = s;
-                x++;
-            }
-        }
-        
-        System.out.println(argument+Arrays.toString(newarg));
-        
-        for(int j = 0; j<commMap.length; j++){
-            String comm = commMap[j][1];
-            if(command.equals(comm)){
-                commands[j].exec(newarg, message);
-
-            }
-        }
-        
-    }
+   
     
     public void sendMessage(IChannel channel, String message){
 

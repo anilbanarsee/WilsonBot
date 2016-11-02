@@ -6,6 +6,7 @@
 package abanstudio.discordbot.wilson;
 
 import abanstudio.discordbot.BotServer;
+import abanstudio.command.Action;
 import abanstudio.command.Command;
 import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.exceptions.R9KException;
@@ -74,6 +75,7 @@ public class WilsonServer extends BotServer{
                        
                         };
     
+    
 
     //ArrayList<ArrayList<Thread>> gameThread;
     Thread gameThread;
@@ -107,10 +109,11 @@ public class WilsonServer extends BotServer{
         volumeBuffer = new ArrayList<>();
         parlayUsers = new ArrayList<>();
         djdog = server;
-        commMap = comms;
         userLogs = new HashMap<>();
         initalizeCommands();
+        commData = comms;
         r9k = false;
+        actionMap = new HashMap<>();
         
     }
     
@@ -154,31 +157,31 @@ public class WilsonServer extends BotServer{
     }
 
     private void initalizeCommands(){
-        Command[] comms = {
-                    
-                    new Command(){public void exec(String[] arg, IMessage m) {join(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {play(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {parlay(m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {unparlay(m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {list(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {addClip(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {moveAll(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {game(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {guess(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {deleteClip(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {ban(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {unban(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {veto(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {set(arg,m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {shutdown(m);}},
-                    new Command(){public void exec(String[] arg, IMessage m) {skip(arg,m);}}
-
-                    
+        
+        actionMap.put("join",  new Action(){public void exec(String[] arg, IMessage m) {join(arg,m);}});
+        actionMap.put("play",new Action(){public void exec(String[] arg, IMessage m) {play(arg,m);}});
+        actionMap.put("parlay",new Action(){public void exec(String[] arg, IMessage m) {parlay(m);}});
+        actionMap.put("unparlay",new Action(){public void exec(String[] arg, IMessage m) {unparlay(m);}});
+        actionMap.put("list",new Action(){public void exec(String[] arg, IMessage m) {list(arg,m);}});
+        actionMap.put("addclip",new Action(){public void exec(String[] arg, IMessage m) {addClip(arg,m);}});
+        actionMap.put("moveall",new Action(){public void exec(String[] arg, IMessage m) {moveAll(arg,m);}});
+        actionMap.put("game",new Action(){public void exec(String[] arg, IMessage m) {game(arg,m);}});
+        actionMap.put("guess",new Action(){public void exec(String[] arg, IMessage m) {guess(arg,m);}});
+        actionMap.put("deleteclip",new Action(){public void exec(String[] arg, IMessage m) {deleteClip(arg,m);}});
+        actionMap.put("setvolume",new Action(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}});
+        actionMap.put("ban",new Action(){public void exec(String[] arg, IMessage m) {ban(arg,m);}});
+        actionMap.put("unban",new Action(){public void exec(String[] arg, IMessage m) {unban(arg,m);}});
+        actionMap.put("veto",new Action(){public void exec(String[] arg, IMessage m) {veto(arg,m);}});
+        actionMap.put("set",new Action(){public void exec(String[] arg, IMessage m) {set(arg,m);}});
+        actionMap.put("shutdown",new Action(){public void exec(String[] arg, IMessage m) {shutdown(m);}});
+        actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
+             
+        for(String[] array : commData){
+            
+            commands.add(new Command(actionMap.get(array[1]),array));
                 
-        };
-
-        commands = comms;
+        }
+                    
     }
     
     private void populateMap(){
@@ -211,6 +214,9 @@ public class WilsonServer extends BotServer{
         sendMessage(message.getChannel(),"Bot shutting down");
         System.exit(0);
     }
+    
+    
+    
     public IUser checkTrackForChannel(IVoiceChannel voicechannel, Track t){
         
         List<IUser> users = voicechannel.getConnectedUsers();
@@ -728,7 +734,7 @@ public class WilsonServer extends BotServer{
             
            sendMessage(message.getChannel(), "Here are my commands dog :");
            
-            for(String[] comm : commMap){
+            for(String[] comm : commData){
                 s+="_"+comm[1]+"_"+" : `"+comm[2]+"`\n";
                 s+="\n";
             }
