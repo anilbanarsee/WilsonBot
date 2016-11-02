@@ -29,6 +29,9 @@ $RECYCLE.BIN/
 #Database
 *.db
 
+#target folder
+target
+
 #Testing file
 src/main/java/abanstudio/test/Test.java
 
@@ -69,3 +72,4 @@ Database.db
 *.gz
 *.wav
 *.jar
+update.cmd
