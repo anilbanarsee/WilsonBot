@@ -205,6 +205,9 @@ public class WilsonServer extends BotServer{
         threadmap.get(gid).put(thread, t);
     }
     private void shutdown(IMessage message){
+        if(!isMasterAdmin(message.getAuthor())){
+            sendMessage(message.getChannel(), "You must be a master-admin to invoke this command. (This command completely shutsdown the bot, would require sshing back in to reset it.");
+        }
         sendMessage(message.getChannel(),"Bot shutting down");
         System.exit(0);
     }
