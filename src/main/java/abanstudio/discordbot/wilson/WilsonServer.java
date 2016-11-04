@@ -158,6 +158,8 @@ public class WilsonServer extends BotServer{
 
     private void initalizeCommands(){
         
+        actionMap = new HashMap<>();
+        
         actionMap.put("join",  new Action(){public void exec(String[] arg, IMessage m) {join(arg,m);}});
         actionMap.put("play",new Action(){public void exec(String[] arg, IMessage m) {play(arg,m);}});
         actionMap.put("parlay",new Action(){public void exec(String[] arg, IMessage m) {parlay(m);}});
@@ -176,6 +178,9 @@ public class WilsonServer extends BotServer{
         actionMap.put("shutdown",new Action(){public void exec(String[] arg, IMessage m) {shutdown(m);}});
         actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
              
+        commData = comms;
+        commands = new ArrayList<>();
+        
         for(String[] array : commData){
             
             commands.add(new Command(actionMap.get(array[1]),array));
@@ -210,6 +215,7 @@ public class WilsonServer extends BotServer{
     private void shutdown(IMessage message){
         if(!isMasterAdmin(message.getAuthor())){
             sendMessage(message.getChannel(), "You must be a master-admin to invoke this command. (This command completely shutsdown the bot, would require sshing back in to reset it.");
+            return;
         }
         sendMessage(message.getChannel(),"Bot shutting down");
         System.exit(0);

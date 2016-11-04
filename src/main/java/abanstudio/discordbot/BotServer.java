@@ -106,10 +106,16 @@ abstract public class BotServer{
                 if(loaded!=null){
                     String[] array = new String[args.size()];
                     loaded.getAction().exec(args.toArray(array), message);
+                    args.clear();
                 }
                 loaded = c;
             }
+            else{
+                args.add(s);
+            }
         }
+        String[] array = new String[args.size()];
+        loaded.getAction().exec(args.toArray(array), message);
         
     }
     

@@ -73,3 +73,5 @@ Database.db
 *.wav
 *.jar
 update.cmd
+src/main/java/abanstudio/test/Test.java
+target/classes/abanstudio/test/Test.class
