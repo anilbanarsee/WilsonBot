@@ -9,6 +9,7 @@ import abanstudio.exceptions.R9KException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 
@@ -21,18 +22,20 @@ public class UserLog {
     ArrayList<Track> tracks;
     ArrayList<String> commList;
     IUser user;
+    IGuild guild;
     private int maxClips = 5;
     private int r9kTime = 20;
     private int maxTime = 60;
     private HashMap<String, Integer> comms;
     WilsonServer server;
     
-    public UserLog(IUser user, WilsonServer server){
+    public UserLog(IUser user, WilsonServer server, IGuild g){
         comms = new HashMap<>();
         setCommLimits();
         this.user = user;
         tracks = new ArrayList<>();
         this.server = server;
+        guild = g;
     }
     
     private void setCommLimits(){
@@ -71,6 +74,7 @@ public class UserLog {
            
         }
         if(!flag){
+         GuildSettings gs = server.guildSettings.get(user);
          if(server.r9k){
              if(cTime==null)
                 cTime = (LocalTime) track.getMetadata().get("time");

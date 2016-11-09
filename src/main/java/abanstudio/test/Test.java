@@ -15,11 +15,18 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import org.apache.commons.codec.binary.Base64;
+import org.joda.time.DateTime;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.providers.FileProvider;
@@ -30,23 +37,20 @@ import sx.blah.discord.util.audio.providers.FileProvider;
  */
 public class Test {
     public static void main(String[] args) throws MalformedURLException, UnsupportedEncodingException, IOException{
-        /*curl -i -H 'Accept: application/vnd.twitchtv.v2+json'\
--H 'Client-ID: axjhfp777tflhy0yjb5sftsil'\
-'https://api.twitch.tv/kraken/channels/hebo'*/
-        
-        
-   String stringUrl = "https://api.twitch.tv/kraken/channels/hebo";
-        URL url = new URL(stringUrl);
-        URLConnection uc = url.openConnection();
 
-        uc.setRequestProperty("X-Requested-With", "Curl");
+          int[][] array = new int[5][3];
+          
+          for(int i =0 ; i< array.length; i++){
+              array[i] = new int[i];
+              for(int j=0; j<array[i].length; j++){
+                  array[i][j] = j;
+              }
+          }
+          
+          for(int[] subarray: array){
+              System.out.println(Arrays.toString(subarray));
+          }
 
-        String userpass = "username" + ":" + "password";
-        String basicAuth = "Basic " + new String(new Base64().encode(userpass.getBytes()));
-        uc.setRequestProperty("Authorization", basicAuth);
-
-        InputStreamReader inputStreamReader = new InputStreamReader(uc.getInputStream());
-   
     }
     public static void testMethod(String s){
         System.out.println(s.length());

@@ -171,6 +171,32 @@ public class DBHandler {
         
         
     }
+    public static ArrayList<String> getGuildInfo(String guildID){
+        
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
+          String sql = "SELECT * "
+                    +"FROM GUILDS "
+                  + "WHERE ID = '"+guildID+"'"
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+
+        ArrayList<String> row = list.get(0);
+        
+        
+        
+        
+        newDB.closeConn();
+         
+        return row;
+    }
+    
     public static String getAdminRights(String userID){
           
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
