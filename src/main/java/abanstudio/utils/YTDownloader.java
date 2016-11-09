@@ -19,7 +19,7 @@ public class YTDownloader {
 
         public static File download(String url) throws IOException, InterruptedException{
             String filename;
-            final Process p = Runtime.getRuntime().exec("youtube-dl -o C:/Users/Reetoo/Documents/NetBeansProjects/WilsonBot/assets/downloaded/%(id)s.%(ext)s "+url );
+            final Process p = Runtime.getRuntime().exec("youtube-dl -o assets/downloaded/%(id)s.%(ext)s "+url );
             
             ReadingThread rt = new ReadingThread(p);
             rt.start();

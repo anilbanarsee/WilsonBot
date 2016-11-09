@@ -17,7 +17,9 @@ import abanstudio.discordbot.Main;
 import abanstudio.games.PokemonGuessGame;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +31,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import org.joda.time.DateTime;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IChannel;
@@ -89,6 +92,7 @@ public class WilsonServer extends BotServer{
     HashMap<String, UserLog> userLogs;
     
     HashMap<String, HashMap<String, Thread>> threadmap;
+    HashMap<String, GuildSettings> guildSettings;
     
     String[] gameList = {"G1","G2","G3","G4","G5"};
     
@@ -118,6 +122,7 @@ public class WilsonServer extends BotServer{
         commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
+        initGuildSettings();
         
     }
     
@@ -150,7 +155,13 @@ public class WilsonServer extends BotServer{
         
         currentTrack = null;
     }
-    
+    public void initGuildSettings(){
+        List<IGuild> guilds = client.getGuilds();
+        for(IGuild g : guilds){
+            GuildSettings gs = new GuildSettings(DBHandler.getGuildInfo(g.getID()));
+            guildSettings.put(g.getID(), gs);
+        }
+    }
     public IVoiceChannel getConnectedChannel(IGuild guild){
         List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
         for(IVoiceChannel channel : channels){
@@ -176,9 +187,9 @@ public class WilsonServer extends BotServer{
         actionMap.put("guess",new Action(){public void exec(String[] arg, IMessage m) {guess(arg,m);}});
         actionMap.put("deleteclip",new Action(){public void exec(String[] arg, IMessage m) {deleteClip(arg,m);}});
         actionMap.put("setvolume",new Action(){public void exec(String[] arg, IMessage m) {setVolume(arg,m);}});
-        actionMap.put("ban",new Action(){public void exec(String[] arg, IMessage m) {ban(arg,m);}});
-        actionMap.put("unban",new Action(){public void exec(String[] arg, IMessage m) {unban(arg,m);}});
-        actionMap.put("veto",new Action(){public void exec(String[] arg, IMessage m) {veto(arg,m);}});
+        actionMap.put("banclip",new Action(){public void exec(String[] arg, IMessage m) {ban(arg,m);}});
+        actionMap.put("unbanclip",new Action(){public void exec(String[] arg, IMessage m) {unban(arg,m);}});
+        actionMap.put("vetoclip",new Action(){public void exec(String[] arg, IMessage m) {veto(arg,m);}});
         actionMap.put("set",new Action(){public void exec(String[] arg, IMessage m) {set(arg,m);}});
         actionMap.put("shutdown",new Action(){public void exec(String[] arg, IMessage m) {shutdown(m);}});
         actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
@@ -510,7 +521,7 @@ public class WilsonServer extends BotServer{
                 UserLog log = userLogs.get(user.getID());
                 
                 if(log == null){
-                    log = new UserLog(user,this);
+                    log = new UserLog(user,this,guild);
                     userLogs.put(user.getID(), log);
                 }
                 long n;
@@ -619,12 +630,10 @@ public class WilsonServer extends BotServer{
         }
         
         File file = null;
-        
-        
+
 
         double startpoint = 0;
         double duration = 0;
-        String lastBeforeError = "";
         int lastIndex = 0;
         String[] times;
         if(arguments.length<4){
@@ -636,42 +645,55 @@ public class WilsonServer extends BotServer{
 
         try{
         
-            for(int i=2; i<arguments.length; i++){
-                String[] splitTime = arguments[i].split(":");
+            LocalTime[] realTimes = new LocalTime[2];
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+            for(int i = 2; i<arguments.length; i++){
                 lastIndex = i;
-                if(splitTime.length>3){
-                    
-                    sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2 or 30:2 \n Invalid parameter "+arguments[lastIndex]);
-
-                    return;
+                String time = arguments[i];
+                String[] ts = time.split(":");
+                int h = 0, m = 0;
+                long s = 0, ms = 0;
+                
+                if(ts.length>0){
+                    double se = Double.parseDouble(ts[ts.length-1]);
+                    s = Math.round(se);
+                    ms = Math.round((se-s)*1000);
                 }
-                for(int j = 0; j<splitTime.length; j++){
-
-                    lastBeforeError = splitTime[j]; 
-                    if(j!=2){
-                        
-                        Integer.parseInt(splitTime[j]);
-                    }
-                    else{
-                        Double.parseDouble(splitTime[j]);
-                    }
+                if(ts.length>1){
+                    m = Integer.parseInt(ts[ts.length-2]);
+                }
+                if(ts.length>2){
+                    h = Integer.parseInt(ts[0]);
                 }
                 
                 
-                if((i-2)<=times.length){
-                    times[i-2] = arguments[i];
-                }
-                    
+                
+                realTimes[i-2] = LocalTime.of((int) h,(int)m,(int)s,(int)ms);
             }
             
+         
+           
+           
+           if(times.length>1){
+               LocalTime diff = realTimes[1].minusNanos(realTimes[0].toNanoOfDay());
+               times[0] = realTimes[0].format(dtf);
+               times[1] = diff.format(dtf);
+               duration = diff.toSecondOfDay();
+           }
+           else{
+               times[0] = realTimes[0].format(dtf);
+               duration = realTimes[0].toSecondOfDay();
+           }
             
+           
 
         }
         catch(NumberFormatException e ){
             
-            sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2 or 30:2 \n"+lastBeforeError+" was invalid within parameter "+arguments[lastIndex]);
+            sendMessage(message.getChannel(), "An invalid time was given for one of the arguments. Format must be 'HH:MM:SS' for example 10:30:2 or 30:2 \n "+arguments[lastIndex]+" was invalid");
         }
         
+       
         
         
         if(duration<0){
@@ -679,7 +701,7 @@ public class WilsonServer extends BotServer{
             return;
         }
         if(duration>maxClipLength){
-            sendMessage(message.getChannel(), "duration of clip cannot be above 10 seconds");
+            sendMessage(message.getChannel(), "duration of clip cannot be above "+maxClipLength+" seconds");
             return;
         }
         
