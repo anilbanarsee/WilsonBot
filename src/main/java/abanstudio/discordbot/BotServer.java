@@ -51,8 +51,12 @@ abstract public class BotServer{
     protected Matcher m;
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;
+    protected IChannel commandChannel;
+    protected String defCommChanName;
+    protected boolean redirectComm;          
+    protected HashMap<String, IChannel> commChanMap;  
     
-    public String prefix = "dog";
+    public String prefix;
     
     public BotServer(IDiscordClient client){
         this.client = client;
@@ -71,9 +75,10 @@ abstract public class BotServer{
         String message = event.getMessage().getContent();
         
         if(message.startsWith(prefix+" ")){
+            
+           
             String command = message;
-            if((message.startsWith(prefix+" ")))
-                command = message.substring(4);
+            command = message.substring(4);
             parseCommand(command, event.getMessage());
            
         }
@@ -89,6 +94,23 @@ abstract public class BotServer{
         System.out.println("Bot disconnected with reason "+event.getReason()+". Reconnecting...");
     }
     
+    protected abstract void initalizeActions();
+    protected abstract void initalizeCommData();
+    
+    protected void initalizeCommands(){
+        
+        initalizeActions();
+        initalizeCommData();
+        
+        commands = new ArrayList<>();
+        
+        for(String[] array : commData){
+            
+            commands.add(new Command(actionMap.get(array[1]),array));
+                
+        }
+                    
+    }
     
     public void onFileRecieved(MessageEmbedEvent event){
         System.out.println("File Recieved Event");
