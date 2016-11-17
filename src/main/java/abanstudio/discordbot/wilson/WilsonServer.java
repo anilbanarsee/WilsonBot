@@ -118,7 +118,7 @@ public class WilsonServer extends BotServer{
         commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
-        initGuildSettings();
+        //initGuildSettings();
         
     }
     
@@ -150,6 +150,7 @@ public class WilsonServer extends BotServer{
         currentTrack = null;
     }
     public void initGuildSettings(){
+        guildSettings = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
         for(IGuild g : guilds){
             GuildSettings gs = new GuildSettings(DBHandler.getGuildInfo(g.getID()));
@@ -584,6 +585,7 @@ public class WilsonServer extends BotServer{
     }
     
     public void addClip(String[] arguments, IMessage message){
+        System.out.println("addclip command");
         final int maxClipLength = 30;
         sendMessage(message.getChannel(), "Ok dog, I'll try to add that to our soundboard");
         
@@ -611,7 +613,7 @@ public class WilsonServer extends BotServer{
         String name = arguments[1];
         
         
-        String ownerID = DBHandler.getClipID(name);
+        String ownerID = DBHandler.getOwnerID(name);
         if(ownerID!=""){
             if(!message.getAuthor().getID().equals(ownerID)){
                 sendMessage(message.getChannel(), "There is already a clip with name "+name+" which you do not own.");
@@ -638,13 +640,19 @@ public class WilsonServer extends BotServer{
         double duration = 0;
         int lastIndex = 0;
         String[] times;
-        if(arguments.length<4){
-             times = new String[1];
+        if(arguments.length<3){
+             times=null;
+        }
+        else if(arguments.length<4){
+            times = new String[1];
         }
         else{
             times = new String[2];
         }
-
+        if(arguments.length<3){
+            
+        }
+        else
         try{
         
             LocalTime[] realTimes = new LocalTime[2];

@@ -77,12 +77,7 @@ public class Downloader implements Runnable
             String video = url.substring(url.lastIndexOf("=")+1);
             System.out.println(video);
             long minutes = YTApi.getLength(video);
-            if(checkLength){
-                if(YTApi.getLengthS(video)>maxClipSize){
-                    server.sendMessage(channel, "Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
-                    return null;
-                }
-            }
+
             if(minutes<maxMinutes){
                 
                 if(minutes>warnMinutes){
@@ -129,12 +124,12 @@ public class Downloader implements Runnable
             String video = url.substring(url.lastIndexOf("=")+1);
             System.out.println(video);
             long minutes = YTApi.getLength(video);
-            if(checkLength){
+            /*if(checkLength){
                 if(YTApi.getLengthS(video)>maxClipSize){
                     System.out.println("Clip was over the "+maxClipSize+" second limit for clips, use the 3rd and 4th parameters to set a timeframe for the clip");
                     return null;
                 }
-            }
+            }*/
             if(minutes<maxMinutes){
                 
                 if(minutes>warnMinutes){

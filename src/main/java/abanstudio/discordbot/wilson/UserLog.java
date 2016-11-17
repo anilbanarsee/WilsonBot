@@ -74,7 +74,7 @@ public class UserLog {
            
         }
         if(!flag){
-         GuildSettings gs = server.guildSettings.get(user);
+         //GuildSettings gs = server.guildSettings.get(guild.getID());
          if(server.r9k){
              if(cTime==null)
                 cTime = (LocalTime) track.getMetadata().get("time");
