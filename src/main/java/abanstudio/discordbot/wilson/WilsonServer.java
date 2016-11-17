@@ -96,6 +96,8 @@ public class WilsonServer extends BotServer{
     
     String[] gameList = {"G1","G2","G3","G4","G5"};
     
+
+    
     Track currentTrack;
     
     DjDogServer djdog;
@@ -109,18 +111,21 @@ public class WilsonServer extends BotServer{
     public WilsonServer(IDiscordClient client, DjDogServer server){
         
         super(client);
+        prefix = "dog";
         map = new HashMap<>();
         volumeBuffer = new ArrayList<>();
         parlayUsers = new ArrayList<>();
         djdog = server;
         userLogs = new HashMap<>();
         initalizeCommands();
+        initCommChannels();
         commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
         //initGuildSettings();
         
     }
+    
     
     @EventSubscriber
     public void trackChange(TrackStartEvent event){
@@ -144,7 +149,8 @@ public class WilsonServer extends BotServer{
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
-        @EventSubscriber
+        
+    @EventSubscriber
     public void trackEnd(TrackFinishEvent event){
         
         currentTrack = null;
@@ -168,9 +174,8 @@ public class WilsonServer extends BotServer{
         return null;
     }
 
-    private void initalizeCommands(){
-        
-        actionMap = new HashMap<>();
+    protected void initalizeActions(){
+         actionMap = new HashMap<>();
         
         actionMap.put("join",  new Action(){public void exec(String[] arg, IMessage m) {join(arg,m);}});
         actionMap.put("play",new Action(){public void exec(String[] arg, IMessage m) {play(arg,m);}});
@@ -189,16 +194,10 @@ public class WilsonServer extends BotServer{
         actionMap.put("set",new Action(){public void exec(String[] arg, IMessage m) {set(arg,m);}});
         actionMap.put("shutdown",new Action(){public void exec(String[] arg, IMessage m) {shutdown(m);}});
         actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
-             
+    }
+    
+    protected void initalizeCommData(){
         commData = comms;
-        commands = new ArrayList<>();
-        
-        for(String[] array : commData){
-            
-            commands.add(new Command(actionMap.get(array[1]),array));
-                
-        }
-                    
     }
     
     private void populateMap(){
@@ -212,18 +211,16 @@ public class WilsonServer extends BotServer{
     private Game getGame(String gid, String thread){
         return map.get(gid).get(thread);
     }
-    
     private Thread getThread(String gid, String thread){
         return threadmap.get(gid).get(thread);
     }
-    
     private void setGame(String gid, String thread, Game g){
         map.get(gid).put(thread, g);
     }
-    
     private void setThread(String gid, String thread, Thread t){
         threadmap.get(gid).put(thread, t);
     }
+    
     private void shutdown(IMessage message){
         if(!isMasterAdmin(message.getAuthor())){
             sendMessage(message.getChannel(), "You must be a master-admin to invoke this command. (This command completely shutsdown the bot, would require sshing back in to reset it.");
@@ -585,7 +582,7 @@ public class WilsonServer extends BotServer{
     }
     
     public void addClip(String[] arguments, IMessage message){
-        System.out.println("addclip command");
+
         final int maxClipLength = 30;
         sendMessage(message.getChannel(), "Ok dog, I'll try to add that to our soundboard");
         
@@ -899,12 +896,9 @@ public class WilsonServer extends BotServer{
            
         
     }
-    
-    
     public static void recieveFile(IChannel channel, File f){
         
     }
-    
     public void moveAll(String[] arguments, IMessage message){
        // sendMessage(message.getChannel(), "Move all");
         if(arguments.length < 2){
@@ -987,7 +981,6 @@ public class WilsonServer extends BotServer{
         
        
     }
-    
     public void listClips(IMessage message) {
        
         String s = "";
@@ -1093,6 +1086,27 @@ public class WilsonServer extends BotServer{
         return false;
     }
 
-
-
+    protected void initCommChannels(){
+        List<IGuild> guilds = client.getGuilds();
+        for(IGuild guild : guilds){
+            setCommChannel(guild);
+        }
+    }
+    protected void setCommChannel(IGuild guild){
+        
+        List<IChannel> channels = guild.getChannels();
+        for(IChannel channel: channels){
+            
+            if(channel.getName().equals(defCommChanName)){
+                setCommChannel(channel);
+                return;
+            }
+            
+        }
+        
+        
+    }
+    protected void setCommChannel(IChannel channel){
+        this.commChanMap.put(channel.getGuild().getID(), channel);
+    }
 }
