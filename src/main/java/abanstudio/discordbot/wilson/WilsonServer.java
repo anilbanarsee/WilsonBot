@@ -34,6 +34,8 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import org.joda.time.DateTime;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -118,7 +120,6 @@ public class WilsonServer extends BotServer{
         djdog = server;
         userLogs = new HashMap<>();
         initalizeCommands();
-        initCommChannels();
         commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
@@ -149,7 +150,57 @@ public class WilsonServer extends BotServer{
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
+    
+    @Override
+    @EventSubscriber
+    public void onMessage(MessageReceivedEvent event){
         
+        IMessage m = event.getMessage();
+        
+        if(event.getMessage().getAuthor().isBot())
+            return;
+        String message = event.getMessage().getContent();
+        
+        if(message.startsWith(prefix+" ")){
+            
+           
+            String command = message;
+            parseCommand(command, event.getMessage());
+            
+            IChannel redirect = commChanMap.get(m.getGuild().getID());
+            if(redirect!=null){
+                redirect(m,redirect);
+            }
+           
+        }
+        
+    }
+    
+    @Override
+    @EventSubscriber
+    public void onReady(ReadyEvent event){
+        this.initGuildSettings();
+        this.initCommChannels();
+    }
+    
+    public void redirect(IMessage m, IChannel redirection){
+        String author = m.getAuthor().getName();
+        String content = m.getContent();
+        
+        try {
+            m.delete();
+        } catch (MissingPermissionsException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (RateLimitException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DiscordException ex) {
+            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+         
+        sendMessage(redirection, "[Redirected] "+author+": "+content);
+       
+    }
+    
     @EventSubscriber
     public void trackEnd(TrackFinishEvent event){
         
@@ -158,11 +209,12 @@ public class WilsonServer extends BotServer{
     public void initGuildSettings(){
         guildSettings = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
-        for(IGuild g : guilds){
+        guilds.stream().forEach((g) -> {
             GuildSettings gs = new GuildSettings(DBHandler.getGuildInfo(g.getID()));
             guildSettings.put(g.getID(), gs);
-        }
+        });
     }
+    
     public IVoiceChannel getConnectedChannel(IGuild guild){
         List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
         for(IVoiceChannel channel : channels){
@@ -1095,18 +1147,24 @@ public class WilsonServer extends BotServer{
     protected void setCommChannel(IGuild guild){
         
         List<IChannel> channels = guild.getChannels();
+        boolean set = false;
+        
         for(IChannel channel: channels){
             
+            
             if(channel.getName().equals(defCommChanName)){
-                setCommChannel(channel);
+                set = true;
+                commChanMap.put(guild.getID(), channel);
                 return;
             }
-            
         }
         
+        if(!set){
+            commChanMap.put(guild.getID(), null);
+        }
+            
         
-    }
-    protected void setCommChannel(IChannel channel){
-        this.commChanMap.put(channel.getGuild().getID(), channel);
+        
+        
     }
 }

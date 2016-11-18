@@ -147,6 +147,7 @@ public class DjDogServer extends BotServer {
     
     @Override
     protected void initalizeCommData() {
+        String[][] comms = null;
         commData = comms;
     }
     

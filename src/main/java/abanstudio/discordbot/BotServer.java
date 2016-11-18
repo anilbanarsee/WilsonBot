@@ -50,11 +50,9 @@ abstract public class BotServer{
     protected ArrayList<IRole> roles;
     protected Matcher m;
     protected String[][] commData;
-    protected HashMap<String, Action> actionMap;
-    protected IChannel commandChannel;
-    protected String defCommChanName;
-    protected boolean redirectComm;          
-    protected HashMap<String, IChannel> commChanMap;  
+    protected HashMap<String, Action> actionMap;        
+    protected HashMap<String, IChannel> commChanMap; 
+    protected String defCommChanName = "bot commands";
     
     public String prefix;
     
@@ -78,7 +76,6 @@ abstract public class BotServer{
             
            
             String command = message;
-            command = message.substring(4);
             parseCommand(command, event.getMessage());
            
         }
@@ -118,6 +115,7 @@ abstract public class BotServer{
     
     public void parseCommand(String input, IMessage message){
         
+        input = input.substring(4);
         String[] split = input.split(" ");
         Command loaded = null;
         ArrayList<String> args = new ArrayList<String>();
