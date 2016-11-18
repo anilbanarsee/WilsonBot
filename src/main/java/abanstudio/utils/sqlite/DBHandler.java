@@ -171,6 +171,7 @@ public class DBHandler {
         
         
     }
+    
     public static ArrayList<String> getGuildInfo(String guildID){
         
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
@@ -187,7 +188,13 @@ public class DBHandler {
         
         List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
 
-        ArrayList<String> row = list.get(0);
+        ArrayList<String> row;
+        
+        if(list.size()<1){
+            row = null;
+        }
+        else
+            row = list.get(0);
         
         
         
@@ -196,6 +203,42 @@ public class DBHandler {
          
         return row;
     }
+    public static void setGuildSetting(String guildID, String setting, String set){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+          newDB.openConn();
+          
+        String sql;
+        if(getGuildInfo(guildID)==null){
+           
+           String query = "INSERT into GUILDS (ID) "
+                    + "VALUES (?);"
+                    ;
+            
+            newDB.openConn();
+            newDB.setSQL(query);
+            newDB.prepStatement();
+
+            newDB.pstSetString(1, guildID);
+
+
+
+            newDB.executeN();
+          
+              
+        }
+        
+         
+          sql = "UPDATE GUILDS SET "+setting+"='"+set+"' WHERE ID='"+guildID+"'";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        newDB.executeN();
+         
+        
+
+         newDB.closeConn();
+        
+    };
     
     public static String getAdminRights(String userID){
           

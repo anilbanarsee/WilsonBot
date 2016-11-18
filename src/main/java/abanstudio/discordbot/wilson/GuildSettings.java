@@ -18,7 +18,7 @@ public class GuildSettings {
     
     public GuildSettings(ArrayList<String> data){
         
-      
+        
         r9k_def = Boolean.parseBoolean(data.get(0));
         redirect = data.get(1);
         redirect_id = data.get(2);
