@@ -38,19 +38,11 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class Test {
     public static void main(String[] args) throws MalformedURLException, UnsupportedEncodingException, IOException{
 
-          int[][] array = new int[5][3];
-          
-          for(int i =0 ; i< array.length; i++){
-              array[i] = new int[i];
-              for(int j=0; j<array[i].length; j++){
-                  array[i][j] = j;
-              }
-          }
-          
-          for(int[] subarray: array){
-              System.out.println(Arrays.toString(subarray));
-          }
-
+        Object[] array = new Object[5];
+        for(int i=1; i<6;i++){
+            array[i-1] = i;
+        }
+        System.out.println(Arrays.toString(array));
     }
     public static void testMethod(String s){
         System.out.println(s.length());

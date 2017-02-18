@@ -52,7 +52,7 @@ abstract public class BotServer{
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;        
     protected HashMap<String, IChannel> commChanMap; 
-    protected String defCommChanName = "bot commands";
+    protected String defCommChanName = "botcommands";
     
     public String prefix;
     

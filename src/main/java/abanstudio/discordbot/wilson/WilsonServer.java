@@ -42,8 +42,10 @@ import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
+import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.AudioPlayer.Track;
 import sx.blah.discord.util.audio.events.TrackStartEvent;
@@ -123,6 +125,7 @@ public class WilsonServer extends BotServer{
         commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
+        
         //initGuildSettings();
         
     }
@@ -157,6 +160,7 @@ public class WilsonServer extends BotServer{
         
         IMessage m = event.getMessage();
         
+        
         if(event.getMessage().getAuthor().isBot())
             return;
         String message = event.getMessage().getContent();
@@ -165,12 +169,15 @@ public class WilsonServer extends BotServer{
             
            
             String command = message;
-            parseCommand(command, event.getMessage());
-            
+            IMessage mess = event.getMessage();
             IChannel redirect = commChanMap.get(m.getGuild().getID());
             if(redirect!=null){
-                redirect(m,redirect);
+                if(!(m.getChannel().equals(redirect))){
+                    redirect(m,redirect);
+                    
+                }
             }
+            parseCommand(command, event.getMessage());
            
         }
         
@@ -179,8 +186,11 @@ public class WilsonServer extends BotServer{
     @Override
     @EventSubscriber
     public void onReady(ReadyEvent event){
+        System.out.println("Initalizing stuff");
         this.initGuildSettings();
+        System.out.println("Initalizing redirect channel");
         this.initCommChannels();
+        System.out.println("WilsonBot ready");
     }
     
     public void redirect(IMessage m, IChannel redirection){
@@ -210,8 +220,11 @@ public class WilsonServer extends BotServer{
         guildSettings = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
         guilds.stream().forEach((g) -> {
-            GuildSettings gs = new GuildSettings(DBHandler.getGuildInfo(g.getID()));
-            guildSettings.put(g.getID(), gs);
+            ArrayList<String> data = DBHandler.getGuildInfo(g.getID());
+            if(data!=null){
+                GuildSettings gs = new GuildSettings(data);
+                guildSettings.put(g.getID(), gs);
+            }
         });
     }
     
@@ -375,7 +388,15 @@ public class WilsonServer extends BotServer{
         
 
     }
-    
+    @Override
+    public void sendMessage(IChannel channel, String message){
+
+         IChannel redirect = commChanMap.get(channel.getGuild().getID());
+            if(redirect!=null){
+                super.sendMessage(redirect, message);
+            }
+
+    }
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
         for(IUser u : parlayUsers){
@@ -716,7 +737,7 @@ public class WilsonServer extends BotServer{
                 if(ts.length>0){
                     double se = Double.parseDouble(ts[ts.length-1]);
                     s = Math.round(se);
-                    ms = Math.round((se-s)*1000);
+                    ms = Math.round((s-se)*1000);
                 }
                 if(ts.length>1){
                     m = Integer.parseInt(ts[ts.length-2]);
@@ -1139,6 +1160,7 @@ public class WilsonServer extends BotServer{
     }
 
     protected void initCommChannels(){
+        commChanMap = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
         for(IGuild guild : guilds){
             setCommChannel(guild);
