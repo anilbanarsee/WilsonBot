@@ -7,6 +7,7 @@ package abanstudio.command;
 
 import abanstudio.command.Action;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,12 +70,14 @@ public class Command {
         for(Command c : commList){
             Pattern p = Pattern.compile(c.getRegex());
             Matcher m = p.matcher(input);
-            if(m.find()){
+            /*if(m.find()){
                 return c;
-            }
+            }*/
+            if(m.matches()){ return c; };
         }
         return null;
     }
     
+
     
 }

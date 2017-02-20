@@ -75,3 +75,6 @@ Database.db
 update.cmd
 src/main/java/abanstudio/test/Test.java
 target/classes/abanstudio/test/Test.class
+src/main/java/abanstudio/utils/sqlite/FuncCoursework.java
+djtoken.txt
+wilsontoken.txt
