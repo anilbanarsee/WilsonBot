@@ -10,6 +10,7 @@ import abanstudio.command.Action;
 import abanstudio.command.Command;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.exceptions.InvalidSearchException;
+import abanstudio.module.Module;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,8 +52,10 @@ abstract public class BotServer{
     protected Matcher m;
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;        
-    protected HashMap<String, IChannel> commChanMap; 
+    protected HashMap<String, IChannel> commChanMap;
+    protected HashMap<String, Module> modules;
     protected String defCommChanName = "botcommands";
+    
     
     public String prefix;
     
@@ -232,6 +235,9 @@ abstract public class BotServer{
         }
         
         throw new InvalidSearchException();
+        
+    }
+    public void addModule(Module module){
         
     }
     public static void sendFile(IChannel channel, File f){

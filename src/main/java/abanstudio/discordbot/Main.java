@@ -49,7 +49,6 @@ public class Main {
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             wilsonClient = new ClientBuilder().withToken(IOUtils.toString(inputStream)).login();
-            //wilsonClient = new ClientBuilder().withToken("MTgwOTczODE1OTQ0MTgzODA4.C4oMnw.W8oZYNfWcgLa-DHj9K4Rk1xs2p8").login();
         }
         catch(FileNotFoundException e){
             System.out.println("wilsontoken.txt not found. If you are running this for the first time, you must obtain a discord bot token and insert it into a file named as such.");
