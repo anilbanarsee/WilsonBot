@@ -93,6 +93,15 @@ public class DjDogServer extends BotServer {
         sendMessage(message.getChannel(),"Music added to my collection");
         
     }
+    public static void download(IGuild guild, IMessage message, String commands){
+        
+        String m = message.getContent().substring(5,6);
+        if(m.equals("f")){
+            System.out.println("Stack size = 5");
+        }
+    
+        
+    }
     public void skip(IGuild guild) throws DiscordException{
          AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
          player.skip();

@@ -1033,6 +1033,69 @@ public class WilsonServer extends BotServer{
         
        
     }
+    public void listRecentClips(IMessage message, int num){
+          String s = "";
+        sendMessage(message.getChannel(),"Here are the most recent "+num+" clips I know.");
+        
+         File folder = new File("assets");
+        
+       
+         for (String[] file :  DBHandler.getClips(num)){ 
+            
+                s += file[0]+"\n";
+                int n = s.length();
+                if(n>1500){
+                    sendMessage(message.getChannel(),"```"+s+"```");
+                    s="";
+                }
+         }
+         
+
+         
+         sendMessage(message.getChannel(),"```"+s+"```");
+    }
+    public void listRecentClips(IMessage message){
+          String s = "";
+        sendMessage(message.getChannel(),"Here are the recent clips I know.");
+        
+         File folder = new File("assets");
+        
+       
+         for (String[] file :  DBHandler.getClips(10)){ 
+            
+                s += file[0]+"\n";
+                int n = s.length();
+                if(n>1500){
+                    sendMessage(message.getChannel(),"```"+s+"```");
+                    s="";
+                }
+         }
+         
+
+         
+         sendMessage(message.getChannel(),"```"+s+"```");
+    }
+    public void listClips(IMessage message, String[] tags){
+        String s = "";
+        sendMessage(message.getChannel(),"Here are the clips I know with the tag '"+tags[0]+"'.");
+        
+         File folder = new File("assets");
+        
+       
+         for (String[] file :  DBHandler.getClips(tags)){ 
+            
+                s += file[0]+"\n";
+                int n = s.length();
+                if(n>1500){
+                    sendMessage(message.getChannel(),"```"+s+"```");
+                    s="";
+                }
+         }
+         
+
+         
+         sendMessage(message.getChannel(),"```"+s+"```");
+    }
     public void listClips(IMessage message) {
        
         String s = "";

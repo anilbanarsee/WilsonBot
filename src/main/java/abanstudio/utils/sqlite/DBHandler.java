@@ -23,7 +23,7 @@ public class DBHandler {
     
     
     }
-
+    
     public static int addClip(String name, int start, int duration, String source, String ownerID){
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
         
@@ -564,6 +564,17 @@ public class DBHandler {
         newDB.prepStatement();
         newDB.executeN();
         newDB.closeConn();
+        
+    }
+    public static ArrayList<String[]> getClips(int n){
+        ArrayList<String[]> allClips = getClips();
+        ArrayList<String[]> clips = new ArrayList<>();
+        
+        int clipLength = allClips.size();
+        for(int i = clipLength-n; i<clipLength; i++){
+            clips.add(allClips.get(i));
+        }
+        return clips;
         
     }
     public static ArrayList<String[]> getClips(String[] tags){
