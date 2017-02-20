@@ -47,7 +47,7 @@ abstract public class BotServer{
     
     
     protected ArrayList<Command> commands;
-    protected IDiscordClient client;
+    public IDiscordClient client;
     protected ArrayList<IRole> roles;
     protected Matcher m;
     protected String[][] commData;
@@ -55,6 +55,7 @@ abstract public class BotServer{
     protected HashMap<String, IChannel> commChanMap;
     protected HashMap<String, Module> modules;
     protected String defCommChanName = "botcommands";
+
     
     
     public String prefix;
@@ -140,6 +141,30 @@ abstract public class BotServer{
         String[] array = new String[args.size()];
         loaded.getAction().exec(args.toArray(array), message);
         
+    }
+    
+    public void addModule(Module module){
+        ArrayList<Command> commands = module.getCommands();
+        int commAdded = 0;
+        int commRejected = 0;
+        ArrayList<Command> rejectedCommands = new ArrayList<>();
+        module.setServer(this);
+        for(Command cX: commands){
+            boolean flag = true;
+            for(Command cY: this.commands){ 
+                if(cX.getComm().equals(cY.getComm())){
+                    System.out.println("Error : Module "+module.getName()+" tried to add command "+cX.getComm()+" which was already present. Skipping this command, module will still be added.");
+                    flag = false;
+                    commRejected++;
+                    break;
+                }
+            }
+            if(flag){
+                this.commands.add(cX);
+                commAdded++;
+            }
+        }
+        System.out.println("Loaded module '"+module.getName()+"'. Commands added :"+commAdded+". Commands rejected due to merge conflicts :"+commRejected);
     }
     
     public boolean matches(String s, String regex){
@@ -237,9 +262,6 @@ abstract public class BotServer{
         throw new InvalidSearchException();
         
     }
-    public void addModule(Module module){
-        
-    }
     public static void sendFile(IChannel channel, File f){
         
         try {
@@ -248,6 +270,36 @@ abstract public class BotServer{
             Logger.getLogger(BotServer.class.getName()).log(Level.SEVERE, null, ex);
         }
        
+    }
+    protected void initCommChannels(){
+        commChanMap = new HashMap<>();
+        List<IGuild> guilds = client.getGuilds();
+        for(IGuild guild : guilds){
+            setCommChannel(guild);
+        }
+    }
+    protected void setCommChannel(IGuild guild){
+        
+        List<IChannel> channels = guild.getChannels();
+        boolean set = false;
+        
+        for(IChannel channel: channels){
+            
+            
+            if(channel.getName().equals(defCommChanName)){
+                commChanMap.put(guild.getID(), channel);
+                return;
+            }
+        }
+        
+        if(!set){
+            commChanMap.put(guild.getID(), null);
+        }     
+        
+        
+    }
+    protected void setTimeoutChannel(IGuild guild, String name){
+        
     }
     public abstract boolean isAdmin(IUser user);
 }

@@ -6,20 +6,17 @@
 package abanstudio.module;
 
 import abanstudio.command.Action;
-import abanstudio.discordbot.BotServer;
 import java.util.HashMap;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  *
- * @author Reetoo
+ * @author General
  */
-public class Soundboard extends Module{
-    
+public class Games extends Module{
+
     String[][] comms = {{}};
-        
-
-
+    
     @Override
     protected void initalizeActions() {
         actionMap = new HashMap<>();
@@ -31,17 +28,16 @@ public class Soundboard extends Module{
     protected void initalizeCommData() {
         commData = comms;
     }
-    
-    public void ping(String[] arg, IMessage m){
-        server.sendMessage(m.getChannel(), "pong");
-    }
 
     @Override
     public String getName() {
-        return "Soundboard";
+        return "Games";
     }
     
     public void onReady(){
+        
+    }
+    public void ping(String[] args, IMessage m){
         
     }
 }

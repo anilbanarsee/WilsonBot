@@ -22,11 +22,13 @@ public abstract class Module {
    ArrayList<Command> commands;
    HashMap<String, Action> actionMap;    
    
-   public Module(BotServer server){
-       this.server = server;
+   public Module(){
+       initalizeCommands();
    }
    protected abstract void initalizeActions();
    protected abstract void initalizeCommData();
+   public abstract void onReady();
+   public abstract String getName();
    protected void initalizeCommands(){
         
         initalizeActions();
@@ -41,4 +43,10 @@ public abstract class Module {
         }
                     
     }
+   public void setServer(BotServer server){
+       this.server = server;
+   }
+   public ArrayList<Command> getCommands(){
+       return commands;
+   }
 }

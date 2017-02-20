@@ -8,6 +8,7 @@ package abanstudio.discordbot;
 import abanstudio.utils.FFMPEG;
 import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.discordbot.wilson.WilsonServer;
+import abanstudio.module.Soundboard;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -63,14 +64,19 @@ public class Main {
             System.out.println("djtoken.txt not found. If you are running this for the first time, you must obtain a discord bot token and insert it into a file named as such.");
 
         }
-
-        
-        
         
         DjDogServer djdog = new DjDogServer(djdogClient);
+        WilsonServer wilson = new WilsonServer(wilsonClient,djdog);
+        
+        System.out.println("Loading modules ...");
+        wilson.addModule(new Soundboard());
+        
+        
         
         djdogClient.getDispatcher().registerListener(djdog);
-        wilsonClient.getDispatcher().registerListener(new WilsonServer(wilsonClient,djdog));
+        wilsonClient.getDispatcher().registerListener(wilson);
+        
+        
 
         
     }

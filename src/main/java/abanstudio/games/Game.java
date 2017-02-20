@@ -18,9 +18,8 @@ public interface Game extends Runnable{
     
     public void startgame(IMessage message);
     public void endGame();
-    public void printScores();
-    public void nextRound();
-    public void changeSetting(int i[][]);
+    @Override
+    public void run();
 
     
 }

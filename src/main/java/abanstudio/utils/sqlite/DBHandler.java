@@ -24,6 +24,9 @@ public class DBHandler {
     
     }
     
+    public static void setTimeoutChannel(String name, String guildID){
+        
+    }
     public static int addClip(String name, int start, int duration, String source, String ownerID){
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
         
@@ -203,9 +206,39 @@ public class DBHandler {
          
         return row;
     }
+    public static String getGuildSetting(String guildID, String setting){
+        DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
+        newDB.openConn();
+          String sql = "SELECT "+setting+" "
+                    +"FROM GUILDS "
+                  + "WHERE ID = '"+guildID+"'"
+                  + ";";
+        
+        newDB.setSQL(sql);
+        newDB.prepStatement();
+        ResultSet rs = newDB.executeQ();
+         
+        
+        List<ArrayList<String>> list = DbUtils.resultSetToNestedList(rs);
+
+        ArrayList<String> row;
+        
+        if(list.size()<1){
+            row = null;
+        }
+        else
+            row = list.get(0);
+        
+        
+        
+        
+        newDB.closeConn();
+         
+        return row.get(0);
+    }
     public static void setGuildSetting(String guildID, String setting, String set){
         DBConn newDB = new DBConn("org.sqlite.JDBC", "jdbc:sqlite:Database.db");
-          newDB.openConn();
+        newDB.openConn();
           
         String sql;
         if(getGuildInfo(guildID)==null){

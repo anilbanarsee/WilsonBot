@@ -38,11 +38,8 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class Test {
     public static void main(String[] args) throws MalformedURLException, UnsupportedEncodingException, IOException{
 
-        String[] tags = {"trump"};
-         for(String[] ss : DBHandler.getClips(10)){
-             System.out.println(Arrays.toString(ss));
-         }
-
+        System.out.println(DBHandler.getGuildSetting("1", "redirect_id"));
+        
     }
     public static void testMethod(String s){
         System.out.println(s.length());

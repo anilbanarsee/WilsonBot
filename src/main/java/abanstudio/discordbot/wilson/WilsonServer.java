@@ -183,6 +183,7 @@ public class WilsonServer extends BotServer{
         
     }
     
+    
     @Override
     @EventSubscriber
     public void onReady(ReadyEvent event){
@@ -1207,6 +1208,7 @@ public class WilsonServer extends BotServer{
         sendMessage(message.getChannel(),"ERROR VETOING IS NOT IMPLEMENTED. REASON GIVEN : 'can't be fucked rite now'");
     }
 
+
     @Override
     public boolean isAdmin(IUser user) {
         if(DBHandler.getAdminRights(user.getID()).equals("null")){
@@ -1222,34 +1224,5 @@ public class WilsonServer extends BotServer{
         return false;
     }
 
-    protected void initCommChannels(){
-        commChanMap = new HashMap<>();
-        List<IGuild> guilds = client.getGuilds();
-        for(IGuild guild : guilds){
-            setCommChannel(guild);
-        }
-    }
-    protected void setCommChannel(IGuild guild){
-        
-        List<IChannel> channels = guild.getChannels();
-        boolean set = false;
-        
-        for(IChannel channel: channels){
-            
-            
-            if(channel.getName().equals(defCommChanName)){
-                set = true;
-                commChanMap.put(guild.getID(), channel);
-                return;
-            }
-        }
-        
-        if(!set){
-            commChanMap.put(guild.getID(), null);
-        }
-            
-        
-        
-        
-    }
+
 }

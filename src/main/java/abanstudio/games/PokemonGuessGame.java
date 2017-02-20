@@ -59,21 +59,7 @@ public class PokemonGuessGame implements Game{
         running = false;
     }
 
-    @Override
-    public void printScores() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
-    @Override
-    public void nextRound() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void changeSetting(int[][] i) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
     public void guessPokemon(String s){
         if(s.equals(currentPokemon)){
             guessing = false;
