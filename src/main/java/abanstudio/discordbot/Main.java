@@ -8,6 +8,7 @@ package abanstudio.discordbot;
 import abanstudio.utils.FFMPEG;
 import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.discordbot.wilson.WilsonServer;
+import abanstudio.module.Admin;
 import abanstudio.module.Soundboard;
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,7 +46,7 @@ public class Main {
         ffmpeg = new FFMPEG(path);
         
         System.out.println("Connecting");
-        try(FileInputStream inputStream = new FileInputStream("wilsontoken.txt")) 
+        try(FileInputStream inputStream = new FileInputStream("wilsontokentest.txt")) 
         {     
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             //System.out.println("Token: "+IOUtils.toString(inputStream));
@@ -69,7 +70,7 @@ public class Main {
         WilsonServer wilson = new WilsonServer(wilsonClient,djdog);
         
         System.out.println("Loading modules ...");
-        wilson.addModule(new Soundboard());
+        wilson.addModule(new Admin());
         
         
         

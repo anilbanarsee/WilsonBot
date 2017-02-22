@@ -5,14 +5,22 @@
  */
 package abanstudio.module;
 
+import abanstudio.command.Action;
 import abanstudio.utils.sqlite.DBHandler;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.util.DiscordException;
+import sx.blah.discord.util.MissingPermissionsException;
+import sx.blah.discord.util.RateLimitException;
 
 
 /**
@@ -21,34 +29,46 @@ import sx.blah.discord.handle.obj.IUser;
  */
 public class Admin extends Module{
 
-    protected HashMap<String, IChannel> timeChanMap;
+    protected HashMap<String, IVoiceChannel> timeChanMap;
     protected HashMap<String, IRole> timeRoleMap;
     protected String defTimeoutName = "Timeout";
     protected String defTimeoutRole = "Timeout";
+    protected int timeoutTime = 15;
+    
+   
+    public Admin(){
+        super();
+        timeRoleMap = new HashMap<>(); 
+    }
     
     @Override
     protected void initalizeActions() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+        actionMap = new HashMap<>();
+        
+        actionMap.put("timeout",  new Action(){@Override
+        public void exec(String[] arg, IMessage m) {timeout(arg,m);}});        }
 
     @Override
     protected void initalizeCommData() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        String[][] comms = {{"[tT]imeout","timeout","timeout user","'dog timeout [userid]' to timeout user"}};
+        commData = comms;
+        System.out.println("Hello");
     }
 
     @Override
     public String getName() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return "Admin";
     }
     
     @Override
     public void onReady(){
         
         initTimeoutChannels();
+        initTimeoutRoles();
         
     }
     
-    public void initTimeoutRole(String[] args, IMessage message){
+    public void setTimeoutChannel(String[] args, IMessage message){
         
         IGuild g = message.getGuild();
         
@@ -56,7 +76,7 @@ public class Admin extends Module{
             server.sendMessage(message.getChannel(), "You need to give a voicechannel name");
         
         boolean flag = false;
-        for(IChannel chan: g.getVoiceChannelsByName(args[0])){
+        for(IVoiceChannel chan: g.getVoiceChannelsByName(args[0])){
             timeChanMap.put(g.getID(), chan);
             DBHandler.setGuildSetting(g.getID(), "timeout_chan", args[0]);
             flag = true;
@@ -67,20 +87,33 @@ public class Admin extends Module{
         }
         
     }
-    public void setTimeoutRole(IGuild guild){
+    public void setTimeoutRole(String[] args, IMessage message){
+        IGuild g = message.getGuild();
         
-    }
-    
+        if(args.length==0)
+            server.sendMessage(message.getChannel(), "You need to give a role name");
+        
+        boolean flag = false;
+        for(IRole role: g.getRolesByName(args[0])){
+            timeRoleMap.put(g.getID(), role);
+            DBHandler.setGuildSetting(g.getID(), "timeout_role", args[0]);
+            flag = true;
+            break;
+        }
+        if(!flag){
+            server.sendMessage(message.getChannel(), "Could not find a role with that name");
+        }
+    }  
     protected void initTimeoutChannels(){
         timeChanMap = new HashMap<>();
         List<IGuild> guilds = server.client.getGuilds();
         for(IGuild guild : guilds){
-            setTimeoutChannel(guild);
+            initTimeoutChannel(guild);
         }
     }
-    protected void setTimeoutChannel(IGuild guild){
+    protected void initTimeoutChannel(IGuild guild){
         
-        List<IChannel> channels = guild.getChannels();
+        List<IVoiceChannel> channels = guild.getVoiceChannels();
         boolean set = false;
         
         String name = DBHandler.getGuildSetting(guild.getID(), "timeout_chan");
@@ -88,7 +121,7 @@ public class Admin extends Module{
             name = defTimeoutName;
         }
         
-        for(IChannel channel: channels){
+        for(IVoiceChannel channel: channels){
             
             
             if(channel.getName().equals(name)){
@@ -106,17 +139,81 @@ public class Admin extends Module{
         
         
     }
+    protected void initTimeoutRoles(){
+        timeRoleMap = new HashMap<>();
+        List<IGuild> guilds = server.client.getGuilds();
+        for(IGuild guild : guilds){
+            initTimeoutRole(guild);
+        }
+    }
+    protected void initTimeoutRole(IGuild guild){
+        
+        List<IRole> roles = guild.getRoles();
+        boolean set = false;
+        
+        String name = DBHandler.getGuildSetting(guild.getID(), "timeout_role");
+        if(name.equals("null")){
+            name = defTimeoutRole;
+        }
+        
+        for(IRole role: roles){
+            
+            
+            if(role.getName().equals(name)){
+                set = true;
+                timeRoleMap.put(guild.getID(), role);
+                return;
+            }
+        }
+        
+        if(!set){
+            timeRoleMap.put(guild.getID(), null);
+        }
+            
+        
+        
+        
+    }
     public void timeout(String[] args, IMessage message){
         
         IChannel chan = message.getChannel();
-        IChannel tOChan = timeChanMap.get(message.getGuild().getID());
+        IGuild guild = message.getGuild();
         if(args.length==0){
             server.sendMessage(chan, "You haven't given a user ID");
         }
         
-        for(IUser user : message.getGuild().getUsers()){
-            if(user.getID()==args[0]){
-                //user.addRole(irole);
+        for(IUser user : guild.getUsers()){
+            if(user.getID().equals(args[0])){
+                
+                
+                
+                try {
+                    user.addRole(timeRoleMap.get(guild));
+                    user.moveToVoiceChannel(timeChanMap.get(guild.getID()));
+                } catch (MissingPermissionsException ex) {
+                    Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (RateLimitException ex) {
+                    Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (DiscordException ex) {
+                    Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                Thread t = new Thread(() -> {
+                    try {
+                        TimeUnit.SECONDS.sleep(timeoutTime);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    try {
+                        message.getGuild().setMuteUser(user, false);
+                    } catch (DiscordException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (RateLimitException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (MissingPermissionsException ex) {
+                        Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                });
+                t.start();
             }
         }
         

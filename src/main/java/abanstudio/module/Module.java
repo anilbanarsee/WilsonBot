@@ -17,10 +17,10 @@ import java.util.HashMap;
  */
 public abstract class Module {
     
-   BotServer server;
-   String[][] commData;
-   ArrayList<Command> commands;
-   HashMap<String, Action> actionMap;    
+   protected BotServer server;
+   protected String[][] commData;
+   protected ArrayList<Command> commands;
+   protected HashMap<String, Action> actionMap;    
    
    public Module(){
        initalizeCommands();
@@ -29,13 +29,12 @@ public abstract class Module {
    protected abstract void initalizeCommData();
    public abstract void onReady();
    public abstract String getName();
-   protected void initalizeCommands(){
+   protected final void initalizeCommands(){
         
         initalizeActions();
         initalizeCommData();
         
         commands = new ArrayList<>();
-        
         for(String[] array : commData){
             
             commands.add(new Command(actionMap.get(array[1]),array));
@@ -50,3 +49,4 @@ public abstract class Module {
        return commands;
    }
 }
+
