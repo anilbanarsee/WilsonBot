@@ -73,36 +73,37 @@ public class Admin extends Module{
         IGuild g = message.getGuild();
         
         if(args.length==0)
-            server.sendMessage(message.getChannel(), "You need to give a voicechannel name");
+            server.sendMessage(message.getChannel(), "You need to give a voicechannel id");
         
         boolean flag = false;
-        for(IVoiceChannel chan: g.getVoiceChannelsByName(args[0])){
-            timeChanMap.put(g.getID(), chan);
-            DBHandler.setGuildSetting(g.getID(), "timeout_chan", args[0]);
-            flag = true;
-            break;
+        IVoiceChannel chan = message.getGuild().getVoiceChannelByID(args[0]);
+        if(chan == null){
+            server.sendMessage(message.getChannel(), "Could not find a channel with that id on this server");
+            return;
+     
         }
-        if(!flag){
-            server.sendMessage(message.getChannel(), "Could not find a channel with that name");
-        }
+        timeChanMap.put(g.getID(), chan);
+        DBHandler.setGuildSetting(g.getID(), "timeout_chan", args[0]);
+
         
     }
     public void setTimeoutRole(String[] args, IMessage message){
         IGuild g = message.getGuild();
         
         if(args.length==0)
-            server.sendMessage(message.getChannel(), "You need to give a role name");
+            server.sendMessage(message.getChannel(), "You need to give a role id");
         
         boolean flag = false;
-        for(IRole role: g.getRolesByName(args[0])){
-            timeRoleMap.put(g.getID(), role);
-            DBHandler.setGuildSetting(g.getID(), "timeout_role", args[0]);
-            flag = true;
-            break;
+        IRole role = message.getGuild().getRoleByID(args[0]);
+        if(role == null){
+             server.sendMessage(message.getChannel(), "Could not find a role with that name");
+             return;
         }
-        if(!flag){
-            server.sendMessage(message.getChannel(), "Could not find a role with that name");
-        }
+        timeRoleMap.put(g.getID(), role);
+        DBHandler.setGuildSetting(g.getID(), "timeout_role", args[0]);
+        flag = true;
+           
+
     }  
     protected void initTimeoutChannels(){
         timeChanMap = new HashMap<>();
@@ -185,10 +186,15 @@ public class Admin extends Module{
         for(IUser user : guild.getUsers()){
             if(user.getID().equals(args[0])){
                 
-                
-                
+                IVoiceChannel temp = null;
+                for(IVoiceChannel ch: guild.getVoiceChannels()){
+                    if(ch.getUsersHere().contains(user)){
+                        temp = ch;
+                    }
+                }
+                IVoiceChannel origin = temp;
                 try {
-                    user.addRole(timeRoleMap.get(guild));
+                    user.addRole(timeRoleMap.get(guild.getID()));
                     user.moveToVoiceChannel(timeChanMap.get(guild.getID()));
                 } catch (MissingPermissionsException ex) {
                     Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
@@ -204,7 +210,8 @@ public class Admin extends Module{
                         Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     try {
-                        message.getGuild().setMuteUser(user, false);
+                        user.removeRole(timeRoleMap.get(guild.getID()));
+                        user.moveToVoiceChannel(origin);
                     } catch (DiscordException ex) {
                         Logger.getLogger(Admin.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (RateLimitException ex) {

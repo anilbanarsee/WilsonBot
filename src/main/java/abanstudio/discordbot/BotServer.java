@@ -27,12 +27,14 @@ import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageEmbedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
+import sx.blah.discord.handle.impl.obj.Role;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.IVoiceChannel;
+import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
@@ -298,8 +300,24 @@ abstract public class BotServer{
         
         
     }
+    public static boolean canUse(int adminLevel, IUser user, IGuild guild){
+        
+        List<IRole> roles = guild.getRolesForUser(user);
+        
+        for(IRole role: roles){
+            
+            
+            for(Permissions p : role.getPermissions()){
+                p.hasPermission(Permissions.ADMINISTRATOR.ordinal());
+            }
+            
+        }
+        return true;
+        
+    }
     protected void setTimeoutChannel(IGuild guild, String name){
         
+                
     }
     public abstract boolean isAdmin(IUser user);
 }
