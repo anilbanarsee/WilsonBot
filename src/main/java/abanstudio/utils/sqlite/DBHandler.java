@@ -233,7 +233,12 @@ public class DBHandler {
         
         
         newDB.closeConn();
-         
+        if(row == null){
+            return "null";
+        }
+        else if(row.get(0) == null){
+            return "null";
+        }
         return row.get(0);
     }
     public static void setGuildSetting(String guildID, String setting, String set){

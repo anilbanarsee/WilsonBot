@@ -10,6 +10,8 @@ import abanstudio.command.Command;
 import abanstudio.discordbot.BotServer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
 /**
  *
@@ -20,7 +22,8 @@ public abstract class Module {
    protected BotServer server;
    protected String[][] commData;
    protected ArrayList<Command> commands;
-   protected HashMap<String, Action> actionMap;    
+   protected HashMap<String, Action> actionMap;
+   protected boolean onMessage;
    
    public Module(){
        initalizeCommands();
@@ -30,15 +33,24 @@ public abstract class Module {
    public abstract void onReady();
    public abstract String getName();
    protected final void initalizeCommands(){
-        
-        initalizeActions();
+         initalizeActions();
         initalizeCommData();
         
         commands = new ArrayList<>();
+        
         for(String[] array : commData){
             
-            commands.add(new Command(actionMap.get(array[1]),array));
-                
+            int n;
+            try{
+                n = Integer.parseInt(array[array.length-1]);
+            }
+            catch(NumberFormatException e){
+                n = -1;
+            }
+            if(n == -1)
+                commands.add(new Command(actionMap.get(array[1]),array));
+            else
+                commands.add(new Command(actionMap.get(array[1]),array,n));
         }
                     
     }
@@ -47,6 +59,9 @@ public abstract class Module {
    }
    public ArrayList<Command> getCommands(){
        return commands;
+   }
+   public String toString(){
+       return getName();
    }
 }
 

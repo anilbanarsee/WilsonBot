@@ -95,6 +95,7 @@ public class Command {
         return null;
     }
     
+    public int getAdminLevel(){return adminLevel;}
 
     
 }

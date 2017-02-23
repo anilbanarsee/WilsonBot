@@ -7,6 +7,7 @@ package abanstudio.module;
 
 import abanstudio.command.Action;
 import java.util.HashMap;
+import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
@@ -40,4 +41,5 @@ public class Games extends Module{
     public void ping(String[] args, IMessage m){
         
     }
+
 }

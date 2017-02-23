@@ -75,7 +75,7 @@ public class WilsonServer extends BotServer{
                        ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
                        ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
                        ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
-                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)"}
+                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)","2"}
                        ,{"[sS]kip","skip","Skips the current clip (no current limitations, please use responsibly)"}
 
 
@@ -153,7 +153,7 @@ public class WilsonServer extends BotServer{
         AudioPlayer player = event.getPlayer();
         player.setVolume((float) t.getMetadata().get("volume"));
     }
-    
+    /*
     @Override
     @EventSubscriber
     public void onMessage(MessageReceivedEvent event){
@@ -182,36 +182,17 @@ public class WilsonServer extends BotServer{
         }
         
     }
+    */
     
-    
+
     @Override
-    @EventSubscriber
-    public void onReady(ReadyEvent event){
-        System.out.println("Initalizing stuff");
+    public void onServerReady(ReadyEvent event){
+        System.out.println("WilsonBot initalizing");
         this.initGuildSettings();
-        System.out.println("Initalizing redirect channel");
-        this.initCommChannels();
-        System.out.println("WilsonBot ready");
-    }
-    
-    public void redirect(IMessage m, IChannel redirection){
-        String author = m.getAuthor().getName();
-        String content = m.getContent();
         
-        try {
-            m.delete();
-        } catch (MissingPermissionsException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RateLimitException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (DiscordException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
-        }
-         
-        sendMessage(redirection, "[Redirected] "+author+": "+content);
-       
     }
     
+
     @EventSubscriber
     public void trackEnd(TrackFinishEvent event){
         
@@ -389,15 +370,6 @@ public class WilsonServer extends BotServer{
         
 
     }
-    @Override
-    public void sendMessage(IChannel channel, String message){
-
-         IChannel redirect = commChanMap.get(channel.getGuild().getID());
-            if(redirect!=null){
-                super.sendMessage(redirect, message);
-            }
-
-    }
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
         for(IUser u : parlayUsers){
@@ -540,7 +512,7 @@ public class WilsonServer extends BotServer{
         
     }
     public void setTagRegex(String[] args, IMessage message){
-        if(!isAdmin(message.getAuthor())){
+        if(!isAdmin(message.getAuthor(),message.getGuild())){
             sendMessage(message.getChannel(),"You must be an admin to do that. It's not that I don't trust you, I just don't trust you");
             return;
         }
@@ -862,7 +834,7 @@ public class WilsonServer extends BotServer{
     }
     public void set(String[] arguments, IMessage message){
         
-        if(!isAdmin(message.getAuthor())){
+        if(!isAdmin(message.getAuthor(),message.getGuild())){
             sendMessage(message.getChannel(), "You are not an admin");
             return;
         }
@@ -1209,19 +1181,27 @@ public class WilsonServer extends BotServer{
     }
 
 
-    @Override
-    public boolean isAdmin(IUser user) {
-        if(DBHandler.getAdminRights(user.getID()).equals("null")){
-            return false;
-        }
-        return true;
-    }
 
     public boolean isMasterAdmin(IUser user) {
         if(DBHandler.getAdminRights(user.getID()).equals("master")){
             return true;
         }
         return false;
+    }
+    @Override
+    public boolean canUse(int adminLevel, IUser user, IGuild guild){
+        
+        switch (adminLevel) {
+            case 0:
+                return true;
+            case 1:
+                return isAdmin(user,guild);
+            case 2:
+                return isMasterAdmin(user);
+            default:
+                return false;
+        }
+        
     }
 
 

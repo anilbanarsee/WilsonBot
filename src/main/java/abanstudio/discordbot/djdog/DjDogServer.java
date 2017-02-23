@@ -47,11 +47,16 @@ public class DjDogServer extends BotServer {
         
     }
     
-    @EventSubscriber
+
     @Override
-    public void onReady(ReadyEvent event){
-        System.out.println("DjDog Ready");
+    public void onServerReady(ReadyEvent event){
+        
+        int n = 5+4;
+        System.out.println(n);
+        
+        System.out.println("DjDog ready");
     }
+    
     @EventSubscriber
     @Override
     public void onDisconnect(DiscordDisconnectedEvent event) throws DiscordException{
@@ -122,10 +127,7 @@ public class DjDogServer extends BotServer {
         player.skip(); 
     }
 
-    @Override
-    public boolean isAdmin(IUser user) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+
 
     @Override
     protected void initalizeActions() {

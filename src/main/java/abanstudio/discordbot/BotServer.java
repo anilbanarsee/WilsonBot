@@ -13,6 +13,7 @@ import abanstudio.exceptions.InvalidSearchException;
 import abanstudio.module.Module;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -54,9 +55,8 @@ abstract public class BotServer{
     protected Matcher m;
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;        
-    protected HashMap<String, IChannel> commChanMap;
-    protected HashMap<String, Module> modules;
-    protected String defCommChanName = "botcommands";
+    protected ArrayList<Module> modules;
+    protected Module onMessageOverride = null;
 
     
     
@@ -64,31 +64,51 @@ abstract public class BotServer{
     
     public BotServer(IDiscordClient client){
         this.client = client;
+        modules = new ArrayList<>();
     }
     
     @EventSubscriber
     public void onReady(ReadyEvent event){
-        System.out.println("Bot Ready !");
+        
+        onServerReady(event);
+        System.out.println("Modules setting up...");
+        for(Module m: modules){
+            System.out.println("["+m+"]");
+            m.onReady();
+            System.out.println("Module :"+m+", ready");
+        }
+        System.out.println("Modules ready");
+        System.out.println("Setup complete");
+        
+
     }
+    protected abstract void onServerReady(ReadyEvent event);
     
     @EventSubscriber
     public void onMessage(MessageReceivedEvent event){
        
-        if(event.getMessage().getAuthor().isBot())
-            return;
-        String message = event.getMessage().getContent();
-        
-        if(message.startsWith(prefix+" ")){
-            
-           
-            String command = message;
-            parseCommand(command, event.getMessage());
-           
+        if(this.onMessageOverride!=null){
+            try {
+               
+                    onMessageOverride.getClass().getMethod("onMessage", MessageReceivedEvent.class).invoke(onMessageOverride,event);
+
+            } catch (NoSuchMethodException | SecurityException  | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(BotServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
-
-
-
+        else{
+            if(event.getMessage().getAuthor().isBot())
+                return;
+            String message = event.getMessage().getContent();
+        
+            if(message.startsWith(prefix+" ")){
             
+           
+                String command = message;
+                parseCommand(command, event.getMessage());
+           
+            }
+        }
         
     }
     
@@ -109,8 +129,17 @@ abstract public class BotServer{
         
         for(String[] array : commData){
             
-            commands.add(new Command(actionMap.get(array[1]),array));
-                
+            int n;
+            try{
+                n = Integer.parseInt(array[array.length-1]);
+            }
+            catch(NumberFormatException e){
+                n = -1;
+            }
+            if(n == -1)
+                commands.add(new Command(actionMap.get(array[1]),array));
+            else
+                commands.add(new Command(actionMap.get(array[1]),array,n));
         }
                     
     }
@@ -119,20 +148,27 @@ abstract public class BotServer{
         System.out.println("File Recieved Event");
     }
     
-    public void parseCommand(String input, IMessage message){
+    public boolean parseCommand(String input, IMessage message){
         
         input = input.substring(4);
         String[] split = input.split(" ");
         Command loaded = null;
         ArrayList<String> args = new ArrayList<String>();
+        boolean isCommand = false;
         for(String s : split){
             Command c = Command.matchCommand(commands, s);
             
             if(c!=null){
                 if(loaded!=null){
-                    String[] array = new String[args.size()];
-                    loaded.getAction().exec(args.toArray(array), message);
-                    args.clear();
+                    if(canUse(loaded.getAdminLevel(),message.getAuthor(),message.getGuild())){
+                        String[] array = new String[args.size()];
+                        loaded.getAction().exec(args.toArray(array), message);
+                        args.clear();
+                        isCommand = true;
+                    }
+                    else{
+                        sendMessage(message.getChannel(),"You do not have permission to use this command");
+                    }
                 }
                 loaded = c;
             }
@@ -140,17 +176,43 @@ abstract public class BotServer{
                 args.add(s);
             }
         }
-        String[] array = new String[args.size()];
-        loaded.getAction().exec(args.toArray(array), message);
-        
+        if(loaded!=null){
+            if(canUse(loaded.getAdminLevel(),message.getAuthor(),message.getGuild())){
+                String[] array = new String[args.size()];
+                loaded.getAction().exec(args.toArray(array), message);
+                args.clear();
+                isCommand = true;
+            }
+        }
+        else{
+            sendMessage(message.getChannel(),"You do not have permission to use this command");
+        }
+
+        return isCommand;
     }
     
     public void addModule(Module module){
         ArrayList<Command> commands = module.getCommands();
+        try {
+            module.getClass().getMethod("onMessage",MessageReceivedEvent.class);
+            if(this.onMessageOverride!=null){
+                System.out.println("Module "+module+" attempted to override onMessage() however module "+onMessageOverride+" has already overrided this, continuing without replacing");
+            }
+            else{
+                onMessageOverride = module;
+                System.out.println("Module "+module+" successfully overrided onMessage()");
+            }
+            
+        } catch (NoSuchMethodException ex) {
+            
+        } catch (SecurityException ex) {
+            Logger.getLogger(BotServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+                
         int commAdded = 0;
         int commRejected = 0;
-        ArrayList<Command> rejectedCommands = new ArrayList<>();
         module.setServer(this);
+        modules.add(module);
         for(Command cX: commands){
             boolean flag = true;
             for(Command cY: this.commands){ 
@@ -168,7 +230,7 @@ abstract public class BotServer{
         }
         System.out.println("Loaded module '"+module.getName()+"'. Commands added :"+commAdded+". Commands rejected due to merge conflicts :"+commRejected);
     }
-    
+
     public boolean matches(String s, String regex){
             Pattern p = Pattern.compile(regex);
             m = p.matcher(s);
@@ -176,7 +238,6 @@ abstract public class BotServer{
             return m.find();
     }
 
-   
     
     public void sendMessage(IChannel channel, String message){
 
@@ -273,51 +334,36 @@ abstract public class BotServer{
         }
        
     }
-    protected void initCommChannels(){
-        commChanMap = new HashMap<>();
-        List<IGuild> guilds = client.getGuilds();
-        for(IGuild guild : guilds){
-            setCommChannel(guild);
-        }
-    }
-    protected void setCommChannel(IGuild guild){
-        
-        List<IChannel> channels = guild.getChannels();
-        boolean set = false;
-        
-        for(IChannel channel: channels){
-            
-            
-            if(channel.getName().equals(defCommChanName)){
-                commChanMap.put(guild.getID(), channel);
-                return;
-            }
+ 
+    public boolean canUse(int adminLevel, IUser user, IGuild guild){
+       
+        if(adminLevel == 0){
+            return true;
         }
         
-        if(!set){
-            commChanMap.put(guild.getID(), null);
-        }     
+        else if(adminLevel >= 1){
+            return isAdmin(user, guild);
+        }
         
+        else{
+            return false;
+        }
         
     }
-    public static boolean canUse(int adminLevel, IUser user, IGuild guild){
+    public boolean isAdmin(IUser user, IGuild guild){
+         
         
         List<IRole> roles = guild.getRolesForUser(user);
-        
+        //System.out.println("Admin :"+Permissions.ADMINISTRATOR.ordinal());
         for(IRole role: roles){
             
-            
+            System.out.println(role.getName());
             for(Permissions p : role.getPermissions()){
-                p.hasPermission(Permissions.ADMINISTRATOR.ordinal());
+               if(p.hasPermission(Permissions.ADMINISTRATOR.ordinal())){
+                   return true;
+               }
             }
-            
         }
-        return true;
-        
+        return false;
     }
-    protected void setTimeoutChannel(IGuild guild, String name){
-        
-                
-    }
-    public abstract boolean isAdmin(IUser user);
 }
