@@ -183,10 +183,11 @@ abstract public class BotServer{
                 args.clear();
                 isCommand = true;
             }
+            else{
+                sendMessage(message.getChannel(),"You do not have permission to use this command");
+            }
         }
-        else{
-            sendMessage(message.getChannel(),"You do not have permission to use this command");
-        }
+       
 
         return isCommand;
     }

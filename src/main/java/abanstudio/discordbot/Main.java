@@ -46,7 +46,7 @@ public class Main {
         ffmpeg = new FFMPEG(path);
         
         System.out.println("Connecting");
-        try(FileInputStream inputStream = new FileInputStream("wilsontokentest.txt")) 
+        try(FileInputStream inputStream = new FileInputStream("wilsontoken.txt")) 
         {     
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             //System.out.println("Token: "+IOUtils.toString(inputStream));
