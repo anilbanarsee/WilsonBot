@@ -58,6 +58,7 @@ public class Admin extends Module{
         
         actionMap.put("settimeoutchannel", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutChannel(arg,m);}});
         actionMap.put("settimeoutrole", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutRole(arg,m);}});
+        actionMap.put("settimeout",new Action(){@Override public void exec(String[] arg, IMessage m){setTimeout(arg,m);}});
     
     }
 
@@ -65,6 +66,7 @@ public class Admin extends Module{
     protected void initalizeCommData() {
         String[][] comms = {{"[tT]imeout","timeout","timeout user","'dog timeout [userid]' to timeout user","1"},
                             {"[sS]etTimeoutChannel","settimeoutchannel","sets the timeout channel","1"},
+                            {"[sS]etTimeout","settimeout","sets the timeout period","1"},
                             {"[sS]etTimeoutRole","settimeoutrole","sets the timeout role","1"}};
         commData = comms;
         System.out.println("Hello");
@@ -89,7 +91,25 @@ public class Admin extends Module{
         initCommChannels();
         
     }
-    
+    public void setTimeout(String[] args, IMessage message){
+        if(args.length<1){
+            server.sendMessage(message.getChannel(), "You need to give me a number");
+        }
+        
+        try{
+            int n = Integer.parseInt(args[0]);
+            if(n>60){
+                server.sendMessage(message.getChannel(), "Timeout cannot be longer than 60 seconds");
+                return;
+            }
+            this.timeoutTime = n;
+            server.sendMessage(message.getChannel(), "Timeout period set to "+timeoutTime);
+        }
+        catch(NumberFormatException e){
+            server.sendMessage(message.getChannel(), "That was not a number");
+            return;
+        }
+    }
     public void setTimeoutChannel(String[] args, IMessage message){
         
         IGuild g = message.getGuild();
@@ -233,6 +253,7 @@ public class Admin extends Module{
                     if(timeRole != null){
                         user.addRole(timeRole);
                         user.moveToVoiceChannel(timeChanMap.get(guild.getID()));
+                        
                         muted = false;
                     }
                     else{
@@ -259,6 +280,8 @@ public class Admin extends Module{
                         if(!muteFinal){
                             user.removeRole(timeRoleMap.get(guild.getID()));
                             user.moveToVoiceChannel(origin);
+                           
+                            
                         }
                         else{
                             guild.setMuteUser(user, false);

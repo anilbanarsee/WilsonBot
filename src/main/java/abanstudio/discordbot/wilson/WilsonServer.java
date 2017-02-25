@@ -1195,7 +1195,7 @@ public class WilsonServer extends BotServer{
             case 0:
                 return true;
             case 1:
-                return isAdmin(user,guild);
+                return isAdmin(user,guild)||isMasterAdmin(user);
             case 2:
                 return isMasterAdmin(user);
             default:
