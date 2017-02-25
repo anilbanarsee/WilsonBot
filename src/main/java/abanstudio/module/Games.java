@@ -41,5 +41,9 @@ public class Games extends Module{
     public void ping(String[] args, IMessage m){
         
     }
+    @Override
+    public boolean overridesOnMessage(){
+        return false;
+    }
 
 }

@@ -56,7 +56,7 @@ abstract public class BotServer{
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;        
     protected ArrayList<Module> modules;
-    protected Module onMessageOverride = null;
+    protected Module onMessageOverrider = null;
 
     
     
@@ -87,14 +87,8 @@ abstract public class BotServer{
     @EventSubscriber
     public void onMessage(MessageReceivedEvent event){
        
-        if(this.onMessageOverride!=null){
-            try {
-               
-                    onMessageOverride.getClass().getMethod("onMessage", MessageReceivedEvent.class).invoke(onMessageOverride,event);
-
-            } catch (NoSuchMethodException | SecurityException  | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                Logger.getLogger(BotServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        if(this.onMessageOverrider!=null){
+            onMessageOverrider.getOverrides().get("onMessage").exec(event);
         }
         else{
             if(event.getMessage().getAuthor().isBot())
@@ -192,28 +186,16 @@ abstract public class BotServer{
     }
     
     public void addModule(Module module){
-        ArrayList<Command> commands = module.getCommands();
-        try {
-            module.getClass().getMethod("onMessage",MessageReceivedEvent.class);
-            if(this.onMessageOverride!=null){
-                System.out.println("Module "+module+" attempted to override onMessage() however module "+onMessageOverride+" has already overrided this, continuing without replacing");
-            }
-            else{
-                onMessageOverride = module;
-                System.out.println("Module "+module+" successfully overrided onMessage()");
-            }
-            
-        } catch (NoSuchMethodException ex) {
-            
-        } catch (SecurityException ex) {
-            Logger.getLogger(BotServer.class.getName()).log(Level.SEVERE, null, ex);
+        ArrayList<Command> moduleCommands = module.getCommands();
+        if(module.overridesOnMessage()){
+            onMessageOverrider = module;
         }
                 
         int commAdded = 0;
         int commRejected = 0;
         module.setServer(this);
         modules.add(module);
-        for(Command cX: commands){
+        for(Command cX: moduleCommands){
             boolean flag = true;
             for(Command cY: this.commands){ 
                 if(cX.getComm().equals(cY.getComm())){

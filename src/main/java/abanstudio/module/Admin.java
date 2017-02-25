@@ -6,7 +6,7 @@
 package abanstudio.module;
 
 import abanstudio.command.Action;
-import abanstudio.discordbot.BotServer;
+import abanstudio.command.CoreAction;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.utils.sqlite.DBHandler;
 import java.util.HashMap;
@@ -78,6 +78,12 @@ public class Admin extends Module{
     @Override
     public void onReady(){
         
+        overrides.put("onMessage",new CoreAction() {
+            @Override
+            public void exec(Object o) {
+                onMessage((MessageReceivedEvent) o);
+            }
+        });
         initTimeoutChannels();
         initTimeoutRoles();
         initCommChannels();
@@ -123,7 +129,7 @@ public class Admin extends Module{
         server.sendMessage(message.getChannel(), "Timeout role set to role : "+role.getName()+" ("+role.getID()+")");
      
         flag = true;
-           
+        
 
     }  
     protected void initTimeoutChannels(){
@@ -329,6 +335,10 @@ public class Admin extends Module{
             }
            
         }
+    }
+    @Override
+    public boolean overridesOnMessage(){
+        return true;
     }
     public void redirect(IMessage m, IChannel redirection){
         System.out.println("Redirecting message");

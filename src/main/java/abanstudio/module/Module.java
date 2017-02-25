@@ -7,6 +7,7 @@ package abanstudio.module;
 
 import abanstudio.command.Action;
 import abanstudio.command.Command;
+import abanstudio.command.CoreAction;
 import abanstudio.discordbot.BotServer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ public abstract class Module {
    protected String[][] commData;
    protected ArrayList<Command> commands;
    protected HashMap<String, Action> actionMap;
+   protected HashMap<String, CoreAction> overrides;
    protected boolean onMessage;
    
    public Module(){
@@ -32,6 +34,7 @@ public abstract class Module {
    protected abstract void initalizeCommData();
    public abstract void onReady();
    public abstract String getName();
+   public abstract boolean overridesOnMessage();
    protected final void initalizeCommands(){
          initalizeActions();
         initalizeCommData();
@@ -54,12 +57,14 @@ public abstract class Module {
         }
                     
     }
+   public HashMap<String, CoreAction> getOverrides(){return overrides;}
    public void setServer(BotServer server){
        this.server = server;
    }
    public ArrayList<Command> getCommands(){
        return commands;
    }
+   @Override
    public String toString(){
        return getName();
    }

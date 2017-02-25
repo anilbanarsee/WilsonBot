@@ -45,6 +45,9 @@ public class Soundboard extends Module{
     public void onReady(){
         
     }
-
+    @Override
+    public boolean overridesOnMessage(){
+        return false;
+    }
 
 }
