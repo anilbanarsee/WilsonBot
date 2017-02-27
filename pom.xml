@@ -36,6 +36,11 @@
     <version>2.7.0</version>
     <classifier>shaded</classifier> <!-- Include this line if you want a shaded jar (all the Discord4J dependencies bundled into one jar)-->
   </dependency>
+  <dependency>
+    <groupId>org.reflections</groupId>
+    <artifactId>reflections</artifactId>
+    <version>0.9.10</version>
+</dependency>
 <dependency>
   <groupId>com.github.axet</groupId>
   <artifactId>vget</artifactId>

@@ -9,15 +9,25 @@ import abanstudio.utils.FFMPEG;
 import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.module.Admin;
+import abanstudio.module.Games;
 import abanstudio.module.Soundboard;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Set;
 import org.apache.commons.io.IOUtils;
+import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.util.ClasspathHelper;
+import org.reflections.util.ConfigurationBuilder;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.Event;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 
@@ -46,7 +56,7 @@ public class Main {
         ffmpeg = new FFMPEG(path);
         
         System.out.println("Connecting");
-        try(FileInputStream inputStream = new FileInputStream("wilsontoken.txt")) 
+        try(FileInputStream inputStream = new FileInputStream("wilsontokentest.txt")) 
         {     
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             //System.out.println("Token: "+IOUtils.toString(inputStream));
@@ -71,11 +81,15 @@ public class Main {
         
         System.out.println("Loading modules ...");
         wilson.addModule(new Admin());
+        //wilson.addModule(new Games());
+        
+        
+       // djdogClient.getDispatcher().registerListener(djdog);
+       // wilsonClient.getDispatcher().registerListener(wilson);
         
         
         
-        djdogClient.getDispatcher().registerListener(djdog);
-        wilsonClient.getDispatcher().registerListener(wilson);
+        
         
         
 

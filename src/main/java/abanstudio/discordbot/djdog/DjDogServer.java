@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -59,7 +60,7 @@ public class DjDogServer extends BotServer {
     
     @EventSubscriber
     @Override
-    public void onDisconnect(DiscordDisconnectedEvent event) throws DiscordException{
+    public void onDisconnect(DisconnectedEvent event) throws DiscordException{
         System.out.println("DjDog disconnected");
     }
     
@@ -158,8 +159,13 @@ public class DjDogServer extends BotServer {
     
     @Override
     protected void initalizeCommData() {
-        String[][] comms = null;
+        String[][] comms = {};
         commData = comms;
+    }
+
+    @Override
+    protected void initalizeEventMethods() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

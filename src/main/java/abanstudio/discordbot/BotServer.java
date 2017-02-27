@@ -8,22 +8,28 @@ package abanstudio.discordbot;
 import abanstudio.discordbot.Main;
 import abanstudio.command.Action;
 import abanstudio.command.Command;
+import abanstudio.command.CoreAction;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.exceptions.InvalidSearchException;
 import abanstudio.module.Module;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import sx.blah.discord.api.IDiscordClient;
+import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.DisconnectedEvent;
 import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
 import sx.blah.discord.handle.impl.events.MessageEmbedEvent;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
@@ -41,6 +47,7 @@ import sx.blah.discord.util.MessageBuilder;
 import sx.blah.discord.util.MissingPermissionsException;
 import sx.blah.discord.util.RateLimitException;
 import sx.blah.discord.util.RequestBuffer;
+import sx.blah.discord.util.audio.AudioPlayer;
 
 /**
  *
@@ -52,9 +59,12 @@ abstract public class BotServer{
     protected ArrayList<Command> commands;
     public IDiscordClient client;
     protected ArrayList<IRole> roles;
-    protected Matcher m;
+    protected Matcher matcher;
     protected String[][] commData;
-    protected HashMap<String, Action> actionMap;        
+    protected HashMap<String, Action> actionMap;    
+    protected HashMap<String, CoreAction> overrides;
+    protected HashMap<String, CoreAction> eventListeners;
+    protected EventListener listener = null;
     protected ArrayList<Module> modules;
     protected Module onMessageOverrider = null;
 
@@ -65,6 +75,12 @@ abstract public class BotServer{
     public BotServer(IDiscordClient client){
         this.client = client;
         modules = new ArrayList<>();
+        overrides = new HashMap<>();
+        eventListeners = new HashMap<>();
+        initalizeCommands();
+        initalizeEventListener();
+        
+        
     }
     
     @EventSubscriber
@@ -83,12 +99,12 @@ abstract public class BotServer{
 
     }
     protected abstract void onServerReady(ReadyEvent event);
-    
     @EventSubscriber
     public void onMessage(MessageReceivedEvent event){
-       
-        if(this.onMessageOverrider!=null){
-            onMessageOverrider.getOverrides().get("onMessage").exec(event);
+        
+        CoreAction action = overrides.get("onMessage");
+        if(action!=null){
+            action.exec(event);
         }
         else{
             if(event.getMessage().getAuthor().isBot())
@@ -105,16 +121,55 @@ abstract public class BotServer{
         }
         
     }
-    
     @EventSubscriber
-    public void onDisconnect(DiscordDisconnectedEvent event) throws DiscordException{
+    public void onDisconnect(DisconnectedEvent event) throws DiscordException{
         System.out.println("Bot disconnected with reason "+event.getReason()+". Reconnecting...");
     }
-    
     protected abstract void initalizeActions();
     protected abstract void initalizeCommData();
+    protected abstract void initalizeEventMethods();
     
-    protected void initalizeCommands(){
+    private void initalizeEventListener(){
+        if(listener==null){
+            listener = new EventListener();
+            client.getDispatcher().registerListener(listener);
+        }
+        else{
+            client.getDispatcher().unregisterListener(listener);
+        }
+        
+        listener.getMethodMap();
+        Method[] methods = this.getClass().getMethods();
+        ArrayList<Method> coreMethods = new ArrayList<>();
+        
+        for(Method method : methods){
+            Annotation[] annotations = method.getAnnotations();
+            if(method.getParameterCount()==1){
+                for(Annotation annotation: annotations){
+                //System.out.println(c);
+                    if(annotation.annotationType().equals(EventSubscriber.class)){
+                        coreMethods.add(method);
+                        break;
+                    }
+                }
+            }
+        }
+        for(Method m : coreMethods){
+
+            //MethodTuple mt = listener.getMethodMap().get(m.getParameterTypes()[0]);
+            ArrayList<MethodTuple> mtlist = new ArrayList<>();
+            mtlist.add(new MethodTuple(m, this));
+            ArrayList<MethodTuple> mt = listener.getMethodMap().putIfAbsent(m.getParameterTypes()[0], mtlist);
+            
+            if(mt!=null){
+                System.out.println("WARNING : On initialization a botserver : "+this.getClass()+" attempted to overwrite it's own event listener "+m+". This usually occurs because you have two methods with @EventSubscriber and with the same parameter event type. The second method was ignored");
+            }
+        }
+        System.out.println("");
+        
+        
+    }
+    private void initalizeCommands(){
         
         initalizeActions();
         initalizeCommData();
@@ -137,11 +192,10 @@ abstract public class BotServer{
         }
                     
     }
-    
+    @EventSubscriber
     public void onFileRecieved(MessageEmbedEvent event){
         System.out.println("File Recieved Event");
     }
-    
     public boolean parseCommand(String input, IMessage message){
         
         input = input.substring(4);
@@ -184,23 +238,113 @@ abstract public class BotServer{
        
 
         return isCommand;
-    }
-    
+    }  
     public void addModule(Module module){
-        ArrayList<Command> moduleCommands = module.getCommands();
-        if(module.overridesOnMessage()){
-            onMessageOverrider = module;
+
+        
+        Method[] methods = module.getClass().getMethods();
+        ArrayList<Method> coreMethods = new ArrayList<>();
+        ArrayList<Method> replaceMethods = new ArrayList<>();
+        
+        for(Method method : methods){
+            Annotation[] annotations = method.getAnnotations();
+            if(method.getParameterCount()==1){
+                boolean eSub = false;
+                boolean replace = false;
+                for(Annotation annotation: annotations){
+                //System.out.println(c);
+                    if(annotation.annotationType().equals(EventSubscriber.class)){
+                        eSub = true;
+                    }
+                    if(annotation.annotationType().equals(Replaces.class)){
+                        replace = true;
+                    }
+                }
+                if(eSub){
+                    if(replace){
+                        replaceMethods.add(method);
+                    }
+                    else{
+                        coreMethods.add(method);
+                    }
+                }
+            }
         }
+        for(Method m : coreMethods){
+
+            ArrayList<MethodTuple> mt = listener.getMethodMap().get(m.getParameterTypes()[0]);
+            
+            if(mt==null){
+                mt = new ArrayList<>();
+                mt.add(new MethodTuple(m,module));
+                listener.getMethodMap().put(m.getParameterTypes()[0], mt);
+                System.out.println("Module "+module+" added listener event "+m.getName()+" sucessfully. There were no previous methods that were overridden");
+
+            }
+            else{
+                mt.add(new MethodTuple(m,module));
+                System.out.println("Module "+module+" added listener event "+m.getName()+" sucessfully.");
+ 
+            }
+            
+        }
+        for(Method m : replaceMethods){
+            ArrayList<MethodTuple> mt = listener.getMethodMap().get(m.getParameterTypes()[0]);
+            
+            if(mt==null){
+                mt = new ArrayList<>();
+                mt.add(new MethodTuple(m,module));
+                System.out.println("Module "+module+" sucessfully added method "+m+" to event listener. There was no previous implementation of this signature");
+            }
+            else{
+                boolean added = false;
+                for(MethodTuple tuple : mt){
+                    if(BotServer.class.isAssignableFrom(tuple.getObject().getClass())){
+                        tuple.setMethodAndObject(m, module);
+                        added = true;
+                        System.out.println("Module "+module+" sucessfully overrided BotServer implementation of method "+m+".");
+                        break;
+                    }
+                }
+                if(!added){    
+                    mt.add(new MethodTuple(m, module));
+                    System.out.println("Module "+module+" sucessfully added EventListener method "+m+". There was no previous BotServer implementation of this method");
+                }
+            }
+        }
+        
+        /*
+        if(module.overridesMethods()){
+            
+            for(HashMap.Entry<String, CoreAction> pair : module.getOverrides().entrySet()){
+                String key = pair.getKey();
+                if(overrides.get(key)!=null){
+                    System.out.println("This module overrided core method "+key+" successfully");
+                    overrides.put(key, pair.getValue());
+                }
+                else{
+                    System.out.println("This module attempted to override core method, however it has already been overwritten by another module");
+                }
+            }
+        }*/
                 
-        int commAdded = 0;
+        ArrayList<Command> moduleCommands = module.getCommands();
+        HashMap<String, Action> overrideActions = module.getOverrides();
+
         int commRejected = 0;
+        int commAdded = 0;
+        int commOver = 0;
+        
         module.setServer(this);
         modules.add(module);
+        
+       
+        
         for(Command cX: moduleCommands){
             boolean flag = true;
             for(Command cY: this.commands){ 
                 if(cX.getComm().equals(cY.getComm())){
-                    System.out.println("Error : Module "+module.getName()+" tried to add command "+cX.getComm()+" which was already present. Skipping this command, module will still be added.");
+                    System.out.println("Error : Module "+module.getName()+" tried to add command "+cX.getComm()+" which was already present. Skipping this command, module will still be added. Add the command to 'overrides' in the module class if you want to override an existing command in a botserver");
                     flag = false;
                     commRejected++;
                     break;
@@ -211,17 +355,34 @@ abstract public class BotServer{
                 commAdded++;
             }
         }
-        System.out.println("Loaded module '"+module.getName()+"'. Commands added :"+commAdded+". Commands rejected due to merge conflicts :"+commRejected);
-    }
+        for(Entry e : overrideActions.entrySet()){
+            
+            e.getKey();
+            
+            for(Command c : commands){
+                if(c.getComm().equals(e.getKey())){
+                    if(Module.class.isAssignableFrom(c.getAction().getOrigin().getClass())){
+                        System.out.println("Module "+module+" attempted to override base command '"+c.getComm()+"'. However, this was already overrided by module "+c.getAction().getOrigin());
+                    }
+                    else{
+                        c.setAction((Action) e.getValue());
+                        commOver++;
+                        System.out.println("Module "+module+" sucessfully overrided base command '"+c.getComm()+"'.");
+                    }
+                }
+            }
+        }
+        
 
+        System.out.println("Loaded module '"+module.getName()+"'. Commands added :"+commAdded+". Commands rejected due to merge conflicts :"+commRejected+". Base commands ovewritten "+commOver+".");
+    }
+    
     public boolean matches(String s, String regex){
             Pattern p = Pattern.compile(regex);
-            m = p.matcher(s);
+            matcher = p.matcher(s);
             
-            return m.find();
+            return matcher.find();
     }
-
-    
     public void sendMessage(IChannel channel, String message){
 
         RequestBuffer.request(() -> {
@@ -234,7 +395,6 @@ abstract public class BotServer{
 	});
 
     }
-    
     public void join(String[] arguments, IMessage message){
         IChannel channel = message.getChannel();
         
@@ -280,7 +440,6 @@ abstract public class BotServer{
 
         
     }
-    
     public void leave(IMessage message){
         String guildID = message.getGuild().getID();
         
@@ -294,7 +453,6 @@ abstract public class BotServer{
         vc.leave();
         
     }
-    
     public IVoiceChannel getVoiceChannel(String guildID) throws InvalidSearchException{
         
         List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
@@ -317,7 +475,6 @@ abstract public class BotServer{
         }
        
     }
- 
     public boolean canUse(int adminLevel, IUser user, IGuild guild){
        
         if(adminLevel == 0){

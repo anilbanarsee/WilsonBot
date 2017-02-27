@@ -7,6 +7,7 @@ package abanstudio.module;
 
 import abanstudio.command.Action;
 import abanstudio.command.CoreAction;
+import abanstudio.discordbot.Replaces;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.utils.sqlite.DBHandler;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
@@ -49,17 +51,19 @@ public class Admin extends Module{
     @Override
     protected void initalizeActions() {
         actionMap = new HashMap<>();
+
         
         actionMap.put("timeout",  new Action(){@Override
             public void exec(String[] arg, IMessage m) {timeout(arg,m);}});
-        
         actionMap.put("check",  new Action(){@Override
             public void exec(String[] arg, IMessage m) {checkAdmin(arg,m);}});
-        
         actionMap.put("settimeoutchannel", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutChannel(arg,m);}});
         actionMap.put("settimeoutrole", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutRole(arg,m);}});
         actionMap.put("settimeout",new Action(){@Override public void exec(String[] arg, IMessage m){setTimeout(arg,m);}});
-    
+        
+        
+        
+        
     }
 
     @Override
@@ -80,12 +84,7 @@ public class Admin extends Module{
     @Override
     public void onReady(){
         
-        overrides.put("onMessage",new CoreAction() {
-            @Override
-            public void exec(Object o) {
-                onMessage((MessageReceivedEvent) o);
-            }
-        });
+        
         initTimeoutChannels();
         initTimeoutRoles();
         initCommChannels();
@@ -332,6 +331,8 @@ public class Admin extends Module{
         
         
     }
+    @EventSubscriber
+    @Replaces
     public void onMessage(MessageReceivedEvent event) {
          
         IMessage m = event.getMessage();
@@ -358,10 +359,6 @@ public class Admin extends Module{
             }
            
         }
-    }
-    @Override
-    public boolean overridesOnMessage(){
-        return true;
     }
     public void redirect(IMessage m, IChannel redirection){
         System.out.println("Redirecting message");

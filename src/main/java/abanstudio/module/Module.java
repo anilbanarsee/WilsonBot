@@ -11,6 +11,7 @@ import abanstudio.command.CoreAction;
 import abanstudio.discordbot.BotServer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 
@@ -21,20 +22,22 @@ import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 public abstract class Module {
     
    protected BotServer server;
+   protected IDiscordClient client;
    protected String[][] commData;
    protected ArrayList<Command> commands;
+   //protected ArrayList<Command> overrideCommands;
    protected HashMap<String, Action> actionMap;
-   protected HashMap<String, CoreAction> overrides;
-   protected boolean onMessage;
+   protected HashMap<String, Action> overrides;
+   
    
    public Module(){
        initalizeCommands();
+       overrides = new HashMap<>();
    }
    protected abstract void initalizeActions();
    protected abstract void initalizeCommData();
    public abstract void onReady();
    public abstract String getName();
-   public abstract boolean overridesOnMessage();
    protected final void initalizeCommands(){
          initalizeActions();
         initalizeCommData();
@@ -57,12 +60,16 @@ public abstract class Module {
         }
                     
     }
-   public HashMap<String, CoreAction> getOverrides(){return overrides;}
+   public HashMap<String, Action> getOverrides(){return overrides;}
    public void setServer(BotServer server){
        this.server = server;
+       client = server.client;
    }
    public ArrayList<Command> getCommands(){
        return commands;
+   }
+   public boolean overridesMethods(){
+       return overrides.size()>0;
    }
    @Override
    public String toString(){

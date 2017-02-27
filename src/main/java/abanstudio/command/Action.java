@@ -14,14 +14,21 @@ import sx.blah.discord.handle.obj.IMessage;
 public abstract class Action {
     
     private Action[] subComms;
+    private Object origin;
     
     public Action(Action[] cs){
+        this();
         subComms = cs;
+        
     }
     public Action(){
         subComms = null;
+        origin = null;
     }
-    
+    public void setOrigin(Object o){
+        origin = o;
+    }
+    public Object getOrigin(){return origin;}
     public abstract void exec(String[] arguments, IMessage message);
     
 }

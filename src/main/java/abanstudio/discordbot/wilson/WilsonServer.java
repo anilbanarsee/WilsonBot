@@ -60,27 +60,6 @@ import sx.blah.discord.util.audio.providers.FileProvider;
 public class WilsonServer extends BotServer{
     
 
-    String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
-                       ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
-                       ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
-                       ,{"[uU]nparlay","unparlay","ends parlay with me"}
-                       ,{"[lL]ist","list","Lists various things, multi-use command"}
-                       ,{"[aA]dd[Cc]lip","addclip","Add clip to soundboard"}
-                       ,{"[mM]ove[Aa]ll","moveall","Moves all users from one channel to another"}
-                       ,{"[gG]ame","game","Starts a game"}
-                       ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
-                       ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
-                       ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
-                       ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
-                       ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
-                       ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
-                       ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
-                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)","2"}
-                       ,{"[sS]kip","skip","Skips the current clip (no current limitations, please use responsibly)"}
-
-
-                       
-                        };
     
     
 
@@ -89,7 +68,7 @@ public class WilsonServer extends BotServer{
     
     HashMap<String, HashMap<String, Game>> map;
     
-    ArrayList<Float> volumeBuffer;
+
     
     ArrayList<IUser> parlayUsers;
     
@@ -102,7 +81,7 @@ public class WilsonServer extends BotServer{
     
 
     
-    Track currentTrack;
+    
     
     DjDogServer djdog;
     
@@ -117,12 +96,10 @@ public class WilsonServer extends BotServer{
         super(client);
         prefix = "dog";
         map = new HashMap<>();
-        volumeBuffer = new ArrayList<>();
+        
         parlayUsers = new ArrayList<>();
         djdog = server;
         userLogs = new HashMap<>();
-        initalizeCommands();
-        commData = comms;
         r9k = false;
         actionMap = new HashMap<>();
         
@@ -131,28 +108,7 @@ public class WilsonServer extends BotServer{
     }
     
     
-    @EventSubscriber
-    public void trackChange(TrackStartEvent event){
-        Track t = event.getTrack();
-        currentTrack = t;
-        String trackName = t.getMetadata().get("name").toString();
-        
-        IUser banner = checkTrackForChannel(getConnectedChannel(event.getPlayer().getGuild()),t);
-        
-        if(banner!=null){
-            IChannel channel = (IChannel) t.getMetadata().get("textchannel");
-            sendMessage(channel, "Clip :"+trackName+" was skipped as "+banner.getName()+" has voted to ban the clip and is present within this channel.");
-            currentTrack = null;
-            event.getPlayer().skip();
-            return;
-        }
     
-        
-        currentTrack = t;
-        t.getMetadata().put("played", true);
-        AudioPlayer player = event.getPlayer();
-        player.setVolume((float) t.getMetadata().get("volume"));
-    }
     /*
     @Override
     @EventSubscriber
@@ -193,11 +149,7 @@ public class WilsonServer extends BotServer{
     }
     
 
-    @EventSubscriber
-    public void trackEnd(TrackFinishEvent event){
-        
-        currentTrack = null;
-    }
+    
     public void initGuildSettings(){
         guildSettings = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
@@ -210,17 +162,9 @@ public class WilsonServer extends BotServer{
         });
     }
     
-    public IVoiceChannel getConnectedChannel(IGuild guild){
-        List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
-        for(IVoiceChannel channel : channels){
-            if(channel.getGuild().getID().equals(guild.getID())){
-                return channel;
-            }
-        }
-        System.out.println("CRITICAL ERROR");
-        return null;
-    }
+   
 
+    @Override
     protected void initalizeActions(){
          actionMap = new HashMap<>();
         
@@ -243,8 +187,38 @@ public class WilsonServer extends BotServer{
         actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
     }
     
+    @Override
     protected void initalizeCommData(){
+        String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
+                       ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
+                       ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
+                       ,{"[uU]nparlay","unparlay","ends parlay with me"}
+                       ,{"[lL]ist","list","Lists various things, multi-use command"}
+                       ,{"[aA]dd[Cc]lip","addclip","Add clip to soundboard"}
+                       ,{"[mM]ove[Aa]ll","moveall","Moves all users from one channel to another"}
+                       ,{"[gG]ame","game","Starts a game"}
+                       ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
+                       ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
+                       ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
+                       ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
+                       ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
+                       ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
+                       ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
+                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)","2"}
+                       ,{"[sS]kip","skip","Skips the current clip (no current limitations, please use responsibly)"}
+
+
+                       
+                        };
+    
         commData = comms;
+    }
+    
+    @Override
+    protected void initalizeEventMethods(){
+        
+        
+        
     }
     
     private void populateMap(){
@@ -279,97 +253,9 @@ public class WilsonServer extends BotServer{
     
     
     
-    public IUser checkTrackForChannel(IVoiceChannel voicechannel, Track t){
-        
-        List<IUser> users = voicechannel.getConnectedUsers();
-        if(currentTrack!=null){
-            String clipName = t.getMetadata().get("name").toString();
-            ArrayList<String> banners = DBHandler.getBanners(clipName);
-            for(IUser u: users){
-            
-                for(String id: banners){
-                    System.out.println(id);
-                    System.out.println(u.getID());
-                    System.out.println(id.equals(u.getID()));
-                    if(id.equals(u.getID())){
-                        
-                        return u;
-                    }
-                }
-            
-            }
-        }
-        
-        return null;
-        
-    }
+
     
-    @Override
-    public void join(String[] arguments, IMessage message){
-        
-        IChannel channel = message.getChannel();
-        
-        if(arguments.length==0){
-            sendMessage(channel,"Nigga, tell me where you want me to go, give a channel name or use 'me' if you want me to join you");
-        }
-        String argument = arguments[0];
-        for(int i = 1; i<arguments.length; i++){
-            argument += " "+arguments[i];
-        }
-        
-        IVoiceChannel voicechannel = null;
-        
-        if(argument.equals("me")){
-           
-            for(IVoiceChannel vc : message.getAuthor().getConnectedVoiceChannels()){
-                if(vc.getGuild().getID().equals(message.getGuild().getID())){
-
-                        voicechannel = vc;
-                        break;
-
-                }
-            }
-            if(voicechannel==null){
-                sendMessage(message.getChannel(),"You are not in a voicechannel");
-                return;
-            }
-        }
-        else{
-            for(IVoiceChannel vchan : message.getGuild().getVoiceChannels()){
-
-            
-                if(vchan.getName().equals(argument)){
-                    
-                    sendMessage(channel,"On my way to "+argument+", dog");
-                    voicechannel = vchan;
-                    break;
-                }            
-            }
-            if(voicechannel==null){
-                sendMessage(channel,"Stop playing nigga there ain't no "+argument+" channel in this guild.");
-                return;
-            }
-        }
-        
-        IUser banner = checkTrackForChannel(voicechannel,currentTrack);
-        if(banner!=null){
-            
-            
-            sendMessage(channel,currentTrack.getMetadata().get("name").toString()+" was skipped on joining this channel as "+banner.getName()+" has banned it.");
-            AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(message.getGuild());
-            player.skip();
-
-       }
-        
-        try {
-            voicechannel.join();
-        } catch (MissingPermissionsException ex) {
-            sendMessage(channel,"I do not have permissions to join this channel.");
-
-        }
-        
-
-    }
+    
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
         for(IUser u : parlayUsers){
@@ -824,7 +710,7 @@ public class WilsonServer extends BotServer{
         }
         for(String arg  : arguments){
             if(matches(arg,"\\S+")){
-                arg = arg.substring(m.start(),m.end());
+                arg = arg.substring(matcher.start(),matcher.end());
                 if(arg.equals("clips")){
                     listClips(message);
                 }

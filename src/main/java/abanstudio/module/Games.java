@@ -7,8 +7,10 @@ package abanstudio.module;
 
 import abanstudio.command.Action;
 import java.util.HashMap;
+import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.api.events.Event;
 
 /**
  *
@@ -16,7 +18,7 @@ import sx.blah.discord.handle.obj.IMessage;
  */
 public class Games extends Module{
 
-    String[][] comms = {{}};
+
     
     @Override
     protected void initalizeActions() {
@@ -24,9 +26,21 @@ public class Games extends Module{
         
         actionMap.put("ping",  new Action(){public void exec(String[] arg, IMessage m) {ping(arg,m);}});    
     }
-
+    
+    public void onMessage(MessageReceivedEvent event){
+        
+         server.sendMessage(event.getMessage().getChannel(), "pong");
+        
+    }
+    @EventSubscriber
+    public void testEvent(Event event){
+        System.out.println("Event received");
+        System.out.println(event.getClass().getName());
+    }
+    
     @Override
     protected void initalizeCommData() {
+            String[][] comms = {};
         commData = comms;
     }
 
@@ -41,9 +55,6 @@ public class Games extends Module{
     public void ping(String[] args, IMessage m){
         
     }
-    @Override
-    public boolean overridesOnMessage(){
-        return false;
-    }
+
 
 }
