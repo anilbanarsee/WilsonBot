@@ -7,6 +7,7 @@ package abanstudio.module;
 
 import abanstudio.command.Action;
 import abanstudio.command.CoreAction;
+import abanstudio.discordbot.BotServer;
 import abanstudio.discordbot.Replaces;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.utils.sqlite.DBHandler;
@@ -43,8 +44,8 @@ public class Admin extends Module{
     protected int timeoutTime = 15;
     
    
-    public Admin(){
-        super();
+    public Admin(BotServer server){
+        super(server);
         timeRoleMap = new HashMap<>(); 
     }
     
@@ -60,7 +61,8 @@ public class Admin extends Module{
         actionMap.put("settimeoutchannel", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutChannel(arg,m);}});
         actionMap.put("settimeoutrole", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutRole(arg,m);}});
         actionMap.put("settimeout",new Action(){@Override public void exec(String[] arg, IMessage m){setTimeout(arg,m);}});
-        
+        actionMap.put("moveall",new Action(){public void exec(String[] arg, IMessage m) {moveAll(arg,m);}});
+
         
         
         
@@ -89,6 +91,88 @@ public class Admin extends Module{
         initTimeoutRoles();
         initCommChannels();
         
+    }
+      public void moveAll(String[] arguments, IMessage message){
+       // sendMessage(message.getChannel(), "Move all");
+        if(arguments.length < 2){
+            sendMessage(message.getChannel(), "You must give two arguments dog, first is the channel origin second is the channel destination");
+        }
+        boolean flag = false;
+        for(int i = 0; i<arguments.length; i++){
+            if(arguments[i].equals("me")){
+                List<IVoiceChannel> channels = message.getAuthor().getConnectedVoiceChannels();
+                IVoiceChannel chan = null;
+                for(IVoiceChannel c : channels)
+                    if(c.getGuild().getID().equals(message.getID()))
+                            chan = c;
+                if(chan!=null){
+                    arguments[i] = chan.getName();
+                }
+            }
+        }
+        System.out.println(arguments[0]);
+        List<IVoiceChannel> list = message.getGuild().getVoiceChannels();
+        
+        List<IUser> userList = message.getGuild().getUsers();
+        
+        IVoiceChannel target = null;
+        flag = true;
+         for(IVoiceChannel channel : list){
+                
+            if(channel.getName().replace(" ", "").equals(arguments[1])){
+                
+                target = channel;
+                flag = false;
+                break;
+                
+                
+            }
+
+
+            
+        }
+        if(flag){
+            sendMessage(message.getChannel(),"Could not find a channel called "+arguments[1]+".");
+            return;
+        }
+        
+         if(target == null){
+             sendMessage(message.getChannel(), "That target channel does not exist playa.");
+         }
+         
+        flag = false;
+        for(IUser user : userList){
+            List<IVoiceChannel> channels = user.getConnectedVoiceChannels();
+            IVoiceChannel chan = null;
+            
+            for(IVoiceChannel channel: channels){
+                if(channel.getGuild().getID().equals(message.getGuild().getID())){
+                    chan = channel;
+                }
+            }
+            
+            if(chan != null){
+                try {
+                    IVoiceChannel vchan = chan;
+                    if(vchan.getName().replace(" ", "").equals(arguments[0].replace(" ", "")))
+                        user.moveToVoiceChannel(target);
+                } catch (DiscordException ex) {
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (MissingPermissionsException ex) {
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (RateLimitException ex) {
+                    Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                    
+            }
+            else{
+                flag = true;
+            }
+        }
+
+        
+        
+       
     }
     public void setTimeout(String[] args, IMessage message){
         if(args.length<1){

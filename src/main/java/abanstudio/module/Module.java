@@ -11,9 +11,11 @@ import abanstudio.command.CoreAction;
 import abanstudio.discordbot.BotServer;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map.Entry;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.obj.IChannel;
 
 /**
  *
@@ -30,9 +32,11 @@ public abstract class Module {
    protected HashMap<String, Action> overrides;
    
    
-   public Module(){
+   public Module(BotServer server){
+       setServer(server);
        initalizeCommands();
        overrides = new HashMap<>();
+       
    }
    protected abstract void initalizeActions();
    protected abstract void initalizeCommData();
@@ -44,24 +48,40 @@ public abstract class Module {
         
         commands = new ArrayList<>();
         
-        for(String[] array : commData){
+        for(Entry<String, Action> entry : actionMap.entrySet()){
             
-            int n;
-            try{
-                n = Integer.parseInt(array[array.length-1]);
+            String[] cData = {};
+            boolean flag = false;
+            
+            for(String[] array : commData){
+                if(array[1].equals(entry.getKey())){
+                    flag = true;
+                    cData = array;
+                }
             }
-            catch(NumberFormatException e){
-                n = -1;
+            if(flag){
+                int n = -345;
+                boolean parsed = false;
+                try{
+                    n = Integer.parseInt(cData[cData.length-1]);
+                    parsed = true;
+                }
+                catch(NumberFormatException e){
+                    commands.add(new Command(actionMap.get(cData[1]),cData));
+                    
+                }
+                if(parsed)
+                    commands.add(new Command(actionMap.get(cData[1]),cData,n));
+                
+            
             }
-            if(n == -1)
-                commands.add(new Command(actionMap.get(array[1]),array));
-            else
-                commands.add(new Command(actionMap.get(array[1]),array,n));
         }
+        
+
                     
     }
    public HashMap<String, Action> getOverrides(){return overrides;}
-   public void setServer(BotServer server){
+   private void setServer(BotServer server){
        this.server = server;
        client = server.client;
    }
@@ -75,5 +95,9 @@ public abstract class Module {
    public String toString(){
        return getName();
    }
+   public void sendMessage(IChannel channel, String message){
+       server.sendMessage(channel, message);
+   }
+   
 }
 

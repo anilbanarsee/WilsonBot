@@ -59,7 +59,7 @@ abstract public class BotServer{
     protected ArrayList<Command> commands;
     public IDiscordClient client;
     protected ArrayList<IRole> roles;
-    protected Matcher matcher;
+    public Matcher matcher;
     protected String[][] commData;
     protected HashMap<String, Action> actionMap;    
     protected HashMap<String, CoreAction> overrides;
@@ -176,20 +176,35 @@ abstract public class BotServer{
         
         commands = new ArrayList<>();
         
-        for(String[] array : commData){
+        for(Entry<String, Action> entry : actionMap.entrySet()){
             
-            int n;
-            try{
-                n = Integer.parseInt(array[array.length-1]);
+            String[] cData = {};
+            boolean flag = false;
+            
+            for(String[] array : commData){
+                if(array[1].equals(entry.getKey())){
+                    flag = true;
+                    cData = array;
+                }
             }
-            catch(NumberFormatException e){
-                n = -1;
+            if(flag){
+                int n = -345;
+                boolean parsed = false;
+                try{
+                    n = Integer.parseInt(cData[cData.length-1]);
+                    parsed = true;
+                }
+                catch(NumberFormatException e){
+                    commands.add(new Command(actionMap.get(cData[1]),cData));
+                    
+                }
+                if(parsed)
+                    commands.add(new Command(actionMap.get(cData[1]),cData,n));
+                
+            
             }
-            if(n == -1)
-                commands.add(new Command(actionMap.get(array[1]),array));
-            else
-                commands.add(new Command(actionMap.get(array[1]),array,n));
         }
+        
                     
     }
     @EventSubscriber
@@ -335,7 +350,7 @@ abstract public class BotServer{
         int commAdded = 0;
         int commOver = 0;
         
-        module.setServer(this);
+        
         modules.add(module);
         
        

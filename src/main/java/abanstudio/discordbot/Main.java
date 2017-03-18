@@ -80,7 +80,9 @@ public class Main {
         WilsonServer wilson = new WilsonServer(wilsonClient,djdog);
         
         System.out.println("Loading modules ...");
-        wilson.addModule(new Admin());
+        wilson.addModule(new Admin(wilson));
+        wilson.addModule(new Soundboard(wilson));
+        
         //wilson.addModule(new Games());
         
         

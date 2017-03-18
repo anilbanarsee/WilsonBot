@@ -24,7 +24,7 @@ public class MethodTuple {
     public Method getMethod(){return m;}
     public Object getObject(){return o;}
     
-    public void setMethodAndObject(Method m, Object o){
+    public final void setMethodAndObject(Method m, Object o){
         this.m = m;
         this.o = o;
     }
