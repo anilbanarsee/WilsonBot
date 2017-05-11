@@ -22,16 +22,19 @@ import sx.blah.discord.handle.obj.IMessage;
  *
  * @author Reetoo
  */
-public class PokemonGuessGame implements Game{
+public class PokemonGuessGame extends Game{
 
+    
+    
     private volatile boolean running = true;
     private volatile boolean guessing = true;
     IChannel channel;
     private List<ArrayList<Object>> list = null;
     private String currentPokemon;
-    BotServer server;
+
     
     public PokemonGuessGame(int gen, boolean b, IMessage m, BotServer server){
+        super(server);
         String s = "";
         if(b){
             list = DBHandler.pokemonIncGen(gen);
@@ -42,7 +45,7 @@ public class PokemonGuessGame implements Game{
             s = "at";
         }
         channel = m.getChannel();
-        this.server = server;
+      //  this.server = server;
         
         server.sendMessage(channel, "Pokemon guess game set-up, using pokemon "+s+" gen "+gen+",");
     }
@@ -107,6 +110,16 @@ public class PokemonGuessGame implements Game{
         {
             server.sendMessage(channel, text);
         }
+    }
+
+    @Override
+    public int getJoinRule() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getStartAction() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
 }

@@ -5,25 +5,30 @@
  */
 package abanstudio.games.hangman;
 
+import abanstudio.discordbot.BotServer;
 import abanstudio.games.Game;
 import abanstudio.module.Games;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  *
  * @author General
  */
-public class Hangman implements Game{
+public class Hangman extends Game{
     
     Games gmodule;
     
-    public Hangman(Games g){
+    public Hangman(BotServer server, Games g){
+        super(server);
         gmodule = g;
     }
     
     @Override
     public void startgame(IMessage message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        IChannel channel = message.getChannel();
+        server.sendMessage(channel, "Hangman game starting");
+        run();
     }
 
     @Override

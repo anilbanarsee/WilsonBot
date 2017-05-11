@@ -5,18 +5,26 @@
  */
 package abanstudio.games.countdown;
 
+import abanstudio.discordbot.BotServer;
 import abanstudio.games.Game;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
  *
  * @author General
  */
-public class Countdown implements Game {
+public class Countdown extends Game {
 
+    public Countdown(BotServer server){
+        super(server);
+    }
+    
     @Override
     public void startgame(IMessage message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        IChannel channel = message.getChannel();
+        server.sendMessage(channel, "Countdown game starting.");
+        run();
     }
 
     @Override
@@ -26,7 +34,9 @@ public class Countdown implements Game {
 
     @Override
     public void run() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        while(true){
+            
+        }
     }
 
     @Override
