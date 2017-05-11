@@ -204,6 +204,9 @@ abstract public class BotServer{
         ArrayList<String> args = new ArrayList<String>();
         boolean isCommand = false;
         for(String s : split){
+            if(s.equals("")){
+                continue;
+            }
             Command c = Command.matchCommand(commands, s);
             
             if(c!=null){

@@ -29,7 +29,7 @@ public class EventListener {
      
     @EventSubscriber
     public void onEvent(Event event){
-        System.out.println("Received event "+ event);
+        //System.out.println("Received event "+ event);
         ArrayList<MethodTuple> mList = methods.get(event.getClass());
         if(mList == null)
             return;

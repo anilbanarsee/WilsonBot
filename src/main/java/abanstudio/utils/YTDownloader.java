@@ -5,10 +5,9 @@
  */
 package abanstudio.utils;
 
-import com.github.axet.vget.VGet;
+
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 /**
  *
