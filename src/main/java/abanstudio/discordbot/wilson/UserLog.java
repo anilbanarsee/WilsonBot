@@ -6,6 +6,7 @@
 package abanstudio.discordbot.wilson;
 
 import abanstudio.exceptions.R9KException;
+import abanstudio.module.Soundboard;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,14 +28,14 @@ public class UserLog {
     private int r9kTime = 20;
     private int maxTime = 60;
     private HashMap<String, Integer> comms;
-    WilsonServer server;
+    Soundboard soundboard;
     
-    public UserLog(IUser user, WilsonServer server, IGuild g){
+    public UserLog(IUser user, Soundboard soundboard, IGuild g){
         comms = new HashMap<>();
         setCommLimits();
         this.user = user;
         tracks = new ArrayList<>();
-        this.server = server;
+        this.soundboard = soundboard;
         guild = g;
     }
     
@@ -75,7 +76,7 @@ public class UserLog {
         }
         if(!flag){
          //GuildSettings gs = server.guildSettings.get(guild.getID());
-         if(server.r9k){
+         if(soundboard.r9k){
              if(cTime==null)
                 cTime = (LocalTime) track.getMetadata().get("time");
              for(Track t: tracks){
