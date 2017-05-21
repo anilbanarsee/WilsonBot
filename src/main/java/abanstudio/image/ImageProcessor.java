@@ -19,7 +19,7 @@ import javax.imageio.ImageIO;
  */
 public class ImageProcessor {
     public static void setSilhouette(BufferedImage image, int alphaThresh){
-
+        //testpush
         //System.out.println(image.getType());
         for(int y = 0; y<image.getHeight(); y++){
             for(int x=0; x<image.getWidth(); x++){
