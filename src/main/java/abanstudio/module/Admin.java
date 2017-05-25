@@ -11,6 +11,7 @@ import abanstudio.discordbot.BotServer;
 import abanstudio.discordbot.Replaces;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.utils.sqlite.DBHandler;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -202,6 +203,7 @@ public class Admin extends Module{
         
         boolean flag = false;
         IVoiceChannel chan = message.getGuild().getVoiceChannelByID(args[0]);
+        
         if(chan == null){
             server.sendMessage(message.getChannel(), "Could not find a channel with that id on this server");
             return;
@@ -441,6 +443,18 @@ public class Admin extends Module{
                     }
                 }
             }
+            /*else{
+                ArrayList<String> links = new ArrayList<>();
+                for(String s : mess.getContent().split(" ")){
+                    if(true){
+                        links.add(s);
+                        
+                    }
+                }
+                if(links.size()>0){
+                    //server.sendMessage(mess.getAuthor().getName()+" :", null);
+                }
+            }*/
            
         }
     }
