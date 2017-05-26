@@ -34,7 +34,6 @@ public abstract class Game implements Runnable{
     @Override
     public abstract void run();
     public abstract int getJoinRule();
-    public abstract int getStartAction();
-     
+    public abstract int getStartAction();    
     
 }

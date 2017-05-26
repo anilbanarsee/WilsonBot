@@ -14,7 +14,6 @@ import abanstudio.utils.sqlite.DBHandler;
 import abanstudio.utils.Downloader;
 import abanstudio.games.Game;
 import abanstudio.discordbot.Main;
-import abanstudio.games.PokemonGuessGame;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -176,8 +175,6 @@ public class WilsonServer extends BotServer{
                        ,{"[lL]ist","list","Lists various things, multi-use command"}
                        ,{"[aA]dd[Cc]lip","addclip","Add clip to soundboard"}
                        ,{"[mM]ove[Aa]ll","moveall","Moves all users from one channel to another"}
-                       ,{"[gG]ame","game","Starts a game"}
-                       ,{"[gG]uess","guess","Guesses an answer for the current game on this server"}
                        ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
                        ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
                        ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}

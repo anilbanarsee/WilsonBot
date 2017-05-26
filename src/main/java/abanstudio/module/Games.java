@@ -88,50 +88,16 @@ public class Games extends Module{
     
     @Override
     protected void initalizeCommData() {
-            String[][] comms = {};
+            String[][] comms = {{"[pP]ing","ping","test","0"},
+                {"[gG]ame","game","starts a game","dog game start [gameType]","0"},
+                {"[gG]uess","game","guesses an answer for the game","dog guess [answer]","0"}
+                                    };
         commData = comms;
     }
     
      public void game(String[] arguments, IMessage message){
 
-        if(arguments[0].equals("start")){
-            
-            
-            
-            
-            
-            if(arguments[1].equals("pokemon")){
-                
-                
-                
-                if(gameThread != null){
-                    if(gameThread.isAlive()){
-                        sendMessage(message.getChannel(), "There is already a game running on this server");
-                        return;
-                    }
-                }
-               boolean b;
-                if(arguments.length<3){
-                    b = false;
-                }
-                else{
-                b = arguments[3].equals("true");
-                }
-               
-                game = new PokemonGuessGame(Integer.parseInt(arguments[2]), b, message,server);
-                gameThread = new Thread(game);
-                gameThread.start();
-            }
-        }
-        if(arguments[0].equals("end")){
-            game.endGame();
-            try {
-                gameThread.join();
-            } catch (InterruptedException ex) {
-                Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            sendMessage(message.getChannel(), "Game ended");
-        }
+       
          
         
     }
