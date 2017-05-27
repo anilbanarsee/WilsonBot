@@ -61,7 +61,8 @@ abstract public class BotServer{
     protected ArrayList<IRole> roles;
     public Matcher matcher;
     protected String[][] commData;
-    protected HashMap<String, Action> actionMap;    
+    protected HashMap<String, Action> actionMap;
+    protected HashMap<String, Action> overrideMap;
     protected HashMap<String, CoreAction> overrides;
     protected HashMap<String, CoreAction> eventListeners;
     protected EventListener listener = null;
@@ -76,6 +77,7 @@ abstract public class BotServer{
         this.client = client;
         modules = new ArrayList<>();
         overrides = new HashMap<>();
+        overrideMap = new HashMap<>();
         eventListeners = new HashMap<>();
         initalizeCommands();
         initalizeEventListener();
@@ -170,9 +172,16 @@ abstract public class BotServer{
         
     }
     private void initalizeCommands(){
-        
+             
         initalizeActions();
         initalizeCommData();
+        
+        for(Action a: actionMap.values()){
+            a.setOrigin(this);
+        }
+        for(Action a: overrideMap.values()){
+            a.setOrigin(this);
+        }
         
         commands = new ArrayList<>();
         
@@ -187,23 +196,83 @@ abstract public class BotServer{
                     cData = array;
                 }
             }
-            if(flag){
-                int n = -345;
-                boolean parsed = false;
-                try{
-                    n = Integer.parseInt(cData[cData.length-1]);
-                    parsed = true;
-                }
-                catch(NumberFormatException e){
-                    commands.add(new Command(actionMap.get(cData[1]),cData));
+            
+            String key = "";
+            if(!flag){
+                key = entry.getKey();
+                cData = new String[3];
+                cData[0] = key;
+                cData[1] = key;
+                cData[2] = "No information sry :(";
+                key = entry.getKey();
+            }
+            else{
+                key = cData[1];
+            }
+            
+            
+            int n = -345;
+            boolean parsed = false;
+            try{
+                n = Integer.parseInt(cData[cData.length-1]);
+                parsed = true;
+            }
+            catch(NumberFormatException e){
+                commands.add(new Command(actionMap.get(key),cData));
                     
-                }
-                if(parsed)
-                    commands.add(new Command(actionMap.get(cData[1]),cData,n));
+            }
+            if(parsed)
+                commands.add(new Command(actionMap.get(key),cData,n));
                 
             
-            }
+            
+
         }
+        if(!overrideMap.isEmpty())
+        for(Entry<String, Action> entry : overrideMap.entrySet()){
+            
+            String[] cData = {};
+            boolean flag = false;
+            
+            for(String[] array : commData){
+                if(array[1].equals(entry.getKey())){
+                    flag = true;
+                    cData = array;
+                }
+            }
+            
+            String key = "";
+            if(!flag){
+                key = entry.getKey();
+                cData = new String[3];
+                cData[0] = key;
+                cData[1] = key;
+                cData[2] = "No information sry :(";
+                key = entry.getKey();
+            }
+            else{
+                key = cData[1];
+            }
+            
+            
+            int n = -345;
+            boolean parsed = false;
+            try{
+                n = Integer.parseInt(cData[cData.length-1]);
+                parsed = true;
+            }
+            catch(NumberFormatException e){
+                commands.add(new Command(overrideMap.get(key),cData));
+                    
+            }
+            if(parsed)
+                commands.add(new Command(overrideMap.get(key),cData,n));
+                
+            
+            
+
+        }
+
         
                     
     }
@@ -356,16 +425,31 @@ abstract public class BotServer{
         
         modules.add(module);
         
-       
+
         
         for(Command cX: moduleCommands){
             boolean flag = true;
             for(Command cY: this.commands){ 
                 if(cX.getComm().equals(cY.getComm())){
-                    System.out.println("Error : Module "+module.getName()+" tried to add command "+cX.getComm()+" which was already present. Skipping this command, module will still be added. Add the command to 'overrides' in the module class if you want to override an existing command in a botserver");
-                    flag = false;
-                    commRejected++;
-                    break;
+                    Action a = overrideActions.get(cX.getComm());
+                    if(a!=null){
+                        if(Module.class.isAssignableFrom(cY.getAction().getOrigin().getClass())){
+                            System.out.println("Module "+module+" attempted to override base command '"+cY.getComm()+"'. However, this was already overrided by module "+cY.getAction().getOrigin());
+                        }
+                        else{
+                            cY.setAction(a);
+                            commOver++;
+                            System.out.println("Module "+module+" sucessfully overrided base command '"+cY.getComm()+"'.");
+                            break;
+                        }
+                    }
+                    else{
+                    
+                        System.out.println("Error : Module "+module.getName()+" tried to add command "+cX.getComm()+" which was already present. Skipping this command, module will still be added. Add the command to 'overrides' in the module class if you want to override an existing command in a botserver");
+                        flag = false;
+                        commRejected++;
+                        break;
+                    }
                 }
             }
             if(flag){
@@ -373,23 +457,8 @@ abstract public class BotServer{
                 commAdded++;
             }
         }
-        for(Entry e : overrideActions.entrySet()){
-            
-            e.getKey();
-            
-            for(Command c : commands){
-                if(c.getComm().equals(e.getKey())){
-                    if(Module.class.isAssignableFrom(c.getAction().getOrigin().getClass())){
-                        System.out.println("Module "+module+" attempted to override base command '"+c.getComm()+"'. However, this was already overrided by module "+c.getAction().getOrigin());
-                    }
-                    else{
-                        c.setAction((Action) e.getValue());
-                        commOver++;
-                        System.out.println("Module "+module+" sucessfully overrided base command '"+c.getComm()+"'.");
-                    }
-                }
-            }
-        }
+        
+
         
 
         System.out.println("Loaded module '"+module.getName()+"'. Commands added :"+commAdded+". Commands rejected due to merge conflicts :"+commRejected+". Base commands ovewritten "+commOver+".");

@@ -11,4 +11,5 @@ package abanstudio.games;
  */
 public class GameFactory {
     
+    
 }

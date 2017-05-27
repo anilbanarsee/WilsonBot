@@ -21,25 +21,7 @@ public class Command {
     private Action action;
     String regex, comm, desc_sh, desc;
     int adminLevel;
-    
-    public Command(Action a){
-        setAction(a);
-        //info = new String[0];
-        regex = "";
-        comm = "";
-        desc_sh = "";
-        desc = "";
-        adminLevel = 0;
-    }
-    public Command(Action a, int admin){
-        setAction(a);
-        //info = new String[0];
-        regex = "";
-        comm = "";
-        desc_sh = "";
-        desc = "";
-        adminLevel = admin;
-    }
+
     public Command(Action a, String[] info){
         setAction(a);
         setInfo(info);

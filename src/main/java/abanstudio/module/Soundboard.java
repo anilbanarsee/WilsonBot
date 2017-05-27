@@ -168,10 +168,9 @@ public class Soundboard extends Module{
     @Override
     protected void initalizeActions() {
         actionMap = new HashMap<>();
-        overrides = new HashMap<>();
+        overrideMap = new HashMap<>();
         
-        actionMap.put("ping",  new Action(){public void exec(String[] arg, IMessage m) {ping(arg,m);}});   
-        overrides.put("join", new Action(){
+        overrideMap.put("join", new Action(){
             @Override
             public void exec(String[] arguments, IMessage message) {
                 join(arguments, message);
@@ -184,13 +183,15 @@ public class Soundboard extends Module{
         actionMap.put("banclip",new Action(){public void exec(String[] arg, IMessage m) {ban(arg,m);}});
         actionMap.put("unbanclip",new Action(){public void exec(String[] arg, IMessage m) {unban(arg,m);}});
         actionMap.put("vetoclip",new Action(){public void exec(String[] arg, IMessage m) {veto(arg,m);}});
-
+        overrideMap.put("list", new Action(){public void exec(String[] arg, IMessage m) {list(arg,m);}});
+ 
         
     }
 
     @Override
     protected void initalizeCommData() {
         String[][] comms = {{"[jJ]oin", "join", "joins a channel, will skip any clips currently banned by users within the channel"}};
+        
         commData = comms;
     }
     

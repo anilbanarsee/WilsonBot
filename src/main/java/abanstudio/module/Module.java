@@ -27,15 +27,18 @@ public abstract class Module {
    protected IDiscordClient client;
    protected String[][] commData;
    protected ArrayList<Command> commands;
+   protected ArrayList<Command> overrides;
    //protected ArrayList<Command> overrideCommands;
    protected HashMap<String, Action> actionMap;
-   protected HashMap<String, Action> overrides;
+   protected HashMap<String, Action> overrideMap;
    
    
    public Module(BotServer server){
+       overrideMap = new HashMap<>();
+       
        setServer(server);
        initalizeCommands();
-       overrides = new HashMap<>();
+
        
    }
    protected abstract void initalizeActions();
@@ -43,8 +46,16 @@ public abstract class Module {
    public abstract void onReady();
    public abstract String getName();
    protected final void initalizeCommands(){
-         initalizeActions();
+         
+        initalizeActions();
         initalizeCommData();
+        
+        for(Action a: actionMap.values()){
+            a.setOrigin(this);
+        }
+        for(Action a: overrideMap.values()){
+            a.setOrigin(this);
+        }
         
         commands = new ArrayList<>();
         
@@ -59,28 +70,86 @@ public abstract class Module {
                     cData = array;
                 }
             }
-            if(flag){
-                int n = -345;
-                boolean parsed = false;
-                try{
-                    n = Integer.parseInt(cData[cData.length-1]);
-                    parsed = true;
-                }
-                catch(NumberFormatException e){
-                    commands.add(new Command(actionMap.get(cData[1]),cData));
+            
+            String key = "";
+            if(!flag){
+                key = entry.getKey();
+                cData = new String[3];
+                cData[0] = key;
+                cData[1] = key;
+                cData[2] = "No information sry :(";
+                key = entry.getKey();
+            }
+            else{
+                key = cData[1];
+            }
+            
+            
+            int n = -345;
+            boolean parsed = false;
+            try{
+                n = Integer.parseInt(cData[cData.length-1]);
+                parsed = true;
+            }
+            catch(NumberFormatException e){
+                commands.add(new Command(actionMap.get(key),cData));
                     
-                }
-                if(parsed)
-                    commands.add(new Command(actionMap.get(cData[1]),cData,n));
+            }
+            if(parsed)
+                commands.add(new Command(actionMap.get(key),cData,n));
                 
             
-            }
+            
+
         }
-        
+        if(!overrideMap.isEmpty())
+        for(Entry<String, Action> entry : overrideMap.entrySet()){
+            
+            String[] cData = {};
+            boolean flag = false;
+            
+            for(String[] array : commData){
+                if(array[1].equals(entry.getKey())){
+                    flag = true;
+                    cData = array;
+                }
+            }
+            
+            String key = "";
+            if(!flag){
+                key = entry.getKey();
+                cData = new String[3];
+                cData[0] = key;
+                cData[1] = key;
+                cData[2] = "No information sry :(";
+                key = entry.getKey();
+            }
+            else{
+                key = cData[1];
+            }
+            
+            
+            int n = -345;
+            boolean parsed = false;
+            try{
+                n = Integer.parseInt(cData[cData.length-1]);
+                parsed = true;
+            }
+            catch(NumberFormatException e){
+                commands.add(new Command(overrideMap.get(key),cData));
+                    
+            }
+            if(parsed)
+                commands.add(new Command(overrideMap.get(key),cData,n));
+                
+            
+            
+
+        }
 
                     
     }
-   public HashMap<String, Action> getOverrides(){return overrides;}
+   public HashMap<String, Action> getOverrides(){return overrideMap;}
    private void setServer(BotServer server){
        this.server = server;
        client = server.client;
@@ -89,7 +158,7 @@ public abstract class Module {
        return commands;
    }
    public boolean overridesMethods(){
-       return overrides.size()>0;
+       return overrideMap.size()>0;
    }
    @Override
    public String toString(){
