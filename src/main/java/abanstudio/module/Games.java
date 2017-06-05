@@ -9,7 +9,10 @@ import abanstudio.command.Action;
 import abanstudio.discordbot.BotServer;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.games.Game;
+import abanstudio.games.GameTuple;
 import abanstudio.games.PokemonGuessGame;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,9 +32,8 @@ public class Games extends Module{
 
     Thread gameThread;
     
-    HashMap<String, HashMap<String, Game>> map;
-    HashMap<String, HashMap<String, Thread>> threadmap;
-    String[] gameList = {"G1","G2","G3","G4","G5"};
+    HashMap<String, HashMap<String, GameTuple>> gameMap; 
+    HashMap<String, Class> gameClassMap;
     
 
     
@@ -40,29 +42,35 @@ public class Games extends Module{
     List<ArrayList<String>> pokemon;
     
 
-    public Games(BotServer server){
+    public Games(BotServer server) throws InvalidGameClassException{
         super(server);
-        map = new HashMap<>();
+        initalizeGameMap();
+        initalizeClassMap();
+        //initalizeGameMap()
+    }
+    private void addGameClass(String n, Class c) throws InvalidGameClassException{
+        if(!Game.class.isAssignableFrom(c)){
+            throw new InvalidGameClassException(c.toString());
+        }
+        gameClassMap.put(n,c);
+    }
+    private void initalizeClassMap() throws InvalidGameClassException{
+        gameClassMap = new HashMap<>();
+        addGameClass("pokemon", PokemonGuessGame.class);
     }
     private void initalizeGameMap(){
-        map = new HashMap<>();
+        gameMap = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
         for(IGuild g : guilds){
-            HashMap<String, Game> hmap = new HashMap<>();
-            map.put(g.getID(), hmap);
+            HashMap<String, GameTuple> hmap = new HashMap<>();
+            gameMap.put(g.getID(), hmap);
         }
     }
-    private Game getGame(String gid, String thread){
-        return map.get(gid).get(thread);
+    public GameTuple getGameTuple(String gid, String thread){
+        return gameMap.get(gid).get(thread);
     }
-    private Thread getThread(String gid, String thread){
-        return threadmap.get(gid).get(thread);
-    }
-    private void setGame(String gid, String thread, Game g){
-        map.get(gid).put(thread, g);
-    }
-    private void setThread(String gid, String thread, Thread t){
-        threadmap.get(gid).put(thread, t);
+    public void setGameTuple(String gid, String thread, GameTuple tuple){
+        gameMap.get(gid).put(thread, tuple);
     }
     @Override
     protected void initalizeActions() {
@@ -96,8 +104,44 @@ public class Games extends Module{
     }
     
      public void game(String[] arguments, IMessage message){
-
-       
+         
+         String game = arguments[0];
+         String[] gameArgs = new String[arguments.length-1];
+         for(int i = 1; i<arguments.length; i++){
+             gameArgs[i-1] = arguments[i];
+         }
+         
+         GameTuple tuple = getGameTuple(message.getGuild().getID(),game);
+         if(tuple == null){
+             Class gameClass = gameClassMap.get(game);
+             if(gameClass == null){
+                 server.sendMessage(message.getChannel(),"No game named "+game+" was found.");
+                 return;
+             }
+             
+             Game gameObj = null;
+             try {
+                 gameObj = (Game) gameClass.getConstructor(server.getClass(),message.getChannel().getClass(),gameArgs.getClass()).newInstance();
+             } catch (NoSuchMethodException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (SecurityException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (InstantiationException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (IllegalAccessException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (IllegalArgumentException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             } catch (InvocationTargetException ex) {
+                 Logger.getLogger(Games.class.getName()).log(Level.SEVERE, null, ex);
+             }
+             if(gameObj == null){
+                 return;
+             }
+             tuple = new GameTuple(gameObj);
+             setGameTuple(message.getGuild().getID(),game,tuple);
+         }
+         
          
         
     }
@@ -126,6 +170,6 @@ public class Games extends Module{
     public void ping(String[] args, IMessage m){
         
     }
-
+    
 
 }

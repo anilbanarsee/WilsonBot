@@ -7,6 +7,7 @@ package abanstudio.games;
 
 import abanstudio.discordbot.BotServer;
 import java.util.Random;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
@@ -17,12 +18,12 @@ public class RussianRoulette extends Game{
     
     int chambers;
     
-    public RussianRoulette(BotServer server){
-        super(server);
+    public RussianRoulette(BotServer server, IChannel channel){
+        super(server, channel);
         chambers = 6;
     }
-    public RussianRoulette(BotServer server, int chambers){
-        this(server);
+    public RussianRoulette(BotServer server, IChannel channel, int chambers){
+        this(server, channel);
         this.chambers = chambers;
     }
     

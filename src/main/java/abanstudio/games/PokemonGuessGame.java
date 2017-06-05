@@ -32,10 +32,14 @@ public class PokemonGuessGame extends Game{
     private List<ArrayList<Object>> list = null;
     private String currentPokemon;
 
-    
-    public PokemonGuessGame(int gen, boolean b, IMessage m, BotServer server){
-        super(server);
+    public PokemonGuessGame(BotServer server, IChannel channel, String[] settings){
+        super(server,channel);
+        int gen = Integer.parseInt(settings[0]);
+        boolean b = false;
         String s = "";
+        if(settings[1].equals("t")){
+            b = true;
+        }
         if(b){
             list = DBHandler.pokemonIncGen(gen);
             s = "up to";
@@ -44,11 +48,10 @@ public class PokemonGuessGame extends Game{
             list = DBHandler.pokemonAtGen(gen);
             s = "at";
         }
-        channel = m.getChannel();
-      //  this.server = server;
-        
-        server.sendMessage(channel, "Pokemon guess game set-up, using pokemon "+s+" gen "+gen+",");
+        server.sendMessage(this.channel, "Pokemon guess game set-up, using pokemon "+s+" gen "+gen+",");
+
     }
+
     
     @Override
     public void startgame(IMessage message) {

@@ -16,8 +16,9 @@ public class GameTuple {
     Game game;
     Thread thread;
     
-    public GameTuple(){
-        
+    public GameTuple(Game g){
+        setGame(g);
+        setThread(null);
     }
     public GameTuple(Game g, Thread t){
         setGame(g);

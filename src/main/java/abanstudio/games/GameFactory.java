@@ -12,4 +12,10 @@ package abanstudio.games;
 public class GameFactory {
     
     
+    
+    public void main(String[] args) throws NoSuchMethodException{
+        Game.class.getConstructor(String.class);
+        
+    }
+    
 }

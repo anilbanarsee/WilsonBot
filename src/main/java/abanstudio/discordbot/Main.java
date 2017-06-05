@@ -10,6 +10,7 @@ import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.module.Admin;
 import abanstudio.module.Games;
+import abanstudio.module.InvalidGameClassException;
 import abanstudio.module.Soundboard;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,6 +20,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.IOUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
@@ -82,14 +85,19 @@ public class Main {
         System.out.println("Loading modules ...");
         wilson.addModule(new Admin(wilson));
         wilson.addModule(new Soundboard(wilson));
+        try {
+            wilson.addModule(new Games(wilson));
+            
+        } catch (InvalidGameClassException ex) {
+            System.out.println("Attempted to add game class "+ex.getMessage()+" however this class is not a subclass of Game");
+            System.out.println("Module was not added");
+        }
         
-        //wilson.addModule(new Games());
-        
-        
-       // djdogClient.getDispatcher().registerListener(djdog);
-       // wilsonClient.getDispatcher().registerListener(wilson);
-        
-        
+                    //wilson.addModule(new Games());
+            
+            
+            // djdogClient.getDispatcher().registerListener(djdog);
+            // wilsonClient.getDispatcher().registerListener(wilson);
         
         
         

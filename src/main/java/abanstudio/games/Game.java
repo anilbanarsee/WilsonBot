@@ -6,6 +6,7 @@
 package abanstudio.games;
 
 import abanstudio.discordbot.BotServer;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
@@ -23,10 +24,13 @@ public abstract class Game implements Runnable{
     public static final int STARTACTION_MOVEALL_CREATOR = 3;
     public static final int STARTACTION_NONE = 4;
     protected final BotServer server;
+    protected IChannel channel;
 
-   
-    public Game(BotServer server ){
+   //Abstract constructor for game objects. Settings and message must be within the parameters of the message
+   //due to the nature of the reflection carried out later.
+    public Game(BotServer server, IChannel channel){
         this.server = server;
+        this.channel = channel;
     }
     
     public abstract void startgame(IMessage message);
@@ -34,6 +38,6 @@ public abstract class Game implements Runnable{
     @Override
     public abstract void run();
     public abstract int getJoinRule();
-    public abstract int getStartAction();    
+    public abstract int getStartAction();
 
 }
