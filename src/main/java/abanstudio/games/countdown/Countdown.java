@@ -16,8 +16,8 @@ import sx.blah.discord.handle.obj.IMessage;
  */
 public class Countdown extends Game {
 
-    public Countdown(BotServer server){
-        super(server);
+    public Countdown(BotServer server, IChannel channel){
+        super(server, channel);
     }
     
     @Override

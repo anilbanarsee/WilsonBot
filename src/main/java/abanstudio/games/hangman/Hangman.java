@@ -17,11 +17,11 @@ import sx.blah.discord.handle.obj.IMessage;
  */
 public class Hangman extends Game{
     
-    Games gmodule;
     
-    public Hangman(BotServer server, Games g){
-        super(server);
-        gmodule = g;
+    
+    public Hangman(BotServer server, IChannel channel){
+        super(server, channel);
+        
     }
     
     @Override
