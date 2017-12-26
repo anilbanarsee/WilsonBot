@@ -32,6 +32,9 @@ $RECYCLE.BIN/
 #target folder
 target
 
+#testtoken
+wilsontokentest.txt
+
 #Testing file
 src/main/java/abanstudio/test/Test.java
 
