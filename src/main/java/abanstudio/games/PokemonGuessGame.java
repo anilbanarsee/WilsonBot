@@ -6,7 +6,6 @@
 package abanstudio.games;
 
 import abanstudio.discordbot.BotServer;
-import abanstudio.games.Game;
 import abanstudio.utils.sqlite.DBHandler;
 import java.io.File;
 import static java.lang.Thread.sleep;
@@ -17,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  *
@@ -54,7 +54,7 @@ public class PokemonGuessGame extends Game{
 
     
     @Override
-    public void startgame(IMessage message) {
+    public void startGame(List<IUser> players) {
         server.sendMessage(channel, "Starting game");
         run();
     }
@@ -124,5 +124,25 @@ public class PokemonGuessGame extends Game{
     public int getStartAction() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    @Override
+    public int getMinPlayers() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxPlayers() {
+        return 0;
+    }
+
+    @Override
+    public void playerJoined() {
+
+    }
+
+    @Override
+    public void message(IMessage message) {
+
+    }
+
 }

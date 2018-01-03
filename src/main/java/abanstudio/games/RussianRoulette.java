@@ -6,9 +6,12 @@
 package abanstudio.games;
 
 import abanstudio.discordbot.BotServer;
+
+import java.util.List;
 import java.util.Random;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
 
 /**
  *
@@ -28,7 +31,7 @@ public class RussianRoulette extends Game{
     }
     
     @Override
-    public void startgame(IMessage message) {
+    public void startGame(List<IUser> players) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -60,5 +63,25 @@ public class RussianRoulette extends Game{
     public int getStartAction() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    @Override
+    public int getMinPlayers() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxPlayers() {
+        return 0;
+    }
+
+    @Override
+    public void playerJoined() {
+
+    }
+
+    @Override
+    public void message(IMessage message) {
+
+    }
+
 }

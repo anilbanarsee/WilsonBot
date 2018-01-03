@@ -5,8 +5,8 @@
  */
 package abanstudio.discordbot;
 
+import abanstudio.games.chameleon.ChameleonGame;
 import abanstudio.utils.FFMPEG;
-import abanstudio.discordbot.djdog.DjDogServer;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.module.Admin;
 import abanstudio.module.Games;
@@ -16,21 +16,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.apache.commons.io.IOUtils;
-import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.util.ClasspathHelper;
-import org.reflections.util.ConfigurationBuilder;
 import sx.blah.discord.api.ClientBuilder;
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.Event;
-import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.DiscordException;
 
@@ -41,7 +32,6 @@ import sx.blah.discord.util.DiscordException;
 public class Main {
     public static FFMPEG ffmpeg;
     public static IDiscordClient wilsonClient;
-    public static IDiscordClient djdogClient;
     static ArrayList<IUser> users;
     
     public static void main(String[] args) throws DiscordException, FileNotFoundException, IOException{
@@ -63,36 +53,25 @@ public class Main {
         {     
             //System.out.println("Token: "+IOUtils.toString(inputStream));
             //System.out.println("Token: "+IOUtils.toString(inputStream));
-            wilsonClient = new ClientBuilder().withToken(IOUtils.toString(inputStream)).login();
+            wilsonClient = new ClientBuilder().withToken(IOUtils.toString(inputStream, Charset.defaultCharset())).login();
         }
         catch(FileNotFoundException e){
             System.out.println("wilsontoken.txt not found. If you are running this for the first time, you must obtain a discord bot token and insert it into a file named as such.");
         }
 
-        try(FileInputStream inputStream = new FileInputStream("djtoken.txt")) 
-        {     
-            djdogClient = new ClientBuilder().withToken(IOUtils.toString(inputStream)).login();
-            
-        }
-        catch(FileNotFoundException e){
-            System.out.println("djtoken.txt not found. If you are running this for the first time, you must obtain a discord bot token and insert it into a file named as such.");
 
-        }
         
-        DjDogServer djdog = new DjDogServer(djdogClient);
-        WilsonServer wilson = new WilsonServer(wilsonClient,djdog);
+
+        WilsonServer wilson = new WilsonServer(wilsonClient);
         
         System.out.println("Loading modules ...");
         wilson.addModule(new Admin(wilson));
         wilson.addModule(new Soundboard(wilson));
-        try {
-            wilson.addModule(new Games(wilson));
-            
-        } catch (InvalidGameClassException ex) {
-            System.out.println("Attempted to add game class "+ex.getMessage()+" however this class is not a subclass of Game");
-            System.out.println("Module was not added");
-        }
-        
+
+        Games games = new Games(wilson);
+        wilson.addModule(games);
+        games.addGameClass("chameleon",ChameleonGame.class);
+
                     //wilson.addModule(new Games());
             
             

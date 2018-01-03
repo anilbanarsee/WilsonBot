@@ -9,6 +9,9 @@ import abanstudio.discordbot.BotServer;
 import abanstudio.games.Game;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
+
+import java.util.List;
 
 /**
  *
@@ -21,10 +24,8 @@ public class Countdown extends Game {
     }
     
     @Override
-    public void startgame(IMessage message) {
-        IChannel channel = message.getChannel();
-        server.sendMessage(channel, "Countdown game starting.");
-        run();
+    public void startGame(List<IUser> players) {
+
     }
 
     @Override
@@ -48,5 +49,27 @@ public class Countdown extends Game {
     public int getStartAction() {
         return Game.STARTACTION_MOVEALL_CREATOR;
     }
-    
+
+    @Override
+    public int getMinPlayers() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxPlayers() {
+        return 0;
+    }
+
+    @Override
+    public void playerJoined() {
+
+    }
+
+    @Override
+    public void message(IMessage message) {
+
+
+
+    }
+
 }

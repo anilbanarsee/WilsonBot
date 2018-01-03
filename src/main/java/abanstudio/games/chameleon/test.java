@@ -12,7 +12,7 @@ package abanstudio.games.chameleon;
 public class test {
     public static void main(String[] args){
         ChameleonGame game = new ChameleonGame(null, null);
-        game.startgame(null);
+        game.startGame();
         
     }
 }

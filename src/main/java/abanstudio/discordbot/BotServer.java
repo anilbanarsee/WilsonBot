@@ -29,10 +29,9 @@ import java.util.regex.Pattern;
 import sx.blah.discord.api.IDiscordClient;
 import sx.blah.discord.api.events.Event;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.DisconnectedEvent;
-import sx.blah.discord.handle.impl.events.DiscordDisconnectedEvent;
-import sx.blah.discord.handle.impl.events.MessageEmbedEvent;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.shard.DisconnectedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageEmbedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.obj.Role;
 import sx.blah.discord.handle.obj.IChannel;
@@ -482,11 +481,25 @@ abstract public class BotServer{
 	});
 
     }
+    public void sendMessage(IUser user, String message){
+
+        RequestBuffer.request(() -> {
+            try {
+                new MessageBuilder(client).withChannel(user.getOrCreatePMChannel()).withContent(message).build();
+            } catch (DiscordException | MissingPermissionsException e) {
+                e.printStackTrace();
+            }
+            return null;
+        });
+
+    }
+
+
     public void join(String[] arguments, IMessage message){
         IChannel channel = message.getChannel();
         
         if(arguments.length==0){
-            sendMessage(channel,"Nigga, tell me where you want me to go, give a channel name or use 'me' if you want me to join you");
+            sendMessage(channel,"Tell me where you want me to go, give a channel name or use 'me' if you want me to join you");
         }
         String argument = arguments[0];
         for(int i = 1; i<arguments.length; i++){
@@ -494,41 +507,46 @@ abstract public class BotServer{
         }
         
         if(argument.equals("me")){
-           
-            for(IVoiceChannel vc : message.getAuthor().getConnectedVoiceChannels()){
-                if(vc.getGuild().getID().equals(message.getGuild().getID())){
-                    try {
-                        vc.join();
-                    } catch (MissingPermissionsException ex) {
-                        sendMessage(message.getChannel(),"I don't have permissions to join that channel");
-                    }
-                    return;
-                }
-            }
-            sendMessage(message.getChannel(),"You are not in a voicechannel");
-            return;
-        }
-        for(IVoiceChannel vchan : message.getGuild().getVoiceChannels()){
 
-            
-            if(vchan.getName().equals(argument)){
-                sendMessage(channel,"On my way to "+argument+", dog");
-                try {
-                    vchan.join();
-                } catch (MissingPermissionsException ex) {
+
+                try
+                {
+                    message.getAuthor().getVoiceStateForGuild(message.getGuild()).getChannel().join();
+
+                }
+                catch (MissingPermissionsException ex)
+                {
                     sendMessage(message.getChannel(),"I don't have permissions to join that channel");
                 }
-                return;
-            }
-            
+
+
+
+
         }
-        sendMessage(channel,"Stop playing nigga there ain't no "+argument+" channel in this guild.");
+        else
+        {
+            List<IVoiceChannel> chanList = message.getGuild().getVoiceChannelsByName(argument);
+            if(chanList.size()>1){
+                sendMessage(message.getChannel(), "This server contains two channels with the name "+argument+". I may not have joined the correct one.");
+            }
+            try {
+                chanList.get(0).join();
+            }
+            catch (MissingPermissionsException ex)
+            {
+                sendMessage(message.getChannel(),"I don't have permissions to join that channel");
+            }
+
+        }
+
+
+
         
 
         
     }
     public void leave(IMessage message){
-        String guildID = message.getGuild().getID();
+        String guildID = message.getGuild().getStringID();
         
         IVoiceChannel vc;
         try {
@@ -545,7 +563,7 @@ abstract public class BotServer{
         List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
         
         for(IVoiceChannel chan : channels){
-            if(chan.getGuild().getID().equals(guildID)){
+            if(chan.getGuild().getStringID().equals(guildID)){
                 return chan;
             }
         }

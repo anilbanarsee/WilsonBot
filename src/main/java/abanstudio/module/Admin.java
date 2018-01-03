@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
+import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -55,10 +55,8 @@ public class Admin extends Module{
         actionMap = new HashMap<>();
 
         
-        actionMap.put("timeout",  new Action(){@Override
-            public void exec(String[] arg, IMessage m) {timeout(arg,m);}});
-        actionMap.put("check",  new Action(){@Override
-            public void exec(String[] arg, IMessage m) {checkAdmin(arg,m);}});
+        actionMap.put("timeout",  new Action(){@Override public void exec(String[] arg, IMessage m) {timeout(arg,m);}});
+        actionMap.put("check",  new Action(){@Override public void exec(String[] arg, IMessage m) {checkAdmin(arg,m);}});
         actionMap.put("settimeoutchannel", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutChannel(arg,m);}});
         actionMap.put("settimeoutrole", new Action(){@Override public void exec(String[] arg, IMessage m){setTimeoutRole(arg,m);}});
         actionMap.put("settimeout",new Action(){@Override public void exec(String[] arg, IMessage m){setTimeout(arg,m);}});
@@ -76,7 +74,7 @@ public class Admin extends Module{
                             {"[sS]etTimeout","settimeout","sets the timeout period","1"},
                             {"[sS]etTimeoutRole","settimeoutrole","sets the timeout role","1"}};
         commData = comms;
-        System.out.println("Hello");
+
     }
 
     @Override
@@ -101,11 +99,8 @@ public class Admin extends Module{
         boolean flag = false;
         for(int i = 0; i<arguments.length; i++){
             if(arguments[i].equals("me")){
-                List<IVoiceChannel> channels = message.getAuthor().getConnectedVoiceChannels();
-                IVoiceChannel chan = null;
-                for(IVoiceChannel c : channels)
-                    if(c.getGuild().getID().equals(message.getID()))
-                            chan = c;
+                IVoiceChannel chan = message.getAuthor().getVoiceStateForGuild(message.getGuild()).getChannel();
+
                 if(chan!=null){
                     arguments[i] = chan.getName();
                 }
@@ -143,15 +138,9 @@ public class Admin extends Module{
          
         flag = false;
         for(IUser user : userList){
-            List<IVoiceChannel> channels = user.getConnectedVoiceChannels();
-            IVoiceChannel chan = null;
-            
-            for(IVoiceChannel channel: channels){
-                if(channel.getGuild().getID().equals(message.getGuild().getID())){
-                    chan = channel;
-                }
-            }
-            
+
+            IVoiceChannel chan = user.getVoiceStateForGuild(message.getGuild()).getChannel();
+
             if(chan != null){
                 try {
                     IVoiceChannel vchan = chan;
@@ -202,16 +191,28 @@ public class Admin extends Module{
             server.sendMessage(message.getChannel(), "You need to give a voicechannel id");
         
         boolean flag = false;
-        IVoiceChannel chan = message.getGuild().getVoiceChannelByID(args[0]);
+
+        long id;
+        try
+        {
+            id = Long.parseLong(args[0]);
+        }
+        catch(NumberFormatException e)
+        {
+            server.sendMessage(message.getChannel(), "'"+args[0]+"' is not a number.");
+            return;
+        }
+
+        IVoiceChannel chan = message.getGuild().getVoiceChannelByID(id);
         
         if(chan == null){
             server.sendMessage(message.getChannel(), "Could not find a channel with that id on this server");
             return;
      
         }
-        timeChanMap.put(g.getID(), chan);
-        DBHandler.setGuildSetting(g.getID(), "timeout_chan", args[0]);
-        server.sendMessage(message.getChannel(), "Timeout channel set to channel : "+chan.getName()+" ("+chan.getID()+")");
+        timeChanMap.put(g.getStringID(), chan);
+        DBHandler.setGuildSetting(g.getStringID(), "timeout_chan", args[0]);
+        server.sendMessage(message.getChannel(), "Timeout channel set to channel : "+chan.getName()+" ("+chan.getStringID()+")");
         
 
         
@@ -229,9 +230,9 @@ public class Admin extends Module{
              return;
         }
         IRole role = roles.get(0);
-        timeRoleMap.put(g.getID(), role);
-        DBHandler.setGuildSetting(g.getID(), "timeout_role", role.getID());
-        server.sendMessage(message.getChannel(), "Timeout role set to role : "+role.getName()+" ("+role.getID()+")");
+        timeRoleMap.put(g.getStringID(), role);
+        DBHandler.setGuildSetting(g.getStringID(), "timeout_role", role.getStringID());
+        server.sendMessage(message.getChannel(), "Timeout role set to role : "+role.getName()+" ("+role.getStringID()+")");
      
         flag = true;
         
@@ -247,15 +248,15 @@ public class Admin extends Module{
     protected void initTimeoutChannel(IGuild guild){
            
      
-        
-        String id = DBHandler.getGuildSetting(guild.getID(), "timeout_chan");
+
+        String id = DBHandler.getGuildSetting(guild.getStringID(), "timeout_chan");
         if(id.equals("null")){
             List<IVoiceChannel> chans = guild.getVoiceChannels();
             for(IVoiceChannel chan: chans){
             
             
                 if(chan.getName().equals(this.defTimeoutName)){
-                    timeChanMap.put(guild.getID(), chan);
+                    timeChanMap.put(guild.getStringID(), chan);
                     return;
                 }
         
@@ -263,12 +264,12 @@ public class Admin extends Module{
         
         }
         else{
-            timeChanMap.put(guild.getID(),guild.getVoiceChannelByID(id));
+            timeChanMap.put(guild.getStringID(),guild.getVoiceChannelByID(Long.parseLong(id)));
             return;
         }
         
         
-        timeChanMap.put(guild.getID(), null);
+        timeChanMap.put(guild.getStringID(), null);
         
             
         
@@ -287,14 +288,14 @@ public class Admin extends Module{
         
      
         
-        String id = DBHandler.getGuildSetting(guild.getID(), "timeout_role");
+        String id = DBHandler.getGuildSetting(guild.getStringID(), "timeout_role");
         if(id.equals("null")){
             List<IRole> roles = guild.getRoles();
             for(IRole role: roles){
             
             
                 if(role.getName().equals(this.defTimeoutRole)){
-                    timeRoleMap.put(guild.getID(), role);
+                    timeRoleMap.put(guild.getStringID(), role);
                     return;
                 }
         
@@ -302,12 +303,12 @@ public class Admin extends Module{
         
         }
         else{
-            timeRoleMap.put(guild.getID(),guild.getRoleByID(id));
+            timeRoleMap.put(guild.getStringID(),guild.getRoleByID(Long.parseLong(id)));
             return;
         }
         
         
-        timeRoleMap.put(guild.getID(), null);
+        timeRoleMap.put(guild.getStringID(), null);
         
             
         
@@ -324,7 +325,7 @@ public class Admin extends Module{
         }
         
         for(IUser user : guild.getUsers()){
-            if(user.getID().equals(args[0])){
+            if(user.getStringID().equals(args[0])){
                 
                 IVoiceChannel temp = null;
                 for(IVoiceChannel ch: guild.getVoiceChannels()){
@@ -334,10 +335,10 @@ public class Admin extends Module{
                 }
                 IVoiceChannel origin = temp;
                 try {
-                    IRole timeRole = timeRoleMap.get(guild.getID());
+                    IRole timeRole = timeRoleMap.get(guild.getStringID());
                     if(timeRole != null){
                         user.addRole(timeRole);
-                        user.moveToVoiceChannel(timeChanMap.get(guild.getID()));
+                        user.moveToVoiceChannel(timeChanMap.get(guild.getStringID()));
                         
                         muted = false;
                     }
@@ -363,7 +364,7 @@ public class Admin extends Module{
                     try {
                         
                         if(!muteFinal){
-                            user.removeRole(timeRoleMap.get(guild.getID()));
+                            user.removeRole(timeRoleMap.get(guild.getStringID()));
                             user.moveToVoiceChannel(origin);
                            
                             
@@ -406,13 +407,13 @@ public class Admin extends Module{
             
             
             if(channel.getName().equals(defCommChanName)){
-                commChanMap.put(guild.getID(), channel);
+                commChanMap.put(guild.getStringID(), channel);
                 return;
             }
         }
         
         if(!set){
-            commChanMap.put(guild.getID(), null);
+            commChanMap.put(guild.getStringID(), null);
         }     
         
         
@@ -435,7 +436,7 @@ public class Admin extends Module{
             IMessage mess = event.getMessage();
             boolean isCommand = server.parseCommand(command, event.getMessage());
             if(isCommand){
-                IChannel redirect = commChanMap.get(m.getGuild().getID());
+                IChannel redirect = commChanMap.get(m.getGuild().getStringID());
                 if(redirect!=null){
                     if(!(m.getChannel().equals(redirect))){
                         redirect(m,redirect);
@@ -467,7 +468,7 @@ public class Admin extends Module{
             m.delete();
             server.sendMessage(redirection, "[Redirected] "+author+": "+content);
         } catch (MissingPermissionsException | RateLimitException | DiscordException ex) {
-            Logger.getLogger(WilsonServer.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("Bot attempted to move a message (deletion) according to Admin module, however bot does not have the requisite permissions");
         }
          
         

@@ -29,7 +29,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
@@ -61,7 +60,7 @@ public class Soundboard extends Module{
     public IVoiceChannel getConnectedChannel(IGuild guild){
         List<IVoiceChannel> channels = client.getConnectedVoiceChannels();
         for(IVoiceChannel channel : channels){
-            if(channel.getGuild().getID().equals(guild.getID())){
+            if(channel.getGuild().getStringID().equals(guild.getStringID())){
                 return channel;
             }
         }
@@ -80,19 +79,23 @@ public class Soundboard extends Module{
         }
         
         if(argument.equals("me")){
-           
-            for(IVoiceChannel vc : message.getAuthor().getConnectedVoiceChannels()){
-                if(vc.getGuild().getID().equals(message.getGuild().getID())){
-                    try {
-                        vc.join();
-                    } catch (MissingPermissionsException ex) {
-                        sendMessage(message.getChannel(),"I don't have permissions to join that channel");
-                    }
-                    return;
+
+            IVoiceChannel vc = message.getAuthor().getVoiceStateForGuild(message.getGuild()).getChannel();
+            if(vc == null) {
+                try {
+                    vc.join();
+                } catch (MissingPermissionsException ex) {
+
+                    sendMessage(message.getChannel(), "I don't have permissions to join that channel");
+
                 }
             }
-            sendMessage(message.getChannel(),"You are not in a voicechannel");
-            return;
+            else {
+
+
+                sendMessage(message.getChannel(), "You are not in a voicechannel");
+                return;
+            }
         }
         for(IVoiceChannel vchan : message.getGuild().getVoiceChannels()){
 
@@ -145,10 +148,8 @@ public class Soundboard extends Module{
             for(IUser u: users){
             
                 for(String id: banners){
-                    System.out.println(id);
-                    System.out.println(u.getID());
-                    System.out.println(id.equals(u.getID()));
-                    if(id.equals(u.getID())){
+
+                    if(id.equals(u.getStringID())){
                         
                         return u;
                     }
@@ -240,11 +241,11 @@ public class Soundboard extends Module{
                 metadata.put("time", LocalTime.now());
                 metadata.put("played", false);
                 metadata.put("textchannel", channel);
-                UserLog log = userLogs.get(user.getID());
+                UserLog log = userLogs.get(user.getStringID());
                 
                 if(log == null){
                     log = new UserLog(user,this,guild);
-                    userLogs.put(user.getID(), log);
+                    userLogs.put(user.getStringID(), log);
                 }
                 long n;
                 try {
@@ -287,7 +288,7 @@ public class Soundboard extends Module{
             return;
         }
         
-        if(!ownerid.equals(message.getAuthor().getID())){
+        if(!ownerid.equals(message.getAuthor().getStringID())){
             sendMessage(message.getChannel(), "According to my records you do not own that clip");
 
             if(server.canUse(2,message.getAuthor(),message.getGuild())){
@@ -501,7 +502,7 @@ public class Soundboard extends Module{
         ArrayList<String> exist = new ArrayList<>();
         ArrayList<String> already = new ArrayList<>();
         ArrayList<String> success = new ArrayList<>();
-        String userID = message.getAuthor().getID();
+        String userID = message.getAuthor().getStringID();
         for(String s: arguments){
             
             if(!DBHandler.clipExists(s)){
@@ -519,7 +520,7 @@ public class Soundboard extends Module{
                     }
                 }
                 if(!flag){
-                    DBHandler.banClip(s, message.getAuthor().getID());
+                    DBHandler.banClip(s, message.getAuthor().getStringID());
                     success.add(s);
                 }
             
@@ -546,7 +547,7 @@ public class Soundboard extends Module{
             }
             else
             {
-                DBHandler.unbanClip(s, message.getAuthor().getID());
+                DBHandler.unbanClip(s, message.getAuthor().getStringID());
                 success.add(s);
             
             }
@@ -570,12 +571,12 @@ public class Soundboard extends Module{
         
         final int maxClips = 50;
         
-        if(message.getAuthor().getID().equals("128406852059922432")){
+        if(message.getAuthor().getStringID().equals("128406852059922432")){
             
         }
         else{
             
-        ArrayList<Integer> clips = DBHandler.getClips(message.getAuthor().getID());
+        ArrayList<Integer> clips = DBHandler.getClips(message.getAuthor().getStringID());
         if(clips.size()>=maxClips){
             sendMessage(message.getChannel(), "You already have the maximum of "+maxClips+" clips");
             return;
@@ -594,7 +595,7 @@ public class Soundboard extends Module{
         
         String ownerID = DBHandler.getOwnerID(name);
         if(ownerID!=""){
-            if(!message.getAuthor().getID().equals(ownerID)){
+            if(!message.getAuthor().getStringID().equals(ownerID)){
                 sendMessage(message.getChannel(), "There is already a clip with name "+name+" which you do not own.");
                 return;
             }
@@ -731,8 +732,8 @@ public class Soundboard extends Module{
         
       
         
-        int clipID = DBHandler.addClip(name, startpoint, duration, url, message.getAuthor().getID());
-        DBHandler.addClipToUser(clipID, message.getAuthor().getID());
+        int clipID = DBHandler.addClip(name, startpoint, duration, url, message.getAuthor().getStringID());
+        DBHandler.addClipToUser(clipID, message.getAuthor().getStringID());
         
         
         

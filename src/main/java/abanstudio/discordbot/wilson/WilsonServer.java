@@ -7,49 +7,18 @@ package abanstudio.discordbot.wilson;
 
 import abanstudio.discordbot.BotServer;
 import abanstudio.command.Action;
-import abanstudio.command.Command;
-import abanstudio.discordbot.djdog.DjDogServer;
-import abanstudio.exceptions.R9KException;
 import abanstudio.utils.sqlite.DBHandler;
-import abanstudio.utils.Downloader;
-import abanstudio.games.Game;
-import abanstudio.discordbot.Main;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.sound.sampled.UnsupportedAudioFileException;
-import org.joda.time.DateTime;
+
 import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.api.events.EventSubscriber;
-import sx.blah.discord.handle.impl.events.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
-import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.IVoiceChannel;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.MissingPermissionsException;
-import sx.blah.discord.util.RateLimitException;
-import sx.blah.discord.util.RequestBuffer;
 import sx.blah.discord.util.audio.AudioPlayer;
-import sx.blah.discord.util.audio.AudioPlayer.Track;
-import sx.blah.discord.util.audio.events.TrackStartEvent;
-import sx.blah.discord.util.audio.events.TrackFinishEvent;
-import sx.blah.discord.util.audio.providers.FileProvider;
 
 
 /**
@@ -76,18 +45,17 @@ public class WilsonServer extends BotServer{
     
     
     
-    DjDogServer djdog;
-    
+
     
     
 
-    public WilsonServer(IDiscordClient client, DjDogServer server){
+    public WilsonServer(IDiscordClient client){
         
         super(client);
         prefix = "dog";
         
         parlayUsers = new ArrayList<>();
-        djdog = server;
+
         
         
         actionMap = new HashMap<>();
@@ -143,10 +111,10 @@ public class WilsonServer extends BotServer{
         guildSettings = new HashMap<>();
         List<IGuild> guilds = client.getGuilds();
         guilds.stream().forEach((g) -> {
-            ArrayList<String> data = DBHandler.getGuildInfo(g.getID());
+            ArrayList<String> data = DBHandler.getGuildInfo(g.getStringID());
             if(data!=null){
                 GuildSettings gs = new GuildSettings(data);
-                guildSettings.put(g.getID(), gs);
+                guildSettings.put(g.getStringID(), gs);
             }
         });
     }
@@ -219,7 +187,7 @@ public class WilsonServer extends BotServer{
     public void parlay(IMessage message){
         IUser user = message.getAuthor();
         for(IUser u : parlayUsers){
-            if(u.getID().equals(user.getID())){
+            if(u.getStringID().equals(user.getStringID())){
                 sendMessage(message.getChannel(),"we already talkin'");
                 return;
             }
@@ -232,7 +200,7 @@ public class WilsonServer extends BotServer{
     public void unparlay(IMessage message){
                 IUser user = message.getAuthor();
         for(int i = 0; i<parlayUsers.size(); i++){
-            if(parlayUsers.get(i).getID().equals(user.getID())){
+            if(parlayUsers.get(i).getStringID().equals(user.getStringID())){
                 sendMessage(message.getChannel(),"Ok, dog, catch you later.");
                 parlayUsers.remove(i);
                 return;
@@ -283,7 +251,7 @@ public class WilsonServer extends BotServer{
 
 
     public boolean isMasterAdmin(IUser user) {
-        if(DBHandler.getAdminRights(user.getID()).equals("master")){
+        if(DBHandler.getAdminRights(user.getStringID()).equals("master")){
             return true;
         }
         return false;

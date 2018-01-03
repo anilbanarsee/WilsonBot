@@ -7,9 +7,11 @@ package abanstudio.games.hangman;
 
 import abanstudio.discordbot.BotServer;
 import abanstudio.games.Game;
-import abanstudio.module.Games;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
+import sx.blah.discord.handle.obj.IUser;
+
+import java.util.List;
 
 /**
  *
@@ -25,10 +27,8 @@ public class Hangman extends Game{
     }
     
     @Override
-    public void startgame(IMessage message) {
-        IChannel channel = message.getChannel();
-        server.sendMessage(channel, "Hangman game starting");
-        run();
+    public void startGame(List<IUser> players) {
+
     }
 
     @Override
@@ -50,5 +50,25 @@ public class Hangman extends Game{
     public int getStartAction() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
+    @Override
+    public int getMinPlayers() {
+        return 0;
+    }
+
+    @Override
+    public int getMaxPlayers() {
+        return 0;
+    }
+
+    @Override
+    public void playerJoined() {
+
+    }
+
+    @Override
+    public void message(IMessage message) {
+
+    }
+
 }
