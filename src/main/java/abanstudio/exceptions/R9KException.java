@@ -6,24 +6,27 @@
 package abanstudio.exceptions;
 
 /**
- *
  * @author Reetoo
  */
-public class R9KException extends Exception{
+public class R9KException extends Exception
+{
 
-    private long diff;
-    private String name;
-    
-    public R9KException(long diff, String name){
-        this.diff = diff;
-        this.name = name;
-    }
-    
-    public long getDiff(){
-        return diff;
-    }
-    
-    public String getName(){
-        return name;
-    }
+	private long diff;
+	private String name;
+
+	public R9KException(long diff, String name)
+	{
+		this.diff = diff;
+		this.name = name;
+	}
+
+	public long getDiff()
+	{
+		return diff;
+	}
+
+	public String getName()
+	{
+		return name;
+	}
 }

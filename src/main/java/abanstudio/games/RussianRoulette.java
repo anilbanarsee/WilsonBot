@@ -9,79 +9,98 @@ import abanstudio.discordbot.BotServer;
 
 import java.util.List;
 import java.util.Random;
+
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IMessage;
 import sx.blah.discord.handle.obj.IUser;
 
 /**
- *
  * @author General
  */
-public class RussianRoulette extends Game{
-    
-    int chambers;
-    
-    public RussianRoulette(BotServer server, IChannel channel){
-        super(server, channel);
-        chambers = 6;
-    }
-    public RussianRoulette(BotServer server, IChannel channel, int chambers){
-        this(server, channel);
-        this.chambers = chambers;
-    }
-    
-    @Override
-    public void startGame(List<IUser> players) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+public class RussianRoulette extends Game
+{
 
-    @Override
-    public void endGame() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	int chambers;
 
-    @Override
-    public void run() {
+	public RussianRoulette(BotServer server, IChannel channel)
+	{
+		super(server, channel);
+		chambers = 6;
+	}
 
-        
-        
-    }
-    public boolean shoot(){
-        System.out.println("Shooting, with "+chambers+" chambers remaining");
-        Random r = new Random();
-        int shot = r.nextInt(chambers);
-        chambers--;
-        return shot==0;
-    }
+	public RussianRoulette(BotServer server, IChannel channel, int chambers)
+	{
+		this(server, channel);
+		this.chambers = chambers;
+	}
 
-    @Override
-    public int getJoinRule() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public void startGame(List<IUser> players)
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
-    @Override
-    public int getStartAction() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+	@Override
+	public void endGame()
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
-    @Override
-    public int getMinPlayers() {
-        return 0;
-    }
+	@Override
+	public void run()
+	{
 
-    @Override
-    public int getMaxPlayers() {
-        return 0;
-    }
 
-    @Override
-    public void playerJoined() {
+	}
 
-    }
+	public boolean shoot()
+	{
+		System.out.println("Shooting, with " + chambers + " chambers remaining");
+		Random r = new Random();
+		int shot = r.nextInt(chambers);
+		chambers--;
+		return shot == 0;
+	}
 
-    @Override
-    public void message(IMessage message) {
+	@Override
+	public int getJoinRule()
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
 
-    }
+	@Override
+	public String getName()
+	{
+		return null;
+	}
+
+	@Override
+	public int getStartAction()
+	{
+		throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+	}
+
+	@Override
+	public int getMinPlayers()
+	{
+		return 0;
+	}
+
+	@Override
+	public int getMaxPlayers()
+	{
+		return 0;
+	}
+
+	@Override
+	public void playerJoined(IUser user)
+	{
+
+	}
+	@Override
+	public void message(IMessage message)
+	{
+
+	}
 
 }

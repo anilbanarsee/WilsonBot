@@ -6,25 +6,27 @@
 package abanstudio.module;
 
 /**
- *
  * @author Anil James Banarsee
  */
-public class InvalidGameClassException extends Exception {
+public class InvalidGameClassException extends Exception
+{
 
-    /**
-     * Creates a new instance of <code>InvalidGameClassException</code> without
-     * detail message.
-     */
-    public InvalidGameClassException() {
-    }
+	/**
+	 * Creates a new instance of <code>InvalidGameClassException</code> without
+	 * detail message.
+	 */
+	public InvalidGameClassException()
+	{
+	}
 
-    /**
-     * Constructs an instance of <code>InvalidGameClassException</code> with the
-     * specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public InvalidGameClassException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Constructs an instance of <code>InvalidGameClassException</code> with the
+	 * specified detail message.
+	 *
+	 * @param msg the detail message.
+	 */
+	public InvalidGameClassException(String msg)
+	{
+		super(msg);
+	}
 }

@@ -8,38 +8,45 @@ package abanstudio.games;
 import abanstudio.games.Game;
 
 /**
- *
  * @author User
  */
-public class GameTuple {
-    
-    Game game;
-    Thread thread;
-    
-    public GameTuple(Game g){
-        setGame(g);
-        setThread(null);
-    }
-    public GameTuple(Game g, Thread t){
-        setGame(g);
-        setThread(t);
-    }
-    
-    public Game getGame(){
-        return game;
-    }
-    
-    public Thread getThread(){
-        return thread;
-    }
-    
-    public void setGame(Game g){
-        game = g;
-    }
-    
-    public void setThread(Thread t){
-        thread = t;
-    }
-    
-    
+public class GameTuple
+{
+
+	Game game;
+	Thread thread;
+
+	public GameTuple(Game g)
+	{
+		setGame(g);
+		setThread(null);
+	}
+
+	public GameTuple(Game g, Thread t)
+	{
+		setGame(g);
+		setThread(t);
+	}
+
+	public Game getGame()
+	{
+		return game;
+	}
+
+	public Thread getThread()
+	{
+		return thread;
+	}
+
+	public void setGame(Game g)
+	{
+		game = g;
+	}
+
+	public void setThread(Thread t)
+	{
+		thread = t;
+	}
+
+
 }

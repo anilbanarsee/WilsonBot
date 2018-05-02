@@ -6,9 +6,9 @@
 package abanstudio.exceptions;
 
 /**
- *
  * @author Reetoo
  */
-public class DisconnectedException extends Exception{
-    
+public class DisconnectedException extends Exception
+{
+
 }

@@ -6,10 +6,10 @@
 package abanstudio.command;
 
 /**
- *
- * @author General
+ * @author
  */
-public abstract class CoreAction {
-    
-    public abstract void exec(Object o);
+public abstract class CoreAction
+{
+
+	public abstract void exec(Object o);
 }

@@ -5,6 +5,7 @@
  */
 package abanstudio.discordbot.wilson;
 
+import abanstudio.command.CommandData;
 import abanstudio.discordbot.BotServer;
 import abanstudio.command.Action;
 import abanstudio.utils.sqlite.DBHandler;
@@ -22,255 +23,214 @@ import sx.blah.discord.util.audio.AudioPlayer;
 
 
 /**
- *
  * @author Reetoo
  */
-public class WilsonServer extends BotServer{
-    
-
-    
-    
-
-    //ArrayList<ArrayList<Thread>> gameThread;
+public class WilsonServer extends BotServer
+{
 
 
-    
-    ArrayList<IUser> parlayUsers;
-    
-  
-  
-    HashMap<String, GuildSettings> guildSettings;
-    
-   
-    
-    
-    
-
-    
-    
-
-    public WilsonServer(IDiscordClient client){
-        
-        super(client);
-        prefix = "dog";
-        
-        parlayUsers = new ArrayList<>();
-
-        
-        
-        actionMap = new HashMap<>();
-        
-        //initGuildSettings();
-        
-    }
-    
-    
-    
-    /*
-    @Override
-    @EventSubscriber
-    public void onMessage(MessageReceivedEvent event){
-        
-        IMessage m = event.getMessage();
-        
-        
-        if(event.getMessage().getAuthor().isBot())
-            return;
-        String message = event.getMessage().getContent();
-        
-        if(message.startsWith(prefix+" ")){
-            
-           
-            String command = message;
-            IMessage mess = event.getMessage();
-            IChannel redirect = commChanMap.get(m.getGuild().getID());
-            if(redirect!=null){
-                if(!(m.getChannel().equals(redirect))){
-                    redirect(m,redirect);
-                    
-                }
-            }
-            parseCommand(command, event.getMessage());
-           
-        }
-        
-    }
-    */
-    
-
-    @Override
-    public void onServerReady(ReadyEvent event){
-        System.out.println("WilsonBot initalizing");
-        this.initGuildSettings();
-        
-    }
-    
-
-    
-    public void initGuildSettings(){
-        guildSettings = new HashMap<>();
-        List<IGuild> guilds = client.getGuilds();
-        guilds.stream().forEach((g) -> {
-            ArrayList<String> data = DBHandler.getGuildInfo(g.getStringID());
-            if(data!=null){
-                GuildSettings gs = new GuildSettings(data);
-                guildSettings.put(g.getStringID(), gs);
-            }
-        });
-    }
-    
-   
-
-    @Override
-    protected void initalizeActions(){
-         actionMap = new HashMap<>();
-        
-        actionMap.put("join",  new Action(){public void exec(String[] arg, IMessage m) {join(arg,m);}});
-        actionMap.put("parlay",new Action(){public void exec(String[] arg, IMessage m) {parlay(m);}});
-        actionMap.put("unparlay",new Action(){public void exec(String[] arg, IMessage m) {unparlay(m);}});
-        actionMap.put("list",new Action(){public void exec(String[] arg, IMessage m) {list(arg,m);}});
-     // actionMap.put("set",new Action(){public void exec(String[] arg, IMessage m) {set(arg,m);}});
-        actionMap.put("shutdown",new Action(){public void exec(String[] arg, IMessage m) {shutdown(m);}});
-        actionMap.put("skip",new Action(){public void exec(String[] arg, IMessage m) {skip(arg,m);}});
-    }
-    
-    @Override
-    protected void initalizeCommData(){
-        String[][] comms = {{"[jJ]oin","join","joins a voicechannel.","'dog join [channel name]' to join a specific channel. 'dog join me' to join the channel you are currently on"}
-                       ,{"[pP]lay","play","plays a clip.","dog play [clipname]. Clip names can be found by using the list command. Multiple clips can be played in sequence using the following format : 'dog play [clipname] [clipname] [clipname]"}
-                       ,{"[pP]arlay","parlay","begins parlay with me, this means you don't have to type 'dog'"}
-                       ,{"[uU]nparlay","unparlay","ends parlay with me"}
-                       ,{"[lL]ist","list","Lists various things, multi-use command"}
-                       ,{"[aA]dd[Cc]lip","addclip","Add clip to soundboard"}
-                       ,{"[mM]ove[Aa]ll","moveall","Moves all users from one channel to another"}
-                       ,{"[dD]elete[cC]lip","deleteclip","Deletes the specified clip"}
-                       ,{"[sS]et[vV]olume","setvolume","Sets the volume of the specified clip"}
-                       ,{"[bB]an[cC]lip","banclip","Bans a clip depending on the current banning policy, use 'dog list ban' for more info"}
-                       ,{"[uU]n[bB]an[cC]lip","unbanclip","Unbans a clip (See banclip)"}
-                       ,{"[vV]eto[cC]lip","vetoclip","Vetoes a clip based on the current vetoing policy, use 'dog list ban' for more info"}
-                       ,{"[sS]et","set","Sets rules on server (currently only r9k on/off) need admin rights "}
-                       ,{"[sS]hutdown","shutdown","shutsdown the bot (this really should be in an admin section)","2"}
-                       ,{"[sS]kip","skip","Skips the current clip (no current limitations, please use responsibly)"}
+	//ArrayList<ArrayList<Thread>> gameThread;
 
 
-                       
-                        };
-    
-        commData = comms;
-    }
-    
-    @Override
-    protected void initalizeEventMethods(){
-        
-        
-        
-    }
-    
+	ArrayList<IUser> parlayUsers;
+	ArrayList<CommandData> commData;
 
-    
+	public WilsonServer(IDiscordClient client)
+	{
 
-    
-    private void shutdown(IMessage message){
-        if(!isMasterAdmin(message.getAuthor())){
-            sendMessage(message.getChannel(), "You must be a master-admin to invoke this command. (This command completely shutsdown the bot, would require sshing back in to reset it.");
-            return;
-        }
-        sendMessage(message.getChannel(),"Bot shutting down");
-        System.exit(0);
-    }
-    
-    
-    
+		super(client);
+		prefix = "dog";
 
-    
-    
-    public void parlay(IMessage message){
-        IUser user = message.getAuthor();
-        for(IUser u : parlayUsers){
-            if(u.getStringID().equals(user.getStringID())){
-                sendMessage(message.getChannel(),"we already talkin'");
-                return;
-            }
-        }
-        sendMessage(message.getChannel(),"Ok dog, I'll know you are talking to me now");
-        parlayUsers.add(user);
-        
-    }
-    
-    public void unparlay(IMessage message){
-                IUser user = message.getAuthor();
-        for(int i = 0; i<parlayUsers.size(); i++){
-            if(parlayUsers.get(i).getStringID().equals(user.getStringID())){
-                sendMessage(message.getChannel(),"Ok, dog, catch you later.");
-                parlayUsers.remove(i);
-                return;
-            }
-        }
-        sendMessage(message.getChannel(),"You never had a parlay with me");
-    }
-    
-        
-    private void list(String[] arguments, IMessage message) {
-   
-        String s = "";
-        if(arguments.length==0){
-            
-           sendMessage(message.getChannel(), "Here are my commands dog :");
-           
-            for(String[] comm : commData){
-                s+="_"+comm[1]+"_"+" : `"+comm[2]+"`\n";
-                s+="\n";
-            }
-               
-            sendMessage(message.getChannel(),s);
-            
-            return;
-        }
-        
-    }
-    public void skip(String[] args, IMessage message){
-        //UserLog ul = userLogs.get(message.getAuthor().getID());
-        IGuild guild = message.getGuild();
-        AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
-        String returnMessage = "";
-        if(args.length!=0){
-            if(args[0].equals("skip")){
-                player.clear();
-                returnMessage = message.getAuthor()+" skipped all queued clips";
-            }
-        }
-        else{
-            player.skip();
-            returnMessage = message.getAuthor().getName()+" skipped the current clip.";
-        }
-        
-        sendMessage(message.getChannel(),returnMessage);
-    }
-   
+		parlayUsers = new ArrayList<>();
+
+	}
 
 
 
-    public boolean isMasterAdmin(IUser user) {
-        if(DBHandler.getAdminRights(user.getStringID()).equals("master")){
-            return true;
-        }
-        return false;
-    }
-    @Override
-    public boolean canUse(int adminLevel, IUser user, IGuild guild){
-        
-        switch (adminLevel) {
-            case 0:
-                return true;
-            case 1:
-                return isAdmin(user,guild)||isMasterAdmin(user);
-            case 2:
-                return isMasterAdmin(user);
-            default:
-                return false;
-        }
-        
-    }
+	@Override
+	public void onServerReady(ReadyEvent event)
+	{
+		System.out.println("WilsonBot initalizing");
+
+	}
+
+
+	@Override
+	protected HashMap<String, Action> initalizeActions()
+	{
+		HashMap<String, Action> actionMap = new HashMap<>();
+
+		actionMap.put("join", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				join(arg, m);
+			}
+		});
+		actionMap.put("parlay", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				parlay(m);
+			}
+		});
+		actionMap.put("unparlay", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				unparlay(m);
+			}
+		});
+		actionMap.put("list", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				list(arg, m);
+			}
+		});
+		actionMap.put("list:test",  new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				list(arg, m);
+			}
+		});
+		// actionMap.put("set",new Action(){public void exec(String[] arg, IMessage m) {set(arg,m);}});
+		actionMap.put("shutdown", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				shutdown(m);
+			}
+		});
+		actionMap.put("skip", new Action()
+		{
+			public void exec(String[] arg, IMessage m)
+			{
+				skip(arg, m);
+			}
+		});
+
+		return actionMap;
+	}
+
+	@Override
+	protected List<CommandData> initalizeCommData()
+	{
+		ArrayList<CommandData> comms = new ArrayList<>();
+		commData = comms;
+		comms.add(new CommandData("[lL]ist", "list", "test description"));
+		comms.add(new CommandData( "[jJ]oin", "join", "test description"));
+		return comms;
+	}
+
+	@Override
+	protected void initalizeEventMethods()
+	{
+
+	}
+
+
+	private void shutdown(IMessage message)
+	{
+		if (!isMasterAdmin(message.getAuthor())) {
+			sendMessage(message.getChannel(), "You must be a master-admin to invoke this command. (This command completely shutsdown the bot, would require sshing back in to reset it.");
+			return;
+		}
+		sendMessage(message.getChannel(), "Bot shutting down");
+		System.exit(0);
+	}
+
+
+	public void parlay(IMessage message)
+	{
+		IUser user = message.getAuthor();
+		for (IUser u : parlayUsers) {
+			if (u.getStringID().equals(user.getStringID())) {
+				sendMessage(message.getChannel(), "we already talkin'");
+				return;
+			}
+		}
+		sendMessage(message.getChannel(), "I'll know you are talking to me now");
+		parlayUsers.add(user);
+
+	}
+
+	public void unparlay(IMessage message)
+	{
+		IUser user = message.getAuthor();
+		for (int i = 0; i < parlayUsers.size(); i++) {
+			if (parlayUsers.get(i).getStringID().equals(user.getStringID())) {
+				sendMessage(message.getChannel(), "Catch you later.");
+				parlayUsers.remove(i);
+				return;
+			}
+		}
+		sendMessage(message.getChannel(), "You never had a parlay with me");
+	}
+
+
+	private void list(String[] arguments, IMessage message)
+	{
+
+		String s = "";
+		if (arguments.length == 0) {
+
+			sendMessage(message.getChannel(), "Here are my commands:");
+
+			for (CommandData comm : commData) {
+				s += "_" + comm.getComm() + "_" + " : `" + comm.getDescS() + "`\n";
+				s += "\n";
+			}
+
+			sendMessage(message.getChannel(), s);
+
+			return;
+		}
+
+	}
+
+	public void skip(String[] args, IMessage message)
+	{
+		//UserLog ul = userLogs.get(message.getAuthor().getID());
+		IGuild guild = message.getGuild();
+		AudioPlayer player = AudioPlayer.getAudioPlayerForGuild(guild);
+		String returnMessage = "";
+		if (args.length != 0) {
+			if (args[0].equals("skip")) {
+				player.clear();
+				returnMessage = message.getAuthor() + " skipped all queued clips";
+			}
+		} else {
+			player.skip();
+			returnMessage = message.getAuthor().getName() + " skipped the current clip.";
+		}
+
+		sendMessage(message.getChannel(), returnMessage);
+	}
+
+
+	public boolean isMasterAdmin(IUser user)
+	{
+		return DBHandler.getAdminRights(user.getStringID()).equals("master");
+	}
+
+	@Override
+	public boolean canUse(int adminLevel, IUser user, IGuild guild)
+	{
+
+		switch (adminLevel) {
+			case 0:
+				return true;
+			case 1:
+				return isAdmin(user, guild) || isMasterAdmin(user);
+			case 2:
+				return isMasterAdmin(user);
+			default:
+				return false;
+		}
+
+	}
 
 
 }

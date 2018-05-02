@@ -6,17 +6,18 @@
 package abanstudio.games.countdown;
 
 /**
- *
  * @author General
  */
-public class NumberSolver {
-    
-    int[] numbers;
-    
-    public static void main(String[] args){
-        int[] nums = {6,2,7,1,9,8};
-        CalcTreeTrunk tree = new CalcTreeTrunk(nums,234);
-        tree.expandStart("DFS");
+public class NumberSolver
+{
+
+	int[] numbers;
+
+	public static void main(String[] args)
+	{
+		int[] nums = {6, 2, 7, 1, 9, 8};
+		CalcTreeTrunk tree = new CalcTreeTrunk(nums, 234);
+		tree.expandStart("DFS");
        /* for(CalcTree t: tree.subNodes){
             System.out.println("-----------");
             System.out.println(t);
@@ -25,6 +26,6 @@ public class NumberSolver {
                 System.out.println(st);
             }
         }*/
-    }
-    
+	}
+
 }

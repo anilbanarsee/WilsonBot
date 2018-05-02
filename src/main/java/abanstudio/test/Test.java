@@ -10,6 +10,7 @@ import abanstudio.command.Command;
 import abanstudio.discordbot.wilson.WilsonServer;
 import abanstudio.module.Games;
 import abanstudio.utils.sqlite.DBHandler;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -29,6 +30,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.sound.sampled.UnsupportedAudioFileException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.joda.time.DateTime;
 import org.reflections.Reflections;
@@ -45,30 +47,32 @@ import sx.blah.discord.util.audio.AudioPlayer;
 import sx.blah.discord.util.audio.providers.FileProvider;
 
 /**
- *
  * @author User
  */
-public class Test {
-    public static void main(String[] args) throws MalformedURLException, UnsupportedEncodingException, IOException{
-        
-        MessageReceivedEvent event;
-        ReadyEvent event2;
-        
-        HashMap<Class, String> map = new HashMap<>();
-        
-        map.put(MessageReceivedEvent.class, "apple");
-        map.put(ReadyEvent.class, "banana");
-        
-        System.out.println(map.get(MessageReceivedEvent.class));
-        System.out.println(map.get(ReadyEvent.class));
-        System.out.println(map.get(Event.class));
-        System.out.println(map.get(ChannelCreateEvent.class));
-        
-        
-       
-        //System.out.println(methods);
-    }
-    public static void testMethod(String s){
-        System.out.println(s.length());
-    }
+public class Test
+{
+	public static void main(String[] args)
+	{
+
+		MessageReceivedEvent event;
+		ReadyEvent event2;
+
+		HashMap<Class, String> map = new HashMap<>();
+
+		map.put(MessageReceivedEvent.class, "apple");
+		map.put(ReadyEvent.class, "banana");
+
+		System.out.println(map.get(MessageReceivedEvent.class));
+		System.out.println(map.get(ReadyEvent.class));
+		System.out.println(map.get(Event.class));
+		System.out.println(map.get(ChannelCreateEvent.class));
+
+
+		//System.out.println(methods);
+	}
+
+	public static void testMethod(String s)
+	{
+		System.out.println(s.length());
+	}
 }

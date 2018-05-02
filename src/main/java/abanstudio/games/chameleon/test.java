@@ -6,13 +6,13 @@
 package abanstudio.games.chameleon;
 
 /**
- *
  * @author Reetoo
  */
-public class test {
-    public static void main(String[] args){
-        ChameleonGame game = new ChameleonGame(null, null);
-        game.startGame();
-        
-    }
+public class test
+{
+	public static void main(String[] args)
+	{
+		ChameleonGame game = new ChameleonGame(null, null);
+
+	}
 }

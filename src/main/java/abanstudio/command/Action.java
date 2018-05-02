@@ -8,27 +8,41 @@ package abanstudio.command;
 import sx.blah.discord.handle.obj.IMessage;
 
 /**
+ * Represents a single action. Contains a method (exec) which is called when this action is called via BotServer.
+ * Both Module and BotServer use these for all command based actions.
  *
- * @author Reetoo
+ * @author Anil James Banarsee
+ * @version 1.0
  */
-public abstract class Action {
-    
-    private Action[] subComms;
-    private Object origin;
-    
-    public Action(Action[] cs){
-        this();
-        subComms = cs;
-        
-    }
-    public Action(){
-        subComms = null;
-        origin = null;
-    }
-    public void setOrigin(Object o){
-        origin = o;
-    }
-    public Object getOrigin(){return origin;}
-    public abstract void exec(String[] arguments, IMessage message);
-    
+public abstract class Action
+{
+
+	private Object origin;
+	private boolean override;
+
+	public Action()
+	{
+		origin = null;
+		override = false;
+	}
+
+	public void setOrigin(Object o)
+	{
+		origin = o;
+	}
+
+	public Object getOrigin()
+	{
+		return origin;
+	}
+	public Action setOverride(boolean b){
+		override = b;
+		return this;
+	}
+	public boolean getOverride(){
+		return override;
+	}
+
+	public abstract void exec(String[] arguments, IMessage message);
+
 }

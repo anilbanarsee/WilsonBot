@@ -81,3 +81,4 @@ target/classes/abanstudio/test/Test.class
 src/main/java/abanstudio/utils/sqlite/FuncCoursework.java
 djtoken.txt
 wilsontoken.txt
+.idea/workspace.xml

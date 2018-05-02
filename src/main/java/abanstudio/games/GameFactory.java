@@ -6,16 +6,16 @@
 package abanstudio.games;
 
 /**
- *
  * @author Anil James Banarsee
  */
-public class GameFactory {
-    
-    
-    
-    public void main(String[] args) throws NoSuchMethodException{
-        Game.class.getConstructor(String.class);
-        
-    }
-    
+public class GameFactory
+{
+
+
+	public void main(String[] args) throws NoSuchMethodException
+	{
+		Game.class.getConstructor(String.class);
+
+	}
+
 }

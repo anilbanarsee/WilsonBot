@@ -14,54 +14,55 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 /**
- *
  * @author Reetoo
  */
-public class ImageProcessor {
-    public static void setSilhouette(BufferedImage image, int alphaThresh){
-        //testpush
-        //System.out.println(image.getType());
-        for(int y = 0; y<image.getHeight(); y++){
-            for(int x=0; x<image.getWidth(); x++){
-            
-                Color c = new Color(image.getRGB(x, y));
-                 int pixel = image.getRGB(x,y);
-                int alpha = 0xFF & (pixel >> 24);
-                
-                 
-  if( alpha > 200 ) {
-      image.setRGB(x,y,Color.BLACK.getRGB());
-  }
-  else{
-      image.setRGB(x, y, new Color(255,255,255,0).getRGB());
-  }
+public class ImageProcessor
+{
+	public static void setSilhouette(BufferedImage image, int alphaThresh)
+	{
+		//testpush
+		//System.out.println(image.getType());
+		for (int y = 0; y < image.getHeight(); y++) {
+			for (int x = 0; x < image.getWidth(); x++) {
 
-             //   System.out.println(alpha);
-               // if(alpha>alphaThresh)
-                    //image.setRGB(x, y, 0);
-                //else
-                  //  image.setRGB(x, y, 1);
-                
-            }
-        }
-        
-    }
-    
-    public static void main(String[] args){
-    
-       File folder = new File("assets/pokemon/artwork");
-       
-       for(File f : folder.listFiles()){
-           try {
-               BufferedImage b = ImageIO.read(f);
-               setSilhouette(b,200);
-               ImageIO.write(b, "png", new File("assets/pokemon/sil/"+f.getName()));
-           } catch (IOException ex) {
-               Logger.getLogger(ImageProcessor.class.getName()).log(Level.SEVERE, null, ex);
-           }
-           
-       }
-        
-        
-    }
+				Color c = new Color(image.getRGB(x, y));
+				int pixel = image.getRGB(x, y);
+				int alpha = 0xFF & (pixel >> 24);
+
+
+				if (alpha > 200) {
+					image.setRGB(x, y, Color.BLACK.getRGB());
+				} else {
+					image.setRGB(x, y, new Color(255, 255, 255, 0).getRGB());
+				}
+
+				//   System.out.println(alpha);
+				// if(alpha>alphaThresh)
+				//image.setRGB(x, y, 0);
+				//else
+				//  image.setRGB(x, y, 1);
+
+			}
+		}
+
+	}
+
+	public static void main(String[] args)
+	{
+
+		File folder = new File("assets/pokemon/artwork");
+
+		for (File f : folder.listFiles()) {
+			try {
+				BufferedImage b = ImageIO.read(f);
+				setSilhouette(b, 200);
+				ImageIO.write(b, "png", new File("assets/pokemon/sil/" + f.getName()));
+			} catch (IOException ex) {
+				Logger.getLogger(ImageProcessor.class.getName()).log(Level.SEVERE, null, ex);
+			}
+
+		}
+
+
+	}
 }

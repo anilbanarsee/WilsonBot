@@ -6,25 +6,27 @@
 package abanstudio.exceptions;
 
 /**
- *
  * @author Reetoo
  */
-public class InvalidDownloadException extends Exception {
+public class InvalidDownloadException extends Exception
+{
 
-    /**
-     * Creates a new instance of <code>InvalidDownloadType</code> without detail
-     * message.
-     */
-    public InvalidDownloadException() {
-    }
+	/**
+	 * Creates a new instance of <code>InvalidDownloadType</code> without detail
+	 * message.
+	 */
+	public InvalidDownloadException()
+	{
+	}
 
-    /**
-     * Constructs an instance of <code>InvalidDownloadType</code> with the
-     * specified detail message.
-     *
-     * @param msg the detail message.
-     */
-    public InvalidDownloadException(String msg) {
-        super(msg);
-    }
+	/**
+	 * Constructs an instance of <code>InvalidDownloadType</code> with the
+	 * specified detail message.
+	 *
+	 * @param msg the detail message.
+	 */
+	public InvalidDownloadException(String msg)
+	{
+		super(msg);
+	}
 }

@@ -6,9 +6,9 @@
 package abanstudio.exceptions;
 
 /**
- *
  * @author User
  */
-public class InvalidSearchException extends Exception {
-    
+public class InvalidSearchException extends Exception
+{
+
 }
